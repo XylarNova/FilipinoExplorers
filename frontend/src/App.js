@@ -1,25 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// Teacher Import
+import TeacherRegistration from './components/TeacherRegistration';
+import TeacherLogin from './components/TeacherLogin';
+import EditTeacherProfile from './components/EditTeacherProfile';
+
+// Student Import
+import StudentRegistration from './components/StudentRegistration';
+import StudentLogin from './components/StudentLogin';
+import EditStudentProfile from './components/EditStudentProfile';
+
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <Router>
+            <Routes>
+              {/* Teacher Side */}
+                <Route path="/register-teacher" element={<TeacherRegistration />} />
+                <Route path="/login-teacher" element={<TeacherLogin />} />
+                <Route path="/edit-profile-teacher" element={<EditTeacherProfile />} />
+
+              {/* Student Side */}
+                <Route path="/register-student" element={<StudentRegistration />} />
+                <Route path="/login-student" element={<StudentLogin />} />
+                <Route path="/edit-profile-student" element={<EditStudentProfile />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

@@ -7,9 +7,11 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-scripts": "5.0.1",
+    "axios": "^1.8.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.4.1",
+    "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -35,5 +37,17 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "semver": "7.7.1",
+    "shell-quote": "1.8.2",
+    "tough-cookie": "5.1.2",
+    "webpack-dev-middleware": "7.4.2",
+    "serialize-javascript": "6.0.2",
+    "sockjs": "0.3.24",
+    "terser": "5.39.0",
+    "yargs-parser": "21.1.1",
+    "nth-check": "2.1.1",
+    "postcss": "8.5.3"
   }
 }
