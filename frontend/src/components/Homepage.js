@@ -67,10 +67,10 @@ function Homepage() {
         <h2>Why Filipino Explorers?</h2>
         <div className="features-grid">
           <div className="feature-card">
-            <span role="img" aria-label="book">📚</span> Curriculum-Aligned
+            <span role="img" aria-label="book">🧠</span> Curriculum-Aligned
           </div>
           <div className="feature-card">
-            <span role="img" aria-label="game">🎮</span> Gamified Experience
+            <span role="img" aria-label="game">🎯</span> Gamified Experience
           </div>
           <div className="feature-card">
             <span role="img" aria-label="chart">📈</span> Track Progress
