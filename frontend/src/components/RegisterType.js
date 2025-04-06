@@ -19,11 +19,11 @@ function RegisterType() {
   };
 
   const handleTeacherSelect = () => {
-    navigate('/register/teacher');
+    navigate('/register-teacher');
   };
 
   const handleStudentSelect = () => {
-    navigate('/register/student');
+    navigate('/register-student');
   };
 
   return (

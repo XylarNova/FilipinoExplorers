@@ -11,7 +11,7 @@ function LoginType() {
   };
 
   const handleTeacherSelect = () => {
-    navigate('/login/teacher');
+    navigate('/login-teacher');
   };
 
   const handleSignUp = () => {
@@ -23,7 +23,7 @@ function LoginType() {
   };
 
   const handleStudentSelect = () => {
-    navigate('/login/student');
+    navigate('/login-student');
   };
 
   return (
