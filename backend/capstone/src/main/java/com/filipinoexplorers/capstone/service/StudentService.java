@@ -1,93 +1,63 @@
 package com.filipinoexplorers.capstone.service;
 
-import com.filipinoexplorers.capstone.entity.StudentEntity;
-import com.filipinoexplorers.capstone.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Optional;
+import com.filipinoexplorers.capstone.dto.AuthResponse;
+import com.filipinoexplorers.capstone.dto.RegisterRequest;
+import com.filipinoexplorers.capstone.entity.Student;
+import com.filipinoexplorers.capstone.repository.StudentRepository;
+
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class StudentService {
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final HttpSession session;
 
-    // Method to hash the password using SHA-256
-    public String hashPassword(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedHash = digest.digest(password.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : encodedHash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
+    public AuthResponse registerStudent(RegisterRequest request) {
+        if (studentRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already taken");
         }
+
+        Student student = Student.builder()
+                .firstName(request.getFirst_name())
+                .lastName(request.getLast_name())
+                .dateOfBirth(request.getDate_of_birth())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role("student")
+                .build();
+
+        studentRepository.save(student);
+        Long studentId = student.getStudentId();
+
+        String token = jwtService.generateToken(student.getEmail());
+
+        session.setAttribute("userEmail", student.getEmail());
+
+        return new AuthResponse(token, studentId, "Student registered successfully", student.getRole());
     }
 
-    // Create a new student
-    public StudentEntity createStudent(StudentEntity student) {
-        // Check if the email already exists
-        if (studentRepository.existsByEmail(student.getEmail())) {
-            throw new RuntimeException("A student with this email already exists.");
-        }
-        student.setPassword(hashPassword(student.getPassword())); // Hash the password before saving
-        return studentRepository.save(student);
-    }
-
-    // Login a student
-    public StudentEntity loginStudent(String email, String password) {
-        StudentEntity student = studentRepository.findByEmail(email);
-        if (student == null || !student.getPassword().equals(hashPassword(password))) {
+    public AuthResponse loginStudent(String email, String password) {
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+    
+        if (!passwordEncoder.matches(password, student.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
-        return student;
+    
+        String token = jwtService.generateToken(email);
+    
+        // Save to session
+        session.setAttribute("userEmail", email);
+    
+        return new AuthResponse(token, student.getStudentId(), "Login successful", student.getRole());
     }
-
-    // Get all students
-    public List<StudentEntity> getAllStudents() {
-        return studentRepository.findAll();
-    }
-
-    // Get a student by ID
-    public Optional<StudentEntity> getStudentById(Long studentId) {
-        return studentRepository.findById(studentId);
-    }
-
-    // Update a student
-    public StudentEntity updateStudent(Long studentId, StudentEntity updatedStudent) {
-        Optional<StudentEntity> existingStudentOpt = studentRepository.findById(studentId);
-        if (existingStudentOpt.isPresent()) {
-            StudentEntity existingStudent = existingStudentOpt.get();
-            existingStudent.setFirstname(updatedStudent.getFirstname());
-            existingStudent.setLastname(updatedStudent.getLastname());
-            existingStudent.setBirthdate(updatedStudent.getBirthdate());
-            existingStudent.setEmail(updatedStudent.getEmail());
-            if (updatedStudent.getPassword() != null && !updatedStudent.getPassword().isEmpty()) {
-                existingStudent.setPassword(hashPassword(updatedStudent.getPassword())); // Hash the new password
-            }
-            return studentRepository.save(existingStudent);
-        } else {
-            throw new RuntimeException("Student not found with ID: " + studentId);
-        }
-    }
-
-    // Delete a student by ID
-    public void deleteStudent(Long studentId) {
-        if (studentRepository.existsById(studentId)) {
-            studentRepository.deleteById(studentId);
-        } else {
-            throw new RuntimeException("Student not found with ID: " + studentId);
-        }
-    }
+    
 }

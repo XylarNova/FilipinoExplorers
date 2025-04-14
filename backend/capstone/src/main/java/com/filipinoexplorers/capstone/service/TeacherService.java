@@ -1,93 +1,64 @@
 package com.filipinoexplorers.capstone.service;
 
-import com.filipinoexplorers.capstone.entity.TeacherEntity;
-import com.filipinoexplorers.capstone.repository.TeacherRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Optional;
+import com.filipinoexplorers.capstone.dto.AuthResponse;
+import com.filipinoexplorers.capstone.dto.RegisterRequest;
+import com.filipinoexplorers.capstone.entity.Teacher;
+import com.filipinoexplorers.capstone.repository.TeacherRepository;
+
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class TeacherService {
 
-    @Autowired
-    private TeacherRepository teacherRepository;
+    private final TeacherRepository teacherRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final HttpSession session;
 
-    // Method to hash the password using SHA-256
-    public String hashPassword(String password) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedHash = digest.digest(password.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : encodedHash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
+    public AuthResponse registerTeacher(RegisterRequest request) {
+        if (teacherRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already taken");
         }
+
+        Teacher teacher = Teacher.builder()
+                .first_name(request.getFirst_name())
+                .last_name(request.getLast_name())
+                .email(request.getEmail())
+                .school(request.getSchool())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role("teacher")
+                .build();
+
+        teacherRepository.save(teacher);
+        Long teacherId = teacher.getTeacher_id();
+
+        String token = jwtService.generateToken(teacher.getEmail());
+
+        // Save to session
+        session.setAttribute("userEmail", teacher.getEmail());
+
+        return new AuthResponse(token, teacherId, "Teacher registered successfully", teacher.getRole());
     }
 
-    // Create a new teacher
-    public TeacherEntity createTeacher(TeacherEntity teacher) {
-        // Check if the email already exists
-        if (teacherRepository.existsByEmail(teacher.getEmail())) {
-            throw new RuntimeException("A teacher with this email already exists.");
-        }
-        teacher.setPassword(hashPassword(teacher.getPassword())); // Hash the password before saving
-        return teacherRepository.save(teacher);
-    }
-
-    // Login a teacher
-    public TeacherEntity loginTeacher(String email, String password) {
-        TeacherEntity teacher = teacherRepository.findByEmail(email);
-        if (teacher == null || !teacher.getPassword().equals(hashPassword(password))) {
+    public AuthResponse loginTeacher(String email, String password) {
+        Teacher teacher = teacherRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+    
+        if (!passwordEncoder.matches(password, teacher.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
-        return teacher;
+    
+        String token = jwtService.generateToken(email);
+    
+        // Save to session
+        session.setAttribute("userEmail", email);
+    
+        return new AuthResponse(token, teacher.getTeacher_id(), "Login successful", teacher.getRole());
     }
-
-    // Get all teachers
-    public List<TeacherEntity> getAllTeachers() {
-        return teacherRepository.findAll();
-    }
-
-    // Get a teacher by ID
-    public Optional<TeacherEntity> getTeacherById(Long teacherId) {
-        return teacherRepository.findById(teacherId);
-    }
-
-    // Update a teacher
-    public TeacherEntity updateTeacher(Long teacherId, TeacherEntity updatedTeacher) {
-        Optional<TeacherEntity> existingTeacherOpt = teacherRepository.findById(teacherId);
-        if (existingTeacherOpt.isPresent()) {
-            TeacherEntity existingTeacher = existingTeacherOpt.get();
-            existingTeacher.setFirstname(updatedTeacher.getFirstname());
-            existingTeacher.setLastname(updatedTeacher.getLastname());
-            existingTeacher.setEmail(updatedTeacher.getEmail());
-            existingTeacher.setInstitution(updatedTeacher.getInstitution());
-            if (updatedTeacher.getPassword() != null && !updatedTeacher.getPassword().isEmpty()) {
-                existingTeacher.setPassword(hashPassword(updatedTeacher.getPassword())); // Hash the new password
-            }
-            return teacherRepository.save(existingTeacher);
-        } else {
-            throw new RuntimeException("Teacher not found with ID: " + teacherId);
-        }
-    }
-
-    // Delete a teacher by ID
-    public void deleteTeacher(Long teacherId) {
-        if (teacherRepository.existsById(teacherId)) {
-            teacherRepository.deleteById(teacherId);
-        } else {
-            throw new RuntimeException("Teacher not found with ID: " + teacherId);
-        }
-    }
+    
 }

@@ -1,13 +1,14 @@
 package com.filipinoexplorers.capstone.repository;
 
-import com.filipinoexplorers.capstone.entity.TeacherEntity;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface TeacherRepository extends JpaRepository<TeacherEntity, Long> {
-    TeacherEntity findByEmail(String email);
+import com.filipinoexplorers.capstone.entity.Teacher;
 
-    // Method to check if a teacher with the given email exists
-    boolean existsByEmail(String email);
+@Repository
+public interface TeacherRepository extends JpaRepository<Teacher, Long> {
+    Optional<Teacher> findByEmail(String email);
 }
+
