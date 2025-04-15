@@ -8,9 +8,11 @@ import RegisterStudent from './assets/RegisterStudent';
 import LoginPage from './assets/LoginPage';
 
 import TeacherDashboard from './assets/TeacherDashboard';
+import ClassCreation from './assets/ClassCreation';
+
 import StudentDashboard from './assets/StudentDashboard';
 
-import GuessTheWord from './assets/Guesstheword';
+import GuessTheWord from './assets/GuessTheWord';
 import MemoryGame from './assets/MemoryGame';
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
@@ -26,6 +28,10 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+        <Route path="/class-creation" element={<ClassCreation />} />
+        
+        {/* Student Dashboard Path */}
+
         <Route path="/student-dashboard" element={<StudentDashboard />} />
 
         {/* Games Section Path */}

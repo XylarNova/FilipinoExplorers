@@ -6,7 +6,7 @@ import ClassIcon from './images/Navigation/ClassIcon.png';
 import GameEditor from './images/Navigation/GameEditorIcon.png';
 import LogOut from './images/Navigation/LogOutIcon.png';
 
-const TeacherDashboard = () => {
+const ClassCreation = () => {
   const [darkMode, setDarkMode] = useState(false);
   
   const toggleDarkMode = () => {
@@ -56,25 +56,10 @@ const TeacherDashboard = () => {
       {/* Main Content */}
       <main className={`flex-1 ${mainBgClass} pt-10 px-10`}>
         <h1 className={`text-[40px] font-bold font-['Fredoka'] ${textClass} mb-8`}>
-          QUICK ACTIONS
+          Create Class Form
         </h1>
-        {/* Quick Action Buttons */}
-        <div className="flex space-x-4">
-          <button
-            className="bg-[#06D7A0] text-black border-[20px] border-[#289A7C] font-['Fredoka'] font-bold text-[15px] py-2 px-6 rounded-lg shadow hover:opacity-90 transition"
-          >
-            Create Class
-          </button>
-          <button
-            className="bg-[#06D7A0] text-black border-[20px] border-[#289A7C] font-['Fredoka'] font-bold text-[15px] py-2 px-6 rounded-lg shadow hover:opacity-90 transition"
-          >
-            Create Game
-          </button>
-        </div>
       </main>
       
-      {/* Right Sidebar - Timeline */}
-      <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-l ${sidebarBorderClass} pt-10 px-6 relative`}>
         {/* Dark Mode Toggle Button */}
         <div className="absolute top-4 right-4">
           <button 
@@ -92,14 +77,8 @@ const TeacherDashboard = () => {
             )}
           </button>
         </div>
-
-        <h2 className={`text-[30px] font-bold font-['Fredoka'] ${textClass} mb-4`}>
-          Timeline
-        </h2>
-        {/* Add timeline content here */}
-      </aside>
     </div>
   );
 };
 
-export default TeacherDashboard;
+export default ClassCreation;
