@@ -1,5 +1,7 @@
 package com.filipinoexplorers.capstone.service;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,16 +9,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.filipinoexplorers.capstone.dto.AuthResponse;
-import com.filipinoexplorers.capstone.dto.LoginRequest;
-import com.filipinoexplorers.capstone.dto.RegisterRequest;
-import com.filipinoexplorers.capstone.entity.Role;
-import com.filipinoexplorers.capstone.entity.Student;
-import com.filipinoexplorers.capstone.entity.Teacher;
-import com.filipinoexplorers.capstone.entity.User;
-import com.filipinoexplorers.capstone.repository.StudentRepository;
-import com.filipinoexplorers.capstone.repository.TeacherRepository;
+import com.filipinoexplorers.capstone.dto.*;
+import com.filipinoexplorers.capstone.entity.*;
+import com.filipinoexplorers.capstone.repository.*;
 
 @Service
 public class AuthService {
@@ -26,29 +23,40 @@ public class AuthService {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtService jwtService;
 
-    public AuthResponse register(RegisterRequest req) {
+    public AuthResponse register(RegisterRequest req, MultipartFile profilePicture) {
         String encodedPassword = passwordEncoder.encode(req.getPassword());
+        byte[] profilePictureBytes = null;
+
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            try {
+                profilePictureBytes = profilePicture.getBytes();
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read profile picture bytes", e);
+            }
+        }
 
         if ("TEACHER".equalsIgnoreCase(req.getRole())) {
-            Teacher teacher = new Teacher();
-            teacher.setEmail(req.getEmail());
-            teacher.setFirst_name(req.getFirst_name());
-            teacher.setLast_name(req.getLast_name());
-            teacher.setPassword(encodedPassword);
-            teacher.setSchool(req.getSchool());
-            teacher.setRole(Role.TEACHER);
-
+            Teacher teacher = Teacher.builder()
+                    .email(req.getEmail())
+                    .first_name(req.getFirst_name())
+                    .last_name(req.getLast_name())
+                    .password(encodedPassword)
+                    .school(req.getSchool())
+                    .role(Role.TEACHER)
+                    .profilePictureData(profilePictureBytes)
+                    .build();
             teacherRepo.save(teacher);
             return new AuthResponse(jwtService.generateToken(teacher));
         } else {
-            Student student = new Student();
-            student.setEmail(req.getEmail());
-            student.setFirst_name(req.getFirst_name());
-            student.setLast_name(req.getLast_name());
-            student.setPassword(encodedPassword);
-            student.setDate_Of_birth(req.getDate_of_birth());
-            student.setRole(Role.STUDENT);
-
+            Student student = Student.builder()
+                    .email(req.getEmail())
+                    .first_name(req.getFirst_name())
+                    .last_name(req.getLast_name())
+                    .password(encodedPassword)
+                    .date_Of_birth(req.getDate_of_birth())
+                    .role(Role.STUDENT)
+                    .profilePictureData(profilePictureBytes)
+                    .build();
             studentRepo.save(student);
             return new AuthResponse(jwtService.generateToken(student));
         }
@@ -66,5 +74,66 @@ public class AuthService {
         }
 
         return new AuthResponse(jwtService.generateToken(user));
+    }
+
+    public UserDetailsResponse getUserDetails(String email) {
+        Optional<? extends User> userOpt =
+                teacherRepo.findByEmail(email).map(u -> (User) u)
+                .or(() -> studentRepo.findByEmail(email).map(u -> (User) u));
+
+        User user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        UserDetailsResponse response = new UserDetailsResponse();
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole().name());
+
+        if (user instanceof Student student) {
+            response.setFirstName(student.getFirst_name());
+            response.setLastName(student.getLast_name());
+            response.setDate_Of_birth(student.getDate_Of_birth());
+            response.setHasProfilePicture(student.getProfilePictureData() != null);
+
+        } else if (user instanceof Teacher teacher) {
+            response.setFirstName(teacher.getFirst_name());
+            response.setLastName(teacher.getLast_name());
+            response.setSchool(teacher.getSchool());
+            response.setHasProfilePicture(teacher.getProfilePictureData() != null);
+        }
+
+        return response;
+    }
+
+    public UserDetailsResponse updateProfile(String email, String firstName, String lastName, String school, LocalDate date_Of_birth, MultipartFile profilePicture) {
+        Optional<? extends User> userOpt =
+                teacherRepo.findByEmail(email).map(u -> (User) u)
+                .or(() -> studentRepo.findByEmail(email).map(u -> (User) u));
+
+        User user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        byte[] profilePictureBytes = null;
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            try {
+                profilePictureBytes = profilePicture.getBytes();
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload profile picture", e);
+            }
+        }
+
+        if (user instanceof Teacher teacher) {
+            if (firstName != null) teacher.setFirst_name(firstName);
+            if (lastName != null) teacher.setLast_name(lastName);
+            if (school != null) teacher.setSchool(school);
+            if (profilePictureBytes != null) teacher.setProfilePictureData(profilePictureBytes);
+            teacherRepo.save(teacher);
+
+        } else if (user instanceof Student student) {
+            if (firstName != null) student.setFirst_name(firstName);
+            if (lastName != null) student.setLast_name(lastName);
+            if (date_Of_birth != null) student.setDate_Of_birth(date_Of_birth);
+            if (profilePictureBytes != null) student.setProfilePictureData(profilePictureBytes);
+            studentRepo.save(student);
+        }
+
+        return getUserDetails(email);
     }
 }

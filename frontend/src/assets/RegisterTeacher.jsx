@@ -50,8 +50,13 @@ const RegisterTeacher = () => {
 
       if (response.ok) {
         alert("Registration successful!");
-        // Redirect to teacher dashboard after successful registration
-        navigate("/teacher-dashboard");
+
+        // ✅ Store the token and optionally email or user info
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("email", formData.email);
+        localStorage.setItem("role", "TEACHER"); 
+        
+        navigate("/profile-teacher");
       } else {
         alert(result.message || "Registration failed");
       }

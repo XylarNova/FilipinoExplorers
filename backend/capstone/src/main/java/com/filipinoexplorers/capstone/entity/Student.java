@@ -22,6 +22,10 @@ public class Student implements User {
     private String password;
     private LocalDate date_Of_birth;
 
+    @Lob
+    @Column(name = "profile_picture_data")
+    private byte[] profilePictureData;
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.STUDENT;
 }

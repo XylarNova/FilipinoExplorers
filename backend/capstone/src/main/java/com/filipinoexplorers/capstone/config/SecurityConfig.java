@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.filipinoexplorers.capstone.service.JwtAuthFilter;
 import com.filipinoexplorers.capstone.service.CustomUserDetailsService;
@@ -28,16 +29,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.disable())
+            .cors(withDefaults()) // <<< THIS enables Spring CORS config
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                 .anyRequest().authenticated()
             )
-            .csrf(csrf -> csrf.disable()); // CSRF remains disabled for now
-
-        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

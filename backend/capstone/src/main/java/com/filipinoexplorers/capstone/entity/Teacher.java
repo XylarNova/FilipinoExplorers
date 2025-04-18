@@ -1,5 +1,6 @@
 package com.filipinoexplorers.capstone.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.Lob;
 
 @Entity
 @Data
@@ -27,6 +29,10 @@ public class Teacher implements User {
     private String last_name;
     private String password;
     private String school;
+
+    @Lob
+    @Column(name = "profile_picture_data")
+    private byte[] profilePictureData;
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.TEACHER;

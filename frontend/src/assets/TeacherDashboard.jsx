@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Logo from './images/logo.png';
 import Dashboard from './images/Navigation/DashboardIcon.png';
 import Profile from './images/Navigation/ProfileIcon.png';
@@ -7,72 +9,79 @@ import GameEditor from './images/Navigation/GameEditorIcon.png';
 import LogOut from './images/Navigation/LogOutIcon.png';
 
 const TeacherDashboard = () => {
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
-  
+
+  // Load dark mode setting from local storage
+  useEffect(() => {
+    const storedDarkMode = localStorage.getItem("darkMode");
+    if (storedDarkMode) setDarkMode(storedDarkMode === "true");
+  }, []);
+
+  // Persist dark mode setting to local storage
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode);
+  }, [darkMode]);
+
+  // Toggle dark mode
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+    setDarkMode(prev => !prev);
   };
-  
-  // Dynamic class names based on dark mode
+
   const mainBgClass = darkMode ? "bg-gray-900" : "bg-white";
   const sidebarBgClass = darkMode ? "bg-gray-800" : "bg-[#FDFBEE]";
   const sidebarBorderClass = darkMode ? "border-gray-700" : "border-[#CEC9A8]";
   const textClass = darkMode ? "text-white" : "text-[#213547]";
-  
+
   return (
-    <div className={`flex h-screen w-full ${darkMode ? "bg-gray-900" : "bg-white"}`}>
+    <div className={`flex h-screen w-full ${mainBgClass}`}>
       
-      {/* Left Sidebar */}
+      {/* Sidebar */}
       <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-r ${sidebarBorderClass} pt-8`}>
-        {/* Logo */}
         <div className="mb-10 flex justify-center">
           <img src={Logo} alt="Filipino Explorer Logo" className="w-40" />
         </div>
-        {/* Navigation */}
         <nav className="space-y-6 pl-6">
-          <div className={`flex items-center space-x-4 font-bold text-lg ${textClass}`}>
-            <img src={Dashboard} alt="Dashboard" className="w-6 h-6" />
-            <span>Dashboard</span>
-          </div>
-          <div className={`flex items-center space-x-4 font-bold text-lg ${textClass}`}>
-            <img src={Profile} alt="My Profile" className="w-6 h-6" />
-            <span>My Profile</span>
-          </div>
-          <div className={`flex items-center space-x-4 font-bold text-lg ${textClass}`}>
-            <img src={ClassIcon} alt="Class" className="w-6 h-6" />
-            <span>Class</span>
-          </div>
-          <div className={`flex items-center space-x-4 font-bold text-lg ${textClass}`}>
-            <img src={GameEditor} alt="Game Editor" className="w-6 h-6" />
-            <span>Game Editor</span>
-          </div>
-          <div className={`flex items-center space-x-4 font-bold text-lg ${textClass}`}>
-            <img src={LogOut} alt="Log Out" className="w-6 h-6" />
-            <span>Log Out</span>
-          </div>
+          {[
+            { icon: Dashboard, label: 'Dashboard', path: '/teacher-dashboard' },
+            { icon: Profile, label: 'My Profile', path: '/profile-teacher' },
+            { icon: ClassIcon, label: 'Class', path: '/class' },
+            { icon: GameEditor, label: 'Game Editor', path: '/editor' },
+            { icon: LogOut, label: 'Log Out', path: '/logout' }
+          ].map((item, idx) => (
+            <div
+              key={idx}
+              className={`flex items-center space-x-4 font-bold text-lg cursor-pointer ${textClass}`}
+              onClick={() => navigate(item.path)}
+            >
+              <img src={item.icon} alt={item.label} className="w-6 h-6" />
+              <span>{item.label}</span>
+            </div>
+          ))}
         </nav>
       </aside>
-      
+
       {/* Main Content */}
       <main className={`flex-1 ${mainBgClass} pt-10 px-10`}>
         <h1 className={`text-[40px] font-bold font-['Fredoka'] ${textClass} mb-8`}>
           QUICK ACTIONS
         </h1>
-        {/* Quick Action Buttons */}
         <div className="flex space-x-4">
-          <button
+          <button 
+            onClick={() => navigate('/class-creation')}
             className="bg-[#06D7A0] text-black border-[20px] border-[#289A7C] font-['Fredoka'] font-bold text-[15px] py-2 px-6 rounded-lg shadow hover:opacity-90 transition"
           >
             Create Class
           </button>
-          <button
+          <button 
+            onClick={() => navigate('/game-creation')}
             className="bg-[#06D7A0] text-black border-[20px] border-[#289A7C] font-['Fredoka'] font-bold text-[15px] py-2 px-6 rounded-lg shadow hover:opacity-90 transition"
           >
             Create Game
           </button>
         </div>
       </main>
-      
+
       {/* Right Sidebar - Timeline */}
       <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-l ${sidebarBorderClass} pt-10 px-6 relative`}>
         {/* Dark Mode Toggle Button */}
