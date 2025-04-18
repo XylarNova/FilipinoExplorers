@@ -1,29 +1,51 @@
 package com.filipinoexplorers.capstone.service;
 
-import java.sql.Date;
+import java.util.Date;
+import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Service;
 
+import com.filipinoexplorers.capstone.entity.User;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
 
-    private final String SECRET = "your_secret_key";
+    // Generate a secure key using Keys.secretKeyFor(SignatureAlgorithm)
+    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public String generateToken(String email) {
+    // Generate Token
+    public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
-                .signWith(SignatureAlgorithm.HS256, SECRET)
+                .setSubject(user.getEmail())
+                .claim("role", user.getRole().name())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .signWith(secretKey)
                 .compact();
     }
 
-    public String extractEmail(String token) {
-        return Jwts.parser().setSigningKey(SECRET)
-                .parseClaimsJws(token)
-                .getBody().getSubject();
+    // Extract Username
+    public String extractUsername(String token) {
+        JwtParser parser = Jwts.parserBuilder().setSigningKey(secretKey).build();
+        Claims claims = parser.parseClaimsJws(token).getBody();
+        return claims.getSubject();
+    }
+
+    // Validate Token
+    public boolean validateToken(String token) {
+        try {
+            JwtParser parser = Jwts.parserBuilder().setSigningKey(secretKey).build();
+            parser.parseClaimsJws(token);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
     }
 }

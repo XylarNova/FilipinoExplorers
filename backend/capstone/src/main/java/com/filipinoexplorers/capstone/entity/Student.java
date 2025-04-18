@@ -6,31 +6,22 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "students")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Student {
+public class Student implements User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long studentId;
 
-    @Column(nullable = false)
-    private String firstName;
-
-    @Column(nullable = false)
-    private String lastName;
-
-    @Column(name = "date_of_birth", nullable = false)
-    private LocalDate dateOfBirth;
-
-    @Column(unique = true, nullable = false)
     private String email;
-
-    @Column(nullable = false)
+    private String first_name;
+    private String last_name;
     private String password;
+    private LocalDate date_Of_birth;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.STUDENT;
 }

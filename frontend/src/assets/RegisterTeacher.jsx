@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Logo from "./images/Logo.png";
 import SignUp from "./images/Log in and sign up/Sign Up.png";
 
@@ -11,6 +12,8 @@ const RegisterTeacher = () => {
     password: "",
     confirmPassword: "",
   });
+
+  const navigate = useNavigate(); // Used to redirect after successful registration
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -28,17 +31,18 @@ const RegisterTeacher = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register-teacher", {
+      const response = await fetch("http://localhost:8080/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
           email: formData.email,
           password: formData.password,
           school: formData.school,
+          role: "TEACHER", 
         }),
       });
 
@@ -46,7 +50,8 @@ const RegisterTeacher = () => {
 
       if (response.ok) {
         alert("Registration successful!");
-        // Redirect or clear form if needed
+        // Redirect to teacher dashboard after successful registration
+        navigate("/teacher-dashboard");
       } else {
         alert(result.message || "Registration failed");
       }
@@ -135,8 +140,8 @@ const RegisterTeacher = () => {
             <div className="flex gap-4" style={{ marginBottom: "1rem" }}>
               <input
                 type="text"
-                name="firstName"
-                value={formData.firstName}
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
                 placeholder="First Name"
                 className="w-1/2 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
@@ -148,8 +153,8 @@ const RegisterTeacher = () => {
               />
               <input
                 type="text"
-                name="lastName"
-                value={formData.lastName}
+                name="last_name"
+                value={formData.last_name}
                 onChange={handleChange}
                 placeholder="Last Name"
                 className="w-1/2 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
@@ -254,17 +259,17 @@ const RegisterTeacher = () => {
 
             {/* Submit Button */}
             <div className="flex justify-center">
-                <button
-                    type="submit"
-                    className="text-white py-3 rounded-lg hover:bg-[#4CA9A9] transition"
-                    style={{
-                    backgroundColor: "#57B4B3", // Updated background color
-                    marginTop: "1rem",
-                    width: "204px", // Set button width to 204px
-                    }}
-                >
-                    Register
-                </button>
+              <button
+                type="submit"
+                className="text-white py-3 rounded-lg hover:bg-[#4CA9A9] transition"
+                style={{
+                  backgroundColor: "#57B4B3", // Updated background color
+                  marginTop: "1rem",
+                  width: "204px", // Set button width to 204px
+                }}
+              >
+                Register
+              </button>
             </div>
           </form>
         </div>
