@@ -23,10 +23,12 @@ public class AuthService {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtService jwtService;
 
+    // Register method updated to handle teacher or student role
     public AuthResponse register(RegisterRequest req, MultipartFile profilePicture) {
         String encodedPassword = passwordEncoder.encode(req.getPassword());
         byte[] profilePictureBytes = null;
 
+        // Handle profile picture if present
         if (profilePicture != null && !profilePicture.isEmpty()) {
             try {
                 profilePictureBytes = profilePicture.getBytes();
@@ -35,6 +37,7 @@ public class AuthService {
             }
         }
 
+        // Register teacher or student based on the role
         if ("TEACHER".equalsIgnoreCase(req.getRole())) {
             Teacher teacher = Teacher.builder()
                     .email(req.getEmail())
@@ -46,7 +49,7 @@ public class AuthService {
                     .profilePictureData(profilePictureBytes)
                     .build();
             teacherRepo.save(teacher);
-            return new AuthResponse(jwtService.generateToken(teacher));
+            return new AuthResponse(jwtService.generateToken(teacher), "TEACHER");
         } else {
             Student student = Student.builder()
                     .email(req.getEmail())
@@ -58,10 +61,11 @@ public class AuthService {
                     .profilePictureData(profilePictureBytes)
                     .build();
             studentRepo.save(student);
-            return new AuthResponse(jwtService.generateToken(student));
+            return new AuthResponse(jwtService.generateToken(student), "STUDENT");
         }
     }
 
+    // Login method modified to return role along with token
     public AuthResponse login(LoginRequest req) {
         Optional<? extends User> userOpt =
                 teacherRepo.findByEmail(req.getEmail()).map(u -> (User) u)
@@ -69,13 +73,19 @@ public class AuthService {
 
         User user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        // Check if password matches
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid password");
         }
 
-        return new AuthResponse(jwtService.generateToken(user));
+        // Get the role of the user
+        String role = user.getRole().name();  // Assuming Role is an enum with TEACHER and STUDENT
+
+        // Return token and role in the response
+        return new AuthResponse(jwtService.generateToken(user), role);
     }
 
+    // Get user details, including role, to send back in the response
     public UserDetailsResponse getUserDetails(String email) {
         Optional<? extends User> userOpt =
                 teacherRepo.findByEmail(email).map(u -> (User) u)
@@ -85,14 +95,14 @@ public class AuthService {
 
         UserDetailsResponse response = new UserDetailsResponse();
         response.setEmail(user.getEmail());
-        response.setRole(user.getRole().name());
+        response.setRole(user.getRole().name());  // Set the role
 
+        // Set user-specific details based on the type of user (Teacher or Student)
         if (user instanceof Student student) {
             response.setFirstName(student.getFirst_name());
             response.setLastName(student.getLast_name());
             response.setDate_Of_birth(student.getDate_Of_birth());
             response.setHasProfilePicture(student.getProfilePictureData() != null);
-
         } else if (user instanceof Teacher teacher) {
             response.setFirstName(teacher.getFirst_name());
             response.setLastName(teacher.getLast_name());
@@ -103,6 +113,7 @@ public class AuthService {
         return response;
     }
 
+    // Update profile, can handle both Teacher and Student updates
     public UserDetailsResponse updateProfile(String email, String firstName, String lastName, String school, LocalDate date_Of_birth, MultipartFile profilePicture) {
         Optional<? extends User> userOpt =
                 teacherRepo.findByEmail(email).map(u -> (User) u)
@@ -111,6 +122,7 @@ public class AuthService {
         User user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         byte[] profilePictureBytes = null;
+        // Handle profile picture update
         if (profilePicture != null && !profilePicture.isEmpty()) {
             try {
                 profilePictureBytes = profilePicture.getBytes();
@@ -119,6 +131,7 @@ public class AuthService {
             }
         }
 
+        // Update Teacher or Student data based on the type of user
         if (user instanceof Teacher teacher) {
             if (firstName != null) teacher.setFirst_name(firstName);
             if (lastName != null) teacher.setLast_name(lastName);
@@ -134,6 +147,6 @@ public class AuthService {
             studentRepo.save(student);
         }
 
-        return getUserDetails(email);
+        return getUserDetails(email);  // Return updated user details
     }
 }

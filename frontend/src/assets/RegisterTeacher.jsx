@@ -84,7 +84,7 @@ const RegisterTeacher = () => {
         <img
           src={SignUp}
           alt="Sign Up"
-          className="absolute bottom-0 h-full object-cover"
+          className="absolute left-[-50px] top-[-73px] w-[600px] h-[739px]"
         />
 
         {/* White Box */}

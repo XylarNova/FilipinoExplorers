@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Logo from "./images/Logo.png";
 import SignUp from "./images/Log in and sign up/Sign Up.png";
 
@@ -12,6 +13,8 @@ const RegisterStudent = () => {
     confirmPassword: "",
   });
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -21,14 +24,14 @@ const RegisterStudent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-  
+
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register-student", {
+      const response = await fetch("http://localhost:8080/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,27 +42,26 @@ const RegisterStudent = () => {
           email: formData.email,
           password: formData.password,
           date_of_birth: formData.date_of_birth,
+          role: "STUDENT", // Role added as STUDENT
         }),
       });
-  
+
       let result;
       try {
         result = await response.json();
       } catch (jsonError) {
         throw new Error("Invalid JSON response from server.");
       }
-  
+
       if (response.ok) {
-        alert(result.message || "Registration successful!");
-        // Optional: clear form or redirect
-        setFormData({
-          first_name: "",
-          last_name: "",
-          email: "",
-          date_of_birth: "",
-          password: "",
-          confirmPassword: "",
-        });
+        // ✅ Store the token and optionally email or user info
+        localStorage.setItem("token", result.token); // Store token in localStorage
+        localStorage.setItem("email", formData.email); // Store email in localStorage
+        localStorage.setItem("firstname", formData.first_name); // Store first name in localStorage
+        localStorage.setItem("lastname", formData.last_name); // Store last name in localStorage
+        localStorage.setItem("role", "STUDENT"); // Store role in localStorage
+
+        navigate("/profile-student");
       } else {
         alert(result.message || "Registration failed.");
       }
@@ -68,7 +70,6 @@ const RegisterStudent = () => {
       alert(error.message || "Something went wrong!");
     }
   };
-  
 
   return (
     <div className="bg-[#073A4D] h-screen flex flex-col items-start p-5 relative">
@@ -87,7 +88,7 @@ const RegisterStudent = () => {
         <img
           src={SignUp}
           alt="Sign Up"
-          className="absolute bottom-0 h-full object-cover"
+          className="absolute left-[-50px] top-[-73px] w-[600px] h-[739px]"
         />
 
         <div

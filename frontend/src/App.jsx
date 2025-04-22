@@ -12,9 +12,13 @@ import ClassCreation from './assets/ClassCreation';
 import MyProfileTeacher from './assets/MyProfileTeacher';
 
 import StudentDashboard from './assets/StudentDashboard';
+import MyProfileStudent from './assets/MyProfileStudent';
 
 import GuessTheWord from './assets/GuessTheWord';
+
 import MemoryGame from './assets/MemoryGame';
+import MemoryGameQuestion from './assets/MemoryGameQuestionForm';
+
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
 
@@ -35,10 +39,14 @@ const App = () => {
         {/* Student Dashboard Path */}
 
         <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/profile-student" element={<MyProfileStudent />} />
 
         {/* Games Section Path */}
         <Route path="/guesstheword" element={<GuessTheWord />} />
+
         <Route path="/memorygame" element={<MemoryGame />} />
+        <Route path="/memorygamequestion" element={<MemoryGameQuestion />} />
+
         <Route path="/paaralanquest" element={<PaaralanQuest />} />
         <Route path="/parkequest" element={<ParkeQuest />} />
       </Routes>

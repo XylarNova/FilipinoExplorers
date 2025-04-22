@@ -1,11 +1,12 @@
 package com.filipinoexplorers.capstone.dto;
 
-
 public class AuthResponse {
     private String token;
+    private String role;  // Add the role field
 
-    public AuthResponse(String token) {
+    public AuthResponse(String token, String role) {
         this.token = token;
+        this.role = role;
     }
 
     public String getToken() {
@@ -14,5 +15,13 @@ public class AuthResponse {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

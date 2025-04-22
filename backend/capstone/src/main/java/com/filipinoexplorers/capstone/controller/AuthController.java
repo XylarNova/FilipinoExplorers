@@ -4,6 +4,7 @@ import com.filipinoexplorers.capstone.dto.AuthResponse;
 import com.filipinoexplorers.capstone.dto.LoginRequest;
 import com.filipinoexplorers.capstone.dto.RegisterRequest;
 import com.filipinoexplorers.capstone.dto.UserDetailsResponse;
+import com.filipinoexplorers.capstone.dto.ErrorResponse;
 import com.filipinoexplorers.capstone.service.AuthService;
 
 import java.time.LocalDate;
@@ -25,17 +26,16 @@ public class AuthController {
     @Autowired private AuthService authService;
 
     @PostMapping(value = "/register", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<AuthResponse> register(
+    public ResponseEntity<?> register(
             @RequestPart(value = "data", required = false) RegisterRequest multipartData,
             @RequestPart(value = "profilePicture", required = false) MultipartFile profilePicture,
             @RequestBody(required = false) RegisterRequest jsonData
     ) {
         try {
-            // Use multipartData if it exists, otherwise fall back to JSON
             RegisterRequest request = multipartData != null ? multipartData : jsonData;
 
             if (request == null) {
-                return ResponseEntity.badRequest().body(new AuthResponse("Invalid registration data."));
+                return ResponseEntity.badRequest().body(new ErrorResponse("Invalid registration data."));
             }
 
             AuthResponse response = authService.register(request, profilePicture);
@@ -43,13 +43,20 @@ public class AuthController {
         } catch (Exception e) {
             System.err.println("Error during registration: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new AuthResponse("Server error occurred."));
+                    .body(new ErrorResponse("Server error occurred."));
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            AuthResponse response = authService.login(request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("Error during login: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse("Invalid credentials."));
+        }
     }
 
     @GetMapping("/user")
@@ -60,7 +67,8 @@ public class AuthController {
 
             return ResponseEntity.ok(userDetails);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            System.err.println("Error fetching user details: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("User not found."));
         }
     }
 
@@ -81,7 +89,7 @@ public class AuthController {
                 try {
                     dob = LocalDate.parse(dateOfBirth); // Format: yyyy-MM-dd
                 } catch (DateTimeParseException e) {
-                    return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd.");
+                    return ResponseEntity.badRequest().body(new ErrorResponse("Invalid date format. Use yyyy-MM-dd."));
                 }
             }
 
@@ -93,7 +101,7 @@ public class AuthController {
 
         } catch (Exception e) {
             System.err.println("Error updating profile: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update profile.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Failed to update profile."));
         }
     }
 }
