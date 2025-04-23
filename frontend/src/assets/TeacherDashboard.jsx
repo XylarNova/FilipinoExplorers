@@ -45,7 +45,7 @@ const TeacherDashboard = () => {
           {[
             { icon: Dashboard, label: 'Dashboard', path: '/teacher-dashboard' },
             { icon: Profile, label: 'My Profile', path: '/profile-teacher' },
-            { icon: ClassIcon, label: 'Class', path: '/class' },
+            { icon: ClassIcon, label: 'Class', path: '/teacher-classlist' },
             { icon: GameEditor, label: 'Game Editor', path: '/editor' },
             { icon: LogOut, label: 'Log Out', path: '/logout' }
           ].map((item, idx) => (

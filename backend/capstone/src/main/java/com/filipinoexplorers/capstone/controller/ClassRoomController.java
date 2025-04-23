@@ -69,10 +69,17 @@ public class ClassRoomController {
         return ResponseEntity.ok(classRoomRepository.save(classRoom));
     }
 
-    // Get all classes for a specific teacher
-    @GetMapping("/teacher/{teacherId}")
-    public ResponseEntity<List<ClassRoom>> getClassesByTeacher(@PathVariable Long teacherId) {
-        List<ClassRoom> classes = classRoomRepository.findByTeacher_TeacherId(teacherId);
+    // Get all classes for a specific teacher by email
+    @GetMapping("/teacher/email/{email}")
+    public ResponseEntity<List<ClassRoom>> getClassesByTeacherEmail(@PathVariable String email) {
+        // Find teacher by email
+        Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
+        if (teacherOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+        }
+
+        // Retrieve classes for the teacher
+        List<ClassRoom> classes = classRoomRepository.findByTeacher(teacherOpt.get());
         return ResponseEntity.ok(classes);
     }
 

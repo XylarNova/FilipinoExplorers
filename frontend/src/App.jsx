@@ -9,6 +9,7 @@ import LoginPage from './assets/LoginPage';
 
 import TeacherDashboard from './assets/TeacherDashboard';
 import ClassCreation from './assets/ClassCreation';
+import TeacherClassList from './assets/TeacherClassList';
 import MyProfileTeacher from './assets/MyProfileTeacher';
 
 import StudentDashboard from './assets/StudentDashboard';
@@ -34,6 +35,7 @@ const App = () => {
 
         <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
         <Route path="/class-creation" element={<ClassCreation />} />
+        <Route path="/teacher-classlist" element={<TeacherClassList />} />
         <Route path="/profile-teacher" element={<MyProfileTeacher />} />
         
         {/* Student Dashboard Path */}
