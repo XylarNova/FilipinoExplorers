@@ -62,6 +62,7 @@ const Homepage = () => {
             </li>
             <li style={{ margin: '0 20px' }}>
               <button 
+                onClick={() => navigate('/login')} 
                 style={{
                   padding: '10px 20px', 
                   fontSize: '16px', 

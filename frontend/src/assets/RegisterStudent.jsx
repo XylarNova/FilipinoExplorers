@@ -57,8 +57,6 @@ const RegisterStudent = () => {
         // ✅ Store the token and optionally email or user info
         localStorage.setItem("token", result.token); // Store token in localStorage
         localStorage.setItem("email", formData.email); // Store email in localStorage
-        localStorage.setItem("firstname", formData.first_name); // Store first name in localStorage
-        localStorage.setItem("lastname", formData.last_name); // Store last name in localStorage
         localStorage.setItem("role", "STUDENT"); // Store role in localStorage
 
         navigate("/profile-student");

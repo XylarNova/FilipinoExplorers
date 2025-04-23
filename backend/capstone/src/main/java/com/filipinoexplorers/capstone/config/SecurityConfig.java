@@ -29,17 +29,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(withDefaults()) // <<< THIS enables Spring CORS config
+            .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs using JWT
+            .cors(withDefaults()) // Enable CORS (cross-origin resource sharing)
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // Public endpoints
+                .requestMatchers("/api/classes/**").hasRole("TEACHER")  // Only TEACHER can create class
+                .anyRequest().authenticated() // Any other request requires authentication
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before default auth filter
 
         return http.build();
     }
-
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

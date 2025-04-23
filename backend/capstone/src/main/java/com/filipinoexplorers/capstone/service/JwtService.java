@@ -48,4 +48,19 @@ public class JwtService {
             return false;
         }
     }
+
+    public String extractRole(String token) {
+        try {
+            JwtParser parser = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build();
+    
+            Claims claims = parser.parseClaimsJws(token).getBody();
+    
+            return claims.get("role", String.class);  // Make sure you store "role" when generating the token
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to extract role from JWT", e);
+        }
+    }
+    
 }
