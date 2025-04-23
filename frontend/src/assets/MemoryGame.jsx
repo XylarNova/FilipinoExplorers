@@ -37,42 +37,42 @@ function MemoryGame() {
         {
           id: 'choice1',
           text: 'Apple',
-          labelTop: 'top-[250px]',
-          labelLeft: 'left-[430px]',
-          bukoTop: 'top-[180px]',
-          bukoLeft: 'left-[430px]',
+          labelTop: 'top-[310px]',
+          labelLeft: 'left-[580px]',
+          bukoTop: 'top-[220px]',
+          bukoLeft: 'left-[580px]',
         },
         {
           id: 'choice2',
           text: 'Banana',
-          labelTop: 'top-[250px]',
-          labelLeft: 'left-[690px]',
-          bukoTop: 'top-[180px]',
-          bukoLeft: 'left-[690px]',
+          labelTop: 'top-[310px]',
+          labelLeft: 'left-[860px]',
+          bukoTop: 'top-[220px]',
+          bukoLeft: 'left-[860px]',
         },
         {
           id: 'choice3',
           text: 'Mango',
-          labelTop: 'top-[250px]',
-          labelLeft: 'left-[940px]',
-          bukoTop: 'top-[180px]',
-          bukoLeft: 'left-[940px]',
+          labelTop: 'top-[310px]',
+          labelLeft: 'left-[1140px]',
+          bukoTop: 'top-[220px]',
+          bukoLeft: 'left-[1140px]',
         },
         {
           id: 'choice4',
           text: 'Coconut',
-          labelTop: 'top-[440px]',
-          labelLeft: 'left-[570px]',
-          bukoTop: 'top-[370px]',
-          bukoLeft: 'left-[570px]',
+          labelTop: 'top-[540px]',
+          labelLeft: 'left-[700px]',
+          bukoTop: 'top-[450px]',
+          bukoLeft: 'left-[700px]',
         },
         {
           id: 'choice5',
           text: 'Pineapple',
-          labelTop: 'top-[440px]',
-          labelLeft: 'left-[830px]',
-          bukoTop: 'top-[370px]',
-          bukoLeft: 'left-[830px]',
+          labelTop: 'top-[540px]',
+          labelLeft: 'left-[1000px]',
+          bukoTop: 'top-[450px]',
+          bukoLeft: 'left-[1000px]',
         },
       ];
       setChoicesData(dataFromBackend);
@@ -128,12 +128,12 @@ function MemoryGame() {
       style={{ backgroundImage: `url(${Background})` }}
     >
       {/* Logo */}
-      <div className="absolute left-[180px] top-[70px]">
-        <img src={Logo} alt="Logo" className="w-40 h-auto" draggable={false} />
+      <div className="absolute left-[250px] top-[70px]">
+        <img src={Logo} alt="Logo" className="w-50 h-auto" draggable={false} />
       </div>
 
       {/* Instruction */}
-      <div className="absolute left-[400px] top-[60px] w-[740px] h-[83px] relative">
+      <div className="absolute left-[550px] top-[60px] w-[840px] h-[100px] relative">
         <img src={Instruction} alt="Instruction" className="w-full h-full" draggable={false} />
         <div className="absolute inset-0 flex items-center justify-center">
           <p className="text-[25px] font-inter font-bold text-center text-[#71361F] w-[735px]">
@@ -147,7 +147,7 @@ function MemoryGame() {
         <img
           src={ChoicesBG}
           alt="Choices Background"
-          className="absolute left-[400px] top-[160px] w-[740px] h-[500px]"
+          className="absolute left-[550px] top-[200px] w-[840px] h-[650px]"
           draggable={false}
         />
 
@@ -156,11 +156,11 @@ function MemoryGame() {
             <img
               src={Buko}
               alt={choice.text}
-              className={`absolute ${choice.bukoTop} ${choice.bukoLeft} w-[150px] h-[150px]`}
+              className={`absolute ${choice.bukoTop} ${choice.bukoLeft} w-[200px] h-[200px]`}
               draggable={false}
             />
             <div
-              className={`absolute ${choice.labelTop} ${choice.labelLeft} w-[165px] h-[50px] cursor-pointer`}
+              className={`absolute ${choice.labelTop} ${choice.labelLeft} w-[215px] h-[70px] cursor-pointer`}
               onClick={() => handleChoiceClick(choice)}
             >
               <img
@@ -177,7 +177,7 @@ function MemoryGame() {
         ))}
 
         {/* Answer Area */}
-        <div className="absolute left-[630px] top-[550px] w-[305px] h-[80px] z-10">
+        <div className="absolute left-[825px] top-[710px] w-[305px] h-[80px] z-10">
           <img src={Answer} alt="Answer" className="w-full h-full pointer-events-none" draggable={false} />
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="text-xl font-bold text-[#71361F]">{currentQuestion.tagalogWord}</p>
@@ -186,23 +186,23 @@ function MemoryGame() {
 
         {/* Buttons */}
         <div>
-          <button onClick={() => console.log('Previous')} className="absolute left-[450px] top-[700px] w-[150px] h-[70px]">
+          <button onClick={() => console.log('Previous')} className="absolute left-[600px] top-[860px] w-[200px] h-[80px]">
             <img src={ButtonPrev} alt="Previous" className="w-full h-full" draggable={false} />
           </button>
 
-          <button onClick={handleCheckAnswerClick} className="absolute left-[680px] top-[700px] w-[200px] h-[70px]">
+          <button onClick={handleCheckAnswerClick} className="absolute left-[850px] top-[860px] w-[250px] h-[80px]">
             <img src={ButtonCheckAnswer} alt="Check Answer" className="w-full h-full" draggable={false} />
           </button>
 
-          <button onClick={() => console.log('Next')} className="absolute left-[950px] top-[700px] w-[150px] h-[70px]">
+          <button onClick={() => console.log('Next')} className="absolute left-[1120px] top-[860px] w-[200px] h-[80px]">
             <img src={ButtonNext} alt="Next" className="w-full h-full" draggable={false} />
           </button>
         </div>
 
         {/* Timer / Log Section */}
         <div>
-          <img src={Log} alt="Log" className="absolute left-[180px] top-[160px] w-[150px] h-[500px]" draggable={false} />
-          <div className="absolute left-[229px] top-[250px] w-[50px] h-[360px] overflow-hidden rounded-[40px]">
+          <img src={Log} alt="Log" className="absolute left-[280px] top-[220px] w-[150px] h-[600px]" draggable={false} />
+          <div className="absolute left-[329px] top-[310px] w-[50px] h-[460px] overflow-hidden rounded-[40px]">
             <img src={Timer} alt="Timer" className="absolute inset-0 w-full h-full z-0" draggable={false} />
             <div
               className="absolute bottom-0 left-0 w-full bg-blue-400 z-10 transition-all duration-1000 ease-linear"
@@ -213,24 +213,24 @@ function MemoryGame() {
 
         {/* Points Section */}
         <div>
-          <img src={PointsBG} alt="Points Background" className="absolute left-[1210px] top-[160px] w-[250px] h-[100px]" draggable={false} />
-          <img src={Points} alt="Points" className="absolute left-[1235px] top-[185px] w-[200px] h-[50px]" draggable={false} />
+          <img src={PointsBG} alt="Points Background" className="absolute left-[1500px] top-[200px] w-[300px] h-[110px]" draggable={false} />
+          <img src={Points} alt="Points" className="absolute left-[1535px] top-[233px] w-[200px] h-[50px]" draggable={false} />
         </div>
 
         {/* Items Section with Results */}
         <div>
-          <img src={ItemsBG} alt="Items Background" className="absolute left-[1210px] top-[280px] w-[250px] h-[200px]" draggable={false} />
+          <img src={ItemsBG} alt="Items Background" className="absolute left-[1500px] top-[350px] w-[300px] h-[300px]" draggable={false} />
           {[
-            { left: 1220, top: 300 },
-            { left: 1281, top: 300 },
-            { left: 1346, top: 300 },
-            { left: 1410, top: 300 },
-            { left: 1220, top: 360 },
-            { left: 1281, top: 360 },
-            { left: 1346, top: 360 },
-            { left: 1410, top: 360 },
-            { left: 1220, top: 420 },
-            { left: 1281, top: 420 },
+            { left: 1520, top: 370 },
+            { left: 1581, top: 370 },
+            { left: 1646, top: 370 },
+            { left: 1710, top: 370 },
+            { left: 1520, top: 430 },
+            { left: 1581, top: 430 },
+            { left: 1646, top: 430 },
+            { left: 1710, top: 430 },
+            { left: 1520, top: 490 },
+            { left: 1581, top: 490 },
           ].map((item, index) => {
             const status = questionResults[index];
             let textColor = 'text-black';
@@ -253,11 +253,11 @@ function MemoryGame() {
 
         {/* Hint and Submit Buttons */}
         <div>
-          <button onClick={handleHintClick} className="absolute left-[1240px] top-[500px] w-[200px] h-[70px]">
+          <button onClick={handleHintClick} className="absolute left-[1540px] top-[680px] w-[200px] h-[70px]">
             <img src={HintButton} alt="Hint Button" className="w-full h-full" draggable={false} />
           </button>
 
-          <button onClick={handleSubmitClick} className="absolute left-[1240px] top-[580px] w-[200px] h-[70px]">
+          <button onClick={handleSubmitClick} className="absolute left-[1540px] top-[740px] w-[200px] h-[70px]">
             <img src={SubmitButton} alt="Submit Button" className="w-full h-full" draggable={false} />
           </button>
         </div>
