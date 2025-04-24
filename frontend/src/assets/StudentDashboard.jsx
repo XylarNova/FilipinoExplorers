@@ -7,6 +7,7 @@ import Profile from "./images/Navigation/ProfileIcon.png";
 import Modules from "./images/Navigation/ClassIcon.png";
 import LogOut from "./images/Navigation/LogOutIcon.png";
 import JoinClass from "./images/Dashboard/JoinClass.png";
+import WordOfTheDay from "./WordOfTheDay";  // Import the WordOfTheDay component
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ const StudentDashboard = () => {
           <img src={Logo} alt="Filipino Explorer Logo" className="w-40" />
         </div>
         <nav className="space-y-6 pl-6">
-          {[
+          {[ 
             { icon: Dashboard, label: "Dashboard", path: "/student-dashboard" },
             { icon: Profile, label: "My Profile", path: "/profile-student" },
             { icon: Modules, label: "Modules", path: "/" },
@@ -67,6 +68,11 @@ const StudentDashboard = () => {
             </div>
           ))}
         </nav>
+
+        {/* Word of the Day in the Sidebar */}
+        <div className="mt-8 px-6">
+          <WordOfTheDay />  {/* Word of the Day component inside the sidebar */}
+        </div>
       </aside>
 
       {/* Main Content */}

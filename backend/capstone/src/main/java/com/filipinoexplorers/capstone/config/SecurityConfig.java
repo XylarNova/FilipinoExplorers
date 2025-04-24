@@ -32,7 +32,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs using JWT
             .cors(withDefaults()) // Enable CORS (cross-origin resource sharing)
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // Public endpoints
+                .requestMatchers("/api/auth/register", "/api/auth/login", "/api/words/**").permitAll() // Public endpoints
                 .requestMatchers("/api/classes/**").hasRole("TEACHER")  // Only TEACHER can create class
                 .anyRequest().authenticated() // Any other request requires authentication
             )

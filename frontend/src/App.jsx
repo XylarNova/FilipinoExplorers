@@ -23,6 +23,9 @@ import MemoryGameQuestion from './assets/MemoryGameQuestionForm';
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
 
+// Admin Side
+import AddWordOfTheDay from './adminpages/AddWordOfTheDay';
+
 const App = () => {
   return (
     <Router>
@@ -42,6 +45,7 @@ const App = () => {
 
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/profile-student" element={<MyProfileStudent />} />
+        
 
         {/* Games Section Path */}
         <Route path="/guesstheword" element={<GuessTheWord />} />
@@ -51,6 +55,9 @@ const App = () => {
 
         <Route path="/paaralanquest" element={<PaaralanQuest />} />
         <Route path="/parkequest" element={<ParkeQuest />} />
+
+        {/* Admin Side */}
+        <Route path="/add-wotd" element={<AddWordOfTheDay />} />
       </Routes>
     </Router>
   );
