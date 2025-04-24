@@ -91,4 +91,38 @@ public class ClassRoomController {
         } while (classRoomRepository.existsByClassCode(code));
         return code;
     }
+
+    // Update class info
+@PutMapping("/update/{id}")
+public ResponseEntity<?> updateClass(@PathVariable Long id,
+                                     @RequestBody ClassCreationRequest request,
+                                     @RequestHeader("Authorization") String token) {
+
+    // Extract teacher from token to ensure ownership (optional security check)
+    String email = jwtService.extractUsername(token.replace("Bearer ", ""));
+    Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
+    if (teacherOpt.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+    }
+
+    Optional<ClassRoom> existingClassOpt = classRoomRepository.findById(id);
+    if (existingClassOpt.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Class not found");
+    }
+
+    ClassRoom classRoom = existingClassOpt.get();
+
+    // (Optional security) Verify that the current teacher owns the class
+    if (!classRoom.getTeacher().getEmail().equals(email)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this class.");
+    }
+
+    // Update class fields
+    classRoom.setName(request.getName());
+    classRoom.setDescription(request.getDescription());
+    classRoom.setBannerUrl(request.getBannerUrl()); // Add banner URL if needed
+
+    return ResponseEntity.ok(classRoomRepository.save(classRoom));
+}
+
 }
