@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
-
 import Logo from './images/logo.png';
 import Dashboard from './images/Navigation/DashboardIcon.png';
 import Profile from './images/Navigation/ProfileIcon.png';
@@ -15,10 +14,13 @@ const TeacherClassList = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [showGetCodeModal, setShowGetCodeModal] = useState(false);
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
   const [copySuccess, setCopySuccess] = useState('');
 
+  // Dark Mode Setup
   useEffect(() => {
     const storedDarkMode = localStorage.getItem("darkMode");
     if (storedDarkMode) setDarkMode(storedDarkMode === "true");
@@ -28,6 +30,7 @@ const TeacherClassList = () => {
     localStorage.setItem("darkMode", darkMode);
   }, [darkMode]);
 
+  // Fetch Classes
   const fetchClasses = async () => {
     const token = localStorage.getItem("token");
     let email;
@@ -35,7 +38,6 @@ const TeacherClassList = () => {
     try {
       const decoded = jwtDecode(token);
       email = decoded.sub;
-
       if (!email) {
         console.error('Email not found in token');
         return;
@@ -65,18 +67,40 @@ const TeacherClassList = () => {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
+  // Open modals
   const openManageModal = (classItem) => {
     setSelectedClass(classItem);
-    setShowModal(true);
+    setShowManageModal(true);
     setCopySuccess('');
   };
 
   const closeManageModal = () => {
-    setShowModal(false);
+    setShowManageModal(false);
     setSelectedClass(null);
     setCopySuccess('');
   };
 
+  const openGetCodeModal = (classItem) => {
+    setSelectedClass(classItem);
+    setShowGetCodeModal(true);
+  };
+
+  const closeGetCodeModal = () => {
+    setShowGetCodeModal(false);
+    setSelectedClass(null);
+  };
+
+  const openDeleteConfirmationModal = (classItem) => {
+    setSelectedClass(classItem);
+    setShowDeleteConfirmationModal(true);
+  };
+
+  const closeDeleteConfirmationModal = () => {
+    setShowDeleteConfirmationModal(false);
+    setSelectedClass(null);
+  };
+
+  // Handle copying code
   const handleCopyCode = () => {
     if (selectedClass?.classCode) {
       navigator.clipboard.writeText(selectedClass.classCode);
@@ -85,10 +109,39 @@ const TeacherClassList = () => {
     }
   };
 
+  // Delete Class
+  const deleteClass = async () => {
+    const classId = selectedClass.id;
+    const token = localStorage.getItem("token");
+    if (!token || !classId) return;
+
+    try {
+      const response = await axios.delete(
+        `http://localhost:8080/api/classes/delete/${classId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Refresh class list after deleting the class
+        fetchClasses();
+        closeDeleteConfirmationModal();
+      } else {
+        console.error('Failed to delete class');
+      }
+    } catch (error) {
+      console.error('Error deleting class:', error);
+    }
+  };
+
+  // Update class
   const updateClass = async () => {
     const token = localStorage.getItem("token");
     if (!token || !selectedClass) return;
-  
+
     try {
       const response = await axios.put(
         `http://localhost:8080/api/classes/update/${selectedClass.id}`,
@@ -103,9 +156,9 @@ const TeacherClassList = () => {
           },
         }
       );
-  
+
       if (response.status === 200) {
-        // Class updated successfully, refresh class list
+        // Refresh class list after update
         fetchClasses();
         closeManageModal();
       } else {
@@ -115,7 +168,6 @@ const TeacherClassList = () => {
       console.error('Error updating class:', error);
     }
   };
-  
 
   const mainBgClass = darkMode ? "bg-gray-900" : "bg-white";
   const sidebarBgClass = darkMode ? "bg-gray-800" : "bg-[#FDFBEE]";
@@ -188,8 +240,8 @@ const TeacherClassList = () => {
                   <div className="hidden group-hover:block absolute right-0 top-6 bg-white shadow-md rounded-lg w-36 z-10">
                     <button onClick={() => openManageModal(classItem)} className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Manage Class</button>
                     <button className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Add Student</button>
-                    <button className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Get Code</button>
-                    <button className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Delete Class</button>
+                    <button onClick={() => openGetCodeModal(classItem)} className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Get Code</button>
+                    <button onClick={() => openDeleteConfirmationModal(classItem)} className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Delete Class</button>
                   </div>
                 </div>
               </div>
@@ -200,8 +252,31 @@ const TeacherClassList = () => {
         </div>
       </main>
 
-      {/* Modal */}
-      {showModal && selectedClass && (
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmationModal && selectedClass && (
+        <div className="absolute top-[20%] left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-white rounded-2xl p-6 w-[500px] relative shadow-lg border border-gray-300">
+            <h2 className="text-2xl font-bold mb-4">Are you sure you want to delete this class?</h2>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={closeDeleteConfirmationModal}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteClass}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manage Class Modal */}
+      {showManageModal && selectedClass && (
         <div className="absolute top-[20%] left-1/2 transform -translate-x-1/2 z-50">
           <div className="bg-white rounded-2xl p-6 w-[500px] relative shadow-lg border border-gray-300">
             <button
@@ -274,30 +349,45 @@ const TeacherClassList = () => {
                 onClick={updateClass}
                 className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
               >
-                Save Changes
+                Update
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Dark Mode Toggle */}
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={toggleDarkMode}
-          className={`rounded-full p-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}
-        >
-          {darkMode ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-            </svg>
-          )}
-        </button>
-      </div>
+      {/* Get Class Code Modal */}
+      {showGetCodeModal && selectedClass && (
+        <div className="absolute top-[20%] left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-white rounded-2xl p-6 w-[500px] relative shadow-lg border border-gray-300">
+            <h2 className="text-2xl font-bold mb-4">Class Code</h2>
+            <p className="mb-6">Share this code with students to allow them to join your class:</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                className="w-full border p-2 rounded bg-gray-100 cursor-not-allowed"
+                value={selectedClass.classCode || ''}
+                readOnly
+              />
+              <button
+                onClick={handleCopyCode}
+                className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Copy
+              </button>
+            </div>
+            {copySuccess && <p className="text-green-500 text-sm mt-1">{copySuccess}</p>}
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={closeGetCodeModal}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

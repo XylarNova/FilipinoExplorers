@@ -125,4 +125,33 @@ public ResponseEntity<?> updateClass(@PathVariable Long id,
     return ResponseEntity.ok(classRoomRepository.save(classRoom));
 }
 
+// Delete a class
+@DeleteMapping("/delete/{id}")
+public ResponseEntity<?> deleteClass(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+    // Extract teacher from token to ensure ownership (optional security check)
+    String email = jwtService.extractUsername(token.replace("Bearer ", ""));
+    Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
+    if (teacherOpt.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+    }
+
+    Optional<ClassRoom> classRoomOpt = classRoomRepository.findById(id);
+    if (classRoomOpt.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Class not found");
+    }
+
+    ClassRoom classRoom = classRoomOpt.get();
+
+    // (Optional security) Verify that the current teacher owns the class
+    if (!classRoom.getTeacher().getEmail().equals(email)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete this class.");
+    }
+
+    // Delete the class
+    classRoomRepository.delete(classRoom);
+
+    return ResponseEntity.ok("Class deleted successfully");
+}
+
+
 }
