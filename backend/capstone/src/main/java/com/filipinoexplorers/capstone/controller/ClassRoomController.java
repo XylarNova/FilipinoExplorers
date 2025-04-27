@@ -2,8 +2,10 @@ package com.filipinoexplorers.capstone.controller;
 
 import com.filipinoexplorers.capstone.dto.ClassCreationRequest;
 import com.filipinoexplorers.capstone.entity.ClassRoom;
+import com.filipinoexplorers.capstone.entity.Student;
 import com.filipinoexplorers.capstone.entity.Teacher;
 import com.filipinoexplorers.capstone.repository.ClassRoomRepository;
+import com.filipinoexplorers.capstone.repository.StudentRepository;
 import com.filipinoexplorers.capstone.repository.TeacherRepository;
 import com.filipinoexplorers.capstone.service.JwtService;
 
@@ -28,7 +30,10 @@ public class ClassRoomController {
     private TeacherRepository teacherRepository;
 
     @Autowired
-    private JwtService jwtService; // Inject JwtService to extract the email from token
+    private StudentRepository studentRepository;
+
+    @Autowired
+    private JwtService jwtService;
 
     // Create a class
     @PostMapping("/createclass")
@@ -83,6 +88,49 @@ public class ClassRoomController {
         return ResponseEntity.ok(classes);
     }
 
+    // Student joins a class using code
+    @PostMapping("/join")
+public ResponseEntity<?> joinClass(
+        @RequestHeader("Authorization") String token,
+        @RequestBody Map<String, String> payload) {
+
+    String email = jwtService.extractUsername(token.replace("Bearer ", ""));
+    System.out.println("Decoded email from JWT: " + email);
+
+    Optional<Student> studentOpt = studentRepository.findByEmail(email);
+    if (studentOpt.isEmpty()) {
+        System.out.println("Student not found with email: " + email);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
+    }
+
+    String classCode = payload.get("classCode");
+    System.out.println("Class code received: " + classCode);
+
+    Optional<ClassRoom> classRoomOpt = classRoomRepository.findByClassCode(classCode);
+    if (classRoomOpt.isEmpty()) {
+        System.out.println("Class not found with code: " + classCode);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Class not found");
+    }
+
+    Student student = studentOpt.get();
+    ClassRoom classRoom = classRoomOpt.get();
+
+    System.out.println("Student: " + student.getEmail());
+    System.out.println("Class: " + classRoom.getName() + " | Code: " + classRoom.getClassCode());
+
+    if (student.getClassrooms().contains(classRoom)) {
+        System.out.println("Student already joined the class.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("Student already joined this class");
+    }
+
+    student.getClassrooms().add(classRoom);
+    studentRepository.save(student);
+    System.out.println("Student successfully joined the class!");
+
+    return ResponseEntity.ok("Student successfully joined the class!");
+}
+
+
     // Helper to generate unique class codes
     private String generateClassCode() {
         String code;
@@ -93,65 +141,82 @@ public class ClassRoomController {
     }
 
     // Update class info
-@PutMapping("/update/{id}")
-public ResponseEntity<?> updateClass(@PathVariable Long id,
-                                     @RequestBody ClassCreationRequest request,
-                                     @RequestHeader("Authorization") String token) {
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateClass(@PathVariable Long id,
+                                         @RequestBody ClassCreationRequest request,
+                                         @RequestHeader("Authorization") String token) {
 
-    // Extract teacher from token to ensure ownership (optional security check)
-    String email = jwtService.extractUsername(token.replace("Bearer ", ""));
-    Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
-    if (teacherOpt.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        // Extract teacher from token to ensure ownership
+        String email = jwtService.extractUsername(token.replace("Bearer ", ""));
+        Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
+        if (teacherOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        Optional<ClassRoom> existingClassOpt = classRoomRepository.findById(id);
+        if (existingClassOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Class not found");
+        }
+
+        ClassRoom classRoom = existingClassOpt.get();
+
+        // Verify teacher owns the class
+        if (!classRoom.getTeacher().getEmail().equals(email)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this class.");
+        }
+
+        // Update fields
+        classRoom.setName(request.getName());
+        classRoom.setDescription(request.getDescription());
+        classRoom.setBannerUrl(request.getBannerUrl());
+
+        return ResponseEntity.ok(classRoomRepository.save(classRoom));
     }
 
-    Optional<ClassRoom> existingClassOpt = classRoomRepository.findById(id);
-    if (existingClassOpt.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Class not found");
+    // Delete a class
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteClass(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+        // Extract teacher from token
+        String email = jwtService.extractUsername(token.replace("Bearer ", ""));
+        Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
+        if (teacherOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        Optional<ClassRoom> classRoomOpt = classRoomRepository.findById(id);
+        if (classRoomOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Class not found");
+        }
+
+        ClassRoom classRoom = classRoomOpt.get();
+
+        // Verify teacher owns the class
+        if (!classRoom.getTeacher().getEmail().equals(email)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete this class.");
+        }
+
+        // Delete
+        classRoomRepository.delete(classRoom);
+
+        return ResponseEntity.ok("Class deleted successfully");
     }
 
-    ClassRoom classRoom = existingClassOpt.get();
+    @GetMapping("/student/joined")
+public ResponseEntity<?> getJoinedClasses(@RequestHeader("Authorization") String token) {
+    try {
+        String email = jwtService.extractUsername(token.replace("Bearer ", ""));
+        Optional<Student> studentOpt = studentRepository.findByEmail(email);
 
-    // (Optional security) Verify that the current teacher owns the class
-    if (!classRoom.getTeacher().getEmail().equals(email)) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this class.");
+        if (studentOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
+        }
+
+        Student student = studentOpt.get();
+
+        return ResponseEntity.ok(student.getClassrooms());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
     }
-
-    // Update class fields
-    classRoom.setName(request.getName());
-    classRoom.setDescription(request.getDescription());
-    classRoom.setBannerUrl(request.getBannerUrl()); // Add banner URL if needed
-
-    return ResponseEntity.ok(classRoomRepository.save(classRoom));
 }
-
-// Delete a class
-@DeleteMapping("/delete/{id}")
-public ResponseEntity<?> deleteClass(@PathVariable Long id, @RequestHeader("Authorization") String token) {
-    // Extract teacher from token to ensure ownership (optional security check)
-    String email = jwtService.extractUsername(token.replace("Bearer ", ""));
-    Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
-    if (teacherOpt.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-    }
-
-    Optional<ClassRoom> classRoomOpt = classRoomRepository.findById(id);
-    if (classRoomOpt.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Class not found");
-    }
-
-    ClassRoom classRoom = classRoomOpt.get();
-
-    // (Optional security) Verify that the current teacher owns the class
-    if (!classRoom.getTeacher().getEmail().equals(email)) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete this class.");
-    }
-
-    // Delete the class
-    classRoomRepository.delete(classRoom);
-
-    return ResponseEntity.ok("Class deleted successfully");
-}
-
 
 }

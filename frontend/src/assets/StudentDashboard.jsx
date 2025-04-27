@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import Logo from "./images/logo.png";
 import Dashboard from "./images/Navigation/DashboardIcon.png";
@@ -7,35 +8,73 @@ import Profile from "./images/Navigation/ProfileIcon.png";
 import Modules from "./images/Navigation/ClassIcon.png";
 import LogOut from "./images/Navigation/LogOutIcon.png";
 import JoinClass from "./images/Dashboard/JoinClass.png";
-import WordOfTheDay from "./WordOfTheDay";  // Import the WordOfTheDay component
+import WordOfTheDay from "./WordOfTheDay";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
-  const [firstName, setFirstName] = useState("");  // Add state for first name
+  const [firstName, setFirstName] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [classCode, setClassCode] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Load dark mode setting from local storage
   useEffect(() => {
     const storedDarkMode = localStorage.getItem("darkMode");
     if (storedDarkMode) setDarkMode(storedDarkMode === "true");
   }, []);
 
-  // Retrieve first name from local storage
   useEffect(() => {
-    const storedFirstName = localStorage.getItem("firstname");  // Get first name from local storage
+    const storedFirstName = localStorage.getItem("firstname");
     if (storedFirstName) {
-      setFirstName(storedFirstName);  // Set first name in the state
+      setFirstName(storedFirstName);
     }
   }, []);
 
-  // Persist dark mode setting to local storage
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);
   }, [darkMode]);
 
-  // Toggle dark mode
   const toggleDarkMode = () => {
     setDarkMode((prev) => !prev);
+  };
+
+  const handleOpenModal = () => {
+    setShowModal(true);
+    setErrorMessage("");
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setClassCode("");
+    setErrorMessage("");
+  };
+
+  const handleSubmitClassCode = async () => {
+    try {
+      const token = localStorage.getItem("token"); // get your JWT token
+  
+      if (!token) {
+        console.error("No token found. User might not be authenticated.");
+        return;
+      }
+  
+      const response = await axios.post(
+        "http://localhost:8080/api/classes/join",
+        { classCode }, // send the classCode in the body
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // attach the token here
+            "Content-Type": "application/json"
+          }
+        }
+      );
+  
+      console.log("Joined class successfully:", response.data);
+      setShowModal(false);
+      setClassCode(""); // Clear input after submitting
+    } catch (error) {
+      console.error("Failed to join class:", error);
+    }
   };
 
   const mainBgClass = darkMode ? "bg-gray-900" : "bg-white";
@@ -52,7 +91,7 @@ const StudentDashboard = () => {
           <img src={Logo} alt="Filipino Explorer Logo" className="w-40" />
         </div>
         <nav className="space-y-6 pl-6">
-          {[ 
+          {[
             { icon: Dashboard, label: "Dashboard", path: "/student-dashboard" },
             { icon: Profile, label: "My Profile", path: "/profile-student" },
             { icon: Modules, label: "Modules", path: "/" },
@@ -69,28 +108,69 @@ const StudentDashboard = () => {
           ))}
         </nav>
 
-        {/* Word of the Day in the Sidebar */}
         <div className="mt-8 px-6">
-          <WordOfTheDay />  {/* Word of the Day component inside the sidebar */}
+          <WordOfTheDay />
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className={`flex-1 ${mainBgClass} pt-10 px-10`}>
-        <div className={`w-full h-full ${sidebarBgClass} border-[5px] ${sidebarBorderClass} rounded-[20px]`}>
+      <main className={`flex-1 ${mainBgClass} pt-10 px-10 relative`}>
+        <div className={`w-full h-full ${sidebarBgClass} border-[5px] ${sidebarBorderClass} rounded-[20px] relative`}>
           <h1 className={`text-[40px] font-bold font-['Poppins'] ${textClass} mb-8 pt-6 pl-6`}>
-            Magandang Araw {firstName || "Student"}, {/* Use first name from local storage */}
+            Magandang Araw {firstName || "Student"},
           </h1>
 
-          <img src={JoinClass} alt="Join Class Button" className="absolute left-[370px] top-[170px] w-[150px] h-[40px]" />
+          <img
+            src={JoinClass}
+            alt="Join Class Button"
+            className="absolute left-[370px] top-[170px] w-[150px] h-[40px] cursor-pointer"
+            onClick={handleOpenModal}
+          />
         </div>
+
+        {/* Modal */}
+        {showModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            {/* Transparent background area to click outside */}
+            <div
+              className="absolute inset-0 bg-black opacity-30"
+              onClick={handleCloseModal}
+            ></div>
+
+            {/* Modal content */}
+            <div className="relative bg-white rounded-lg p-8 w-96 shadow-lg z-50">
+              <h2 className="text-2xl font-bold mb-4 text-center">Enter Class Code</h2>
+              {errorMessage && <div className="text-red-500 mb-4 text-center">{errorMessage}</div>}
+              <input
+                type="text"
+                value={classCode}
+                onChange={(e) => setClassCode(e.target.value)}
+                placeholder="Class Code"
+                className="w-full p-2 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <div className="flex justify-between">
+                <button
+                  onClick={handleCloseModal}
+                  className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitClassCode}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                >
+                  Join
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Right Sidebar - Timeline */}
       <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-l ${sidebarBorderClass} pt-10 px-6 relative`}>
-        {/* Dark Mode Toggle Button */}
         <div className="absolute top-4 right-4">
-          <button 
+          <button
             onClick={toggleDarkMode}
             className={`rounded-full p-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}
           >

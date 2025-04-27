@@ -1,5 +1,8 @@
 package com.filipinoexplorers.capstone.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,4 +28,8 @@ public class ClassRoom {
     @ManyToOne
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
+
+    @ManyToMany(mappedBy = "classrooms")
+    private Set<Student> students = new HashSet<>();
+
 }

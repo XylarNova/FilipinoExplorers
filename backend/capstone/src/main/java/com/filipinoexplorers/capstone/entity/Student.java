@@ -1,6 +1,10 @@
 package com.filipinoexplorers.capstone.entity;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,4 +32,13 @@ public class Student implements User {
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.STUDENT;
+
+    @ManyToMany
+    @JoinTable(
+        name = "student_classroom",
+        joinColumns = @JoinColumn(name = "student_id"),
+        inverseJoinColumns = @JoinColumn(name = "classroom_id")
+    )
+    @JsonIgnoreProperties("students")
+    private Set<ClassRoom> classrooms = new HashSet<>();
 }
