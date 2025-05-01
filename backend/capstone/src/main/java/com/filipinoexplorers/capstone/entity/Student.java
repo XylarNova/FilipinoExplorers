@@ -14,6 +14,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = "classrooms")
+@ToString(exclude = "classrooms")
 public class Student implements User {
 
     @Id

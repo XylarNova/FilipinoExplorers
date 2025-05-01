@@ -124,7 +124,9 @@ public ResponseEntity<?> joinClass(
     }
 
     student.getClassrooms().add(classRoom);
+    classRoom.getStudents().add(student);
     studentRepository.save(student);
+    classRoomRepository.save(classRoom);
     System.out.println("Student successfully joined the class!");
 
     return ResponseEntity.ok("Student successfully joined the class!");

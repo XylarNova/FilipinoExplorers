@@ -11,6 +11,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = "students")
+@ToString(exclude = "students")
 public class ClassRoom {
 
     @Id
@@ -31,5 +33,4 @@ public class ClassRoom {
 
     @ManyToMany(mappedBy = "classrooms")
     private Set<Student> students = new HashSet<>();
-
 }
