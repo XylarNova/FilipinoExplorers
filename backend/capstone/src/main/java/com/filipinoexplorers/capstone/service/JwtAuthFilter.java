@@ -2,6 +2,7 @@ package com.filipinoexplorers.capstone.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,7 +33,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // Skip JWT validation for public endpoints
         String servletPath = request.getServletPath();
         if (servletPath.matches("/api/auth/(register|login)")) {
             filterChain.doFilter(request, response);
@@ -55,9 +55,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             var userDetails = customUserDetailsService.loadUserByUsername(email);
 
             if (jwtService.validateToken(jwt)) {
-                // Extract role claim and wrap in ROLE_ prefix
-                String role = jwtService.extractRole(jwt);  // <-- we will add this method
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+                List<String> roles = jwtService.extractAuthorities(jwt);
+                var authorities = roles.stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
 
                 var authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, authorities

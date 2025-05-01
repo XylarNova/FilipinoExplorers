@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import Logo from './images/logo.png';
 import Dashboard from './images/Navigation/DashboardIcon.png';
 import Profile from './images/Navigation/ProfileIcon.png';
@@ -13,8 +12,12 @@ const ClassCreation = () => {
   const [description, setDescription] = useState('');
   const [enrollmentMethod, setEnrollmentMethod] = useState('');
   const [bannerFile, setBannerFile] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [searchEmail, setSearchEmail] = useState('');
+  const [students, setStudents] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const toggleDarkMode = () => setDarkMode(!darkMode);
+  const toggleDarkMode = () => setDarkMode(prevState => !prevState);
 
   const mainBgClass = darkMode ? "bg-gray-900" : "bg-white";
   const sidebarBgClass = darkMode ? "bg-gray-800" : "bg-[#FDFBEE]";
@@ -29,53 +32,100 @@ const ClassCreation = () => {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
-    let email;
-
-    try {
-      const decoded = jwtDecode(token);
-      email = decoded.sub;
-
-      if (!email) {
-        console.error('Email not found in token');
-        return;
-      }
-    } catch (err) {
-      console.error('Error decoding token:', err);
+    if (!token) {
+      console.error('No token found');
+      setErrorMessage('No token found.');
       return;
     }
 
-    // Creating FormData to send the email and other class info
     const formData = new FormData();
-    formData.append("email", email);  
     formData.append("info", new Blob([JSON.stringify({ name, description, enrollmentMethod })], { type: "application/json" }));
-    if (bannerFile) formData.append("banner", bannerFile);
+
+    if (bannerFile) {
+      formData.append("banner", bannerFile);
+    }
 
     try {
       const response = await fetch('http://localhost:8080/api/classes/createclass', {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Failed to create class");
+      if (!response.ok) throw new Error(`Failed to create class. Status: ${response.status}`);
 
       const data = await response.json();
       console.log("Class created successfully:", data);
-      // Reset form if needed
+
+      // Reset form fields after success
       setName('');
       setDescription('');
       setEnrollmentMethod('');
       setBannerFile(null);
+      setErrorMessage('');
+
+      // Add students if provided
+      if (students.length > 0) {
+        await addStudentsToClass(students, data.classCode);
+      }
     } catch (error) {
       console.error("Error:", error);
+      setErrorMessage(`Failed to create class: ${error.message}`);
+    }
+  };
+
+  const handleEnrollmentChange = (e) => {
+    const value = e.target.value;
+    setEnrollmentMethod(value);
+    if (value === "Manually Input Email") {
+      setShowModal(true);
+    }
+  };
+
+  const handleAddStudent = () => {
+    if (searchEmail && !students.includes(searchEmail)) {
+      setStudents(prev => [...prev, searchEmail]);
+      setSearchEmail('');
+      setShowModal(false);
+    } else {
+      setErrorMessage('Please enter a valid email or avoid adding duplicates.');
+    }
+  };
+
+  const addStudentsToClass = async (studentsList, classCode) => {
+    const token = localStorage.getItem('token');
+    try {
+      for (const email of studentsList) {
+        const response = await fetch('http://localhost:8080/api/classes/add-student', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            studentEmail: email,
+            classCode: classCode,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to add student with email: ${email}. Response: ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log("Student added:", result);
+      }
+
+      setStudents([]); // Clear students after successful addition
+    } catch (error) {
+      console.error("Error adding students:", error);
+      setErrorMessage(`Failed to add students: ${error.message}`);
     }
   };
 
   return (
-    <div className={`flex h-screen w-full ${mainBgClass}`}>
-      {/* Sidebar */}
+    <div className={`flex h-screen w-full ${mainBgClass} relative`}>
       <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-r ${sidebarBorderClass} pt-8`}>
         <div className="mb-10 flex justify-center">
           <img src={Logo} alt="Filipino Explorer Logo" className="w-40" />
@@ -91,12 +141,15 @@ const ClassCreation = () => {
         </nav>
       </aside>
 
-      {/* Main Content */}
       <main className={`flex-1 ${mainBgClass} pt-10 px-10`}>
         <h1 className={`text-[40px] font-bold font-['Fredoka'] ${textClass} mb-8`}>Create Class Form</h1>
+        {errorMessage && (
+          <div className="text-red-500 mb-4">
+            <strong>{errorMessage}</strong>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex gap-8">
-            {/* Class Name */}
             <div>
               <label className="block font-bold text-[20px] text-[#073A4D] mb-2">Class name:</label>
               <input
@@ -108,7 +161,6 @@ const ClassCreation = () => {
               />
             </div>
 
-            {/* Upload Banner */}
             <div>
               <label className="block font-bold text-[20px] text-[#073A4D] mb-2">Upload Class Banner</label>
               <input
@@ -121,7 +173,6 @@ const ClassCreation = () => {
           </div>
 
           <div className="flex gap-8">
-            {/* Description */}
             <div>
               <label className="block font-bold text-[20px] text-[#073A4D] mb-2">Class Description</label>
               <textarea
@@ -131,12 +182,11 @@ const ClassCreation = () => {
               />
             </div>
 
-            {/* Enrollment Method */}
             <div>
               <label className="block font-bold text-[20px] text-[#073A4D] mb-2">Choose Enrollment Method</label>
               <select
                 value={enrollmentMethod}
-                onChange={(e) => setEnrollmentMethod(e.target.value)}
+                onChange={handleEnrollmentChange}
                 className="rounded-[10px] border border-[#F04772] w-[441px] h-[32px] px-2"
                 required
               >
@@ -156,7 +206,33 @@ const ClassCreation = () => {
         </form>
       </main>
 
-      {/* Dark Mode Toggle */}
+      {showModal && (
+        <div className="absolute top-40 left-1/2 transform -translate-x-1/2 bg-white p-6 rounded-lg shadow-xl z-50 border border-gray-300 w-96">
+          <h2 className="text-xl font-bold mb-4">Search for Student Email</h2>
+          <input
+            type="email"
+            value={searchEmail}
+            onChange={(e) => setSearchEmail(e.target.value)}
+            placeholder="Enter student email"
+            className="w-full border p-2 rounded mb-4"
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setShowModal(false)}
+              className="bg-gray-300 text-black px-4 py-2 rounded"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAddStudent}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Add Student
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="absolute top-4 right-4">
         <button onClick={toggleDarkMode} className={`rounded-full p-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
           {darkMode ? (
