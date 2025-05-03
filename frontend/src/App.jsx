@@ -18,7 +18,7 @@ import MyProfileStudent from './assets/MyProfileStudent';
 import GuessTheWord from './assets/GuessTheWord';
 
 import MemoryGame from './assets/MemoryGame';
-import MemoryGameQuestion from './assets/MemoryGameQuestionForm';
+import InputsMemoryGame from './assets/InputsMemoryGame';
 
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
@@ -51,7 +51,7 @@ const App = () => {
         <Route path="/guesstheword" element={<GuessTheWord />} />
 
         <Route path="/memorygame" element={<MemoryGame />} />
-        <Route path="/memorygamequestion" element={<MemoryGameQuestion />} />
+        <Route path="/inputmemorygame" element={<InputsMemoryGame />} />
 
         <Route path="/paaralanquest" element={<PaaralanQuest />} />
         <Route path="/parkequest" element={<ParkeQuest />} />
