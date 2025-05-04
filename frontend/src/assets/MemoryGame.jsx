@@ -24,9 +24,8 @@ function MemoryGame() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [questionResults, setQuestionResults] = useState([]);
-  const [totalPoints, setTotalPoints] = useState(0); // Tracks total points
   const [elapsed, setElapsed] = useState(0);
-  const [duration, setDuration] = useState(10);
+  const [duration, setDuration] = useState(10); // static 10 seconds
 
   const fetchQuestions = async () => {
     try {
@@ -45,14 +44,13 @@ function MemoryGame() {
   useEffect(() => {
     if (questions.length === 0) return;
 
-    const current = questions[currentQuestionIndex];
-    setDuration(current.timerInSeconds || 10);
+    setDuration(10); // <-- Force static timer
     setElapsed(0);
     setSelectedChoice(null);
 
     const interval = setInterval(() => {
       setElapsed((prev) => {
-        if (prev >= current.timerInSeconds) {
+        if (prev >= 10) {
           clearInterval(interval);
           return prev;
         }
@@ -101,10 +99,6 @@ function MemoryGame() {
     const updatedResults = [...questionResults];
     updatedResults[currentQuestionIndex] = isCorrect ? 'correct' : 'wrong';
     setQuestionResults(updatedResults);
-
-    if (isCorrect) {
-      setTotalPoints((prevPoints) => prevPoints + current.points); // Add points for correct answer
-    }
   };
 
   const handleHintClick = () => {
@@ -127,7 +121,6 @@ function MemoryGame() {
     }
   };
 
-  // Construct image path from imageName field
   const imagePath = current.imageName ? `/assets/tagalog-words/${current.imageName}` : null;
 
   return (
@@ -148,7 +141,6 @@ function MemoryGame() {
         </div>
       </div>
 
-      {/* Choices */}
       <div className="flex justify-center items-center h-full">
         <img src={ChoicesBG} alt="Choices Background" className="absolute left-[550px] top-[200px] w-[840px] h-[650px]" draggable={false} />
         {choicesData.map((choice) => (
@@ -171,7 +163,6 @@ function MemoryGame() {
           </div>
         ))}
 
-        {/* Answer area with image fallback */}
         <div className="absolute left-[825px] top-[710px] w-[305px] h-[80px] z-10">
           <img src={Answer} alt="Answer" className="w-full h-full pointer-events-none" draggable={false} />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -183,7 +174,6 @@ function MemoryGame() {
           </div>
         </div>
 
-        {/* Navigation Buttons */}
         <div>
           <button onClick={handlePrev} className="absolute left-[600px] top-[860px] w-[200px] h-[80px]">
             <img src={ButtonPrev} alt="Previous" className="w-full h-full" draggable={false} />
@@ -212,21 +202,8 @@ function MemoryGame() {
 
         {/* Points and Items */}
         <div className="absolute left-[1500px] top-[200px] w-[300px] h-[110px]">
-          <img
-            src={PointsBG}
-            alt="Points Background"
-            className="w-full h-full"
-            draggable={false}
-          />
-          <img
-            src={Points}
-            alt="Points"
-            className="absolute top-[30px] left-1/2 transform -translate-x-1/2 w-[200px] h-[50px]"
-            draggable={false}
-          />
-          <div className="absolute top-[38px] left-1/2 transform -translate-x-1/2 text-[28px] font-bold text-[#71361F] pointer-events-none">
-            {totalPoints}
-          </div>
+          <img src={PointsBG} alt="Points Background" className="w-full h-full" draggable={false} />
+          <img src={Points} alt="Points" className="absolute top-[30px] left-1/2 transform -translate-x-1/2 w-[200px] h-[50px]" draggable={false} />
         </div>
 
         <div>

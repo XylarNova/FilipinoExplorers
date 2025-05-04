@@ -6,8 +6,6 @@ export default function InputsMemoryGame() {
   const [correctAnswer, setCorrectAnswer] = useState('');
   const [choices, setChoices] = useState(['', '', '', '', '']);
   const [hint, setHint] = useState('');
-  const [timerInSeconds, setTimerInSeconds] = useState(10);
-  const [points, setPoints] = useState(1); // NEW
   const [questionList, setQuestionList] = useState([]);
 
   const fetchQuestions = async () => {
@@ -41,16 +39,13 @@ export default function InputsMemoryGame() {
         correctAnswer,
         choices,
         hint,
-        timerInSeconds,
-        points, // NEW
+        timerInSeconds: 10, // Default hardcoded timer
       });
       alert('✅ Question submitted successfully!');
       setTagalogWord('');
       setCorrectAnswer('');
       setChoices(['', '', '', '', '']);
       setHint('');
-      setTimerInSeconds(10);
-      setPoints(1); // RESET
       fetchQuestions();
     } catch (error) {
       console.error(error);
@@ -121,32 +116,6 @@ export default function InputsMemoryGame() {
           />
         </div>
 
-        <div>
-          <label className="block font-semibold mb-1">Timer (in seconds)</label>
-          <input
-            type="number"
-            value={timerInSeconds}
-            onChange={(e) => setTimerInSeconds(Number(e.target.value))}
-            min={5}
-            max={120}
-            required
-            className="w-full border border-gray-300 p-2 rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block font-semibold mb-1">Points</label>
-          <input
-            type="number"
-            value={points}
-            onChange={(e) => setPoints(Number(e.target.value))}
-            min={1}
-            max={100}
-            required
-            className="w-full border border-gray-300 p-2 rounded"
-          />
-        </div>
-
         <button
           type="submit"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
@@ -169,7 +138,6 @@ export default function InputsMemoryGame() {
                 <th className="border px-4 py-2">Choices</th>
                 <th className="border px-4 py-2">Hint</th>
                 <th className="border px-4 py-2">Timer (s)</th>
-                <th className="border px-4 py-2">Points</th> {/* NEW */}
               </tr>
             </thead>
             <tbody>
@@ -181,7 +149,6 @@ export default function InputsMemoryGame() {
                   <td className="border px-4 py-2">{q.choices.join(', ')}</td>
                   <td className="border px-4 py-2">{q.hint}</td>
                   <td className="border px-4 py-2">{q.timerInSeconds}</td>
-                  <td className="border px-4 py-2">{q.points}</td> {/* NEW */}
                 </tr>
               ))}
             </tbody>

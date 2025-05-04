@@ -3,7 +3,7 @@ import axios from 'axios';
 import Logo from './images/Logo.png';
 import LogIn from './images/Log in and sign up/Log in.png';
 import Star from './images/Log in and sign up/star.png';
-import Cloud from './images/Log in and sign up/Log in and Register.png'
+import Cloud from './images/Log in and sign up/Log in and Register.png';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -12,27 +12,25 @@ const LoginPage = () => {
   const innerContentStyle = {
     paddingTop: '40px',
     paddingLeft: '40px',
-    paddingRight: '40px'
+    paddingRight: '40px',
   };
 
   const handleLogin = async () => {
     try {
-      let response;
-      
-      // Attempt login (whether teacher or student)
-      response = await axios.post('http://localhost:8080/api/auth/login', {
+      const response = await axios.post('http://localhost:8080/api/auth/login', {
         email,
         password,
       });
-  
+
       const { token, role, message } = response.data;
-  
+
       // Store the response data in localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('role', role);
-  
-      alert(message);
-  
+
+      // Log message instead of alert
+      console.log('Login successful:', message);
+
       // Redirect based on role
       if (role === 'TEACHER') {
         window.location.href = '/teacher-dashboard';
@@ -44,7 +42,6 @@ const LoginPage = () => {
       alert('Login failed. Please check your credentials.');
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-[#073A4D] flex flex-col">

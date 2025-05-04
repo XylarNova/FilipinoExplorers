@@ -24,8 +24,4 @@ public class Question {
     private List<String> choices;
 
     private String hint;
-
-    private int timerInSeconds;
-
-    private int points;
 }

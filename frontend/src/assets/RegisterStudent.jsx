@@ -31,7 +31,7 @@ const RegisterStudent = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register", {
+      const response = await fetch("https://your-api-endpoint.com/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +61,7 @@ const RegisterStudent = () => {
 
         navigate("/profile-student");
       } else {
-        alert(result.message || "Registration failed.");
+        console.log(result.message || "Registration failed.");
       }
     } catch (error) {
       console.error("Error during registration:", error);
@@ -76,7 +76,7 @@ const RegisterStudent = () => {
         <img
           src={Logo}
           alt="Logo"
-          className="w-48 mb-5"
+          className="w-64 mb-5"  // Increased size
           style={{ paddingTop: "1rem", paddingLeft: "2.5rem" }}
         />
       </div>
@@ -86,7 +86,7 @@ const RegisterStudent = () => {
         <img
           src={SignUp}
           alt="Sign Up"
-          className="absolute left-[-50px] top-[-73px] w-[600px] h-[739px]"
+          className="absolute left-[-50px] top-[-73px] w-[800px] h-[940px]"  // Increased size
         />
 
         <div

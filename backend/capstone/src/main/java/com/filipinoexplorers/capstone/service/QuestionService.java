@@ -30,8 +30,6 @@ public class QuestionService {
             question.setCorrectAnswer(updatedQuestion.getCorrectAnswer());  
             question.setChoices(updatedQuestion.getChoices());  
             question.setHint(updatedQuestion.getHint());  
-            question.setTimerInSeconds(updatedQuestion.getTimerInSeconds());  
-            question.setPoints(updatedQuestion.getPoints());  
             return questionRepository.save(question);  
         }
         return null;  

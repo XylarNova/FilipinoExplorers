@@ -13,7 +13,7 @@ const RegisterTeacher = () => {
     confirmPassword: "",
   });
 
-  const navigate = useNavigate(); // Used to redirect after successful registration
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -42,38 +42,35 @@ const RegisterTeacher = () => {
           email: formData.email,
           password: formData.password,
           school: formData.school,
-          role: "TEACHER", 
+          role: "TEACHER",
         }),
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        alert("Registration successful!");
-
-        // ✅ Store the token and optionally email or user info
+        console.log("Registration successful!");
         localStorage.setItem("token", result.token);
         localStorage.setItem("email", formData.email);
-        localStorage.setItem("role", "TEACHER"); 
-        
+        localStorage.setItem("role", "TEACHER");
         navigate("/profile-teacher");
       } else {
-        alert(result.message || "Registration failed");
+        console.log(result.message || "Registration failed");
       }
     } catch (error) {
-      console.error("Error during registration:", error);
+      console.log("Error during registration:", error);
       alert("Something went wrong!");
     }
   };
 
   return (
-    <div className="bg-[#073A4D] h-screen flex flex-col items-start p-5 relative">
+    <div className="bg-[#073A4D] h-screen flex flex-col items-start p-5 relative overflow-hidden">
       {/* Logo */}
       <div className="w-full flex justify-start">
         <img
           src={Logo}
           alt="Logo"
-          className="w-48 mb-5"
+          className="w-64 mb-5" // increased from w-48 to w-64
           style={{ paddingTop: "1rem", paddingLeft: "2.5rem" }}
         />
       </div>
@@ -84,19 +81,19 @@ const RegisterTeacher = () => {
         <img
           src={SignUp}
           alt="Sign Up"
-          className="absolute left-[-50px] top-[-73px] w-[600px] h-[739px]"
+          className="absolute left-[-100px] top-[-100px] w-[700px] h-[860px]" // made larger and adjusted position
         />
 
         {/* White Box */}
         <div
-          className="bg-white rounded-[40px] flex flex-col justify-start items-start absolute right-50 top-1/2 transform -translate-y-1/2"
-          style={{ width: "540px", height: "635px", padding: "2rem 3rem" }} // Explicit padding for the white box
+          className="bg-white rounded-[40px] flex flex-col justify-start items-start absolute right-20 top-1/2 transform -translate-y-1/2"
+          style={{ width: "540px", height: "635px", padding: "2rem 3rem" }}
         >
           {/* "Teacher" Label */}
           <div
             className="absolute top-4 right-4 bg-[#57B4BA] text-black text-sm font-bold flex items-center justify-center"
             style={{
-              padding: "0 2rem", // Increased padding on the left and right
+              padding: "0 2rem",
               height: "40px",
               borderRadius: "20px",
             }}
@@ -108,19 +105,19 @@ const RegisterTeacher = () => {
           <div
             className="w-full"
             style={{
-              paddingTop: "2rem", // Increased padding above the header
-              paddingBottom: "1rem", // Added padding below the header
+              paddingTop: "2rem",
+              paddingBottom: "1rem",
             }}
           >
             <h1
               className="text-2xl text-[#073A4D] mb-2"
-              style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 500 }} // Set font to Poppins Medium
+              style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 500 }}
             >
               Create an Account
             </h1>
             <p
               className="text-sm text-black mb-5"
-              style={{ fontFamily: "'Poppins', sans-serif" }} // Set font to Poppins
+              style={{ fontFamily: "'Poppins', sans-serif" }}
             >
               Already have an account?{" "}
               <a
@@ -138,11 +135,11 @@ const RegisterTeacher = () => {
             className="w-full pt-6 px-6"
             style={{
               fontFamily: "'Poppins', sans-serif",
-              fontWeight: 200, // Extra Light
+              fontWeight: 200,
             }}
           >
             {/* First Name and Last Name */}
-            <div className="flex gap-4" style={{ marginBottom: "1rem" }}>
+            <div className="flex gap-4 mb-4">
               <input
                 type="text"
                 name="first_name"
@@ -152,8 +149,8 @@ const RegisterTeacher = () => {
                 className="w-1/2 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
                 style={{
                   backgroundColor: "#D9D9D9",
-                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", // Inner shadow
-                  height: "50px", // Increased height
+                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                  height: "50px",
                 }}
               />
               <input
@@ -165,8 +162,8 @@ const RegisterTeacher = () => {
                 className="w-1/2 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
                 style={{
                   backgroundColor: "#D9D9D9",
-                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", // Inner shadow
-                  height: "50px", // Increased height
+                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                  height: "50px",
                 }}
               />
             </div>
@@ -178,12 +175,11 @@ const RegisterTeacher = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Email"
-              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
+              className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
               style={{
                 backgroundColor: "#D9D9D9",
-                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", // Inner shadow
-                height: "50px", // Increased height
-                marginBottom: "1rem", // Reduced space below
+                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                height: "50px",
               }}
             />
 
@@ -194,12 +190,11 @@ const RegisterTeacher = () => {
               value={formData.school}
               onChange={handleChange}
               placeholder="School"
-              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
+              className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
               style={{
                 backgroundColor: "#D9D9D9",
-                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", // Inner shadow
-                height: "50px", // Increased height
-                marginBottom: "1rem", // Reduced space below
+                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                height: "50px",
               }}
             />
 
@@ -210,12 +205,11 @@ const RegisterTeacher = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Password"
-              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
+              className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
               style={{
                 backgroundColor: "#D9D9D9",
-                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", // Inner shadow
-                height: "50px", // Increased height
-                marginBottom: "1rem", // Reduced space below
+                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                height: "50px",
               }}
             />
 
@@ -226,16 +220,15 @@ const RegisterTeacher = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Confirm Password"
-              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
+              className="w-full p-4 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
               style={{
                 backgroundColor: "#D9D9D9",
-                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", // Inner shadow
-                height: "50px", // Increased height
-                marginBottom: "1rem", // Reduced space below
+                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                height: "50px",
               }}
             />
 
-            {/* Terms and Conditions Checkbox */}
+            {/* Terms and Conditions */}
             <div className="flex items-center mb-4">
               <input
                 type="checkbox"
@@ -244,7 +237,7 @@ const RegisterTeacher = () => {
                 style={{
                   width: "18px",
                   height: "18px",
-                  accentColor: "#073A4D", // Changes the checkbox color
+                  accentColor: "#073A4D",
                 }}
               />
               <label
@@ -268,9 +261,9 @@ const RegisterTeacher = () => {
                 type="submit"
                 className="text-white py-3 rounded-lg hover:bg-[#4CA9A9] transition"
                 style={{
-                  backgroundColor: "#57B4B3", // Updated background color
+                  backgroundColor: "#57B4B3",
                   marginTop: "1rem",
-                  width: "204px", // Set button width to 204px
+                  width: "204px",
                 }}
               >
                 Register
