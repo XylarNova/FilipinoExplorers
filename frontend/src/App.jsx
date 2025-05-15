@@ -11,6 +11,7 @@ import TeacherDashboard from './assets/TeacherDashboard';
 import ClassCreation from './assets/ClassCreation';
 import TeacherClassList from './assets/TeacherClassList';
 import MyProfileTeacher from './assets/MyProfileTeacher';
+import GameBank from './assets/GameBank';
 
 import StudentDashboard from './assets/StudentDashboard';
 import MyProfileStudent from './assets/MyProfileStudent';
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="/class-creation" element={<ClassCreation />} />
         <Route path="/teacher-classlist" element={<TeacherClassList />} />
         <Route path="/profile-teacher" element={<MyProfileTeacher />} />
+        <Route path="/gamebank" element={<GameBank />} />
         
         {/* Student Dashboard Path */}
 
@@ -50,7 +52,7 @@ const App = () => {
         {/* Games Section Path */}
         <Route path="/guesstheword" element={<GuessTheWord />} />
 
-        <Route path="/memorygame" element={<MemoryGame />} />
+        <Route path="/memorygame/:sessionId?" element={<MemoryGame />} />
         <Route path="/inputmemorygame" element={<InputsMemoryGame />} />
 
         <Route path="/paaralanquest" element={<PaaralanQuest />} />

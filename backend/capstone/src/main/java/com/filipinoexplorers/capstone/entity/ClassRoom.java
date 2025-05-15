@@ -33,4 +33,7 @@ public class ClassRoom {
 
     @ManyToMany(mappedBy = "classrooms")
     private Set<Student> students = new HashSet<>();
+
+    @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
+    private Set<GameSession> gameSessions = new HashSet<>();
 }

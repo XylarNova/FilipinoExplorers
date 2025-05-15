@@ -6,22 +6,24 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Question {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String tagalogWord;
-
     private String correctAnswer;
 
     @ElementCollection
     private List<String> choices;
 
     private String hint;
+
+    @ManyToMany(mappedBy = "questions")
+    private List<GameSession> gameSessions;
 }

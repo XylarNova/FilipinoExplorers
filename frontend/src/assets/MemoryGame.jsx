@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Background from './images/Memory Game/Memory Game BG.png';
 import Logo from './images/Logo.png';
@@ -20,16 +21,23 @@ import HintButton from './images/Memory Game/HintButton.png';
 import SubmitButton from './images/Memory Game/SubmitButton.png';
 
 function MemoryGame() {
+  const { sessionId } = useParams();
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [questionResults, setQuestionResults] = useState([]);
   const [elapsed, setElapsed] = useState(0);
-  const [duration, setDuration] = useState(10); // static 10 seconds
+  const [duration, setDuration] = useState(10);
 
   const fetchQuestions = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/questions/get');
+      let res;
+      if (sessionId) {
+        const sessionRes = await axios.get(`http://localhost:8080/api/session/${sessionId}`);
+        res = { data: sessionRes.data.questions };
+      } else {
+        res = await axios.get('http://localhost:8080/api/questions/get');
+      }
       setQuestions(res.data);
       setQuestionResults(new Array(res.data.length).fill(null));
     } catch (err) {
@@ -39,18 +47,21 @@ function MemoryGame() {
 
   useEffect(() => {
     fetchQuestions();
-  }, []);
+  }, [sessionId]);
 
   useEffect(() => {
     if (questions.length === 0) return;
 
-    setDuration(10); // <-- Force static timer
+    const current = questions[currentQuestionIndex];
+    const qDuration = current.timerInSeconds || 10;
+
+    setDuration(qDuration);
     setElapsed(0);
     setSelectedChoice(null);
 
     const interval = setInterval(() => {
       setElapsed((prev) => {
-        if (prev >= 10) {
+        if (prev >= qDuration) {
           clearInterval(interval);
           return prev;
         }
@@ -84,6 +95,7 @@ function MemoryGame() {
   const waterHeight = (elapsed / duration) * 100;
 
   const handleChoiceClick = (choice) => {
+    if (questionResults[currentQuestionIndex] !== null) return;
     setSelectedChoice(choice);
   };
 
@@ -93,12 +105,22 @@ function MemoryGame() {
       return;
     }
 
+    if (questionResults[currentQuestionIndex] !== null) return;
+
     const isCorrect = selectedChoice.text === current.correctAnswer;
     alert(isCorrect ? 'Correct!' : 'Wrong answer');
 
     const updatedResults = [...questionResults];
     updatedResults[currentQuestionIndex] = isCorrect ? 'correct' : 'wrong';
     setQuestionResults(updatedResults);
+
+    setTimeout(() => {
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex((prev) => prev + 1);
+      } else {
+        alert('You have completed all the questions!');
+      }
+    }, 1000);
   };
 
   const handleHintClick = () => {
@@ -124,14 +146,13 @@ function MemoryGame() {
   const imagePath = current.imageName ? `/assets/tagalog-words/${current.imageName}` : null;
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center relative"
-      style={{ backgroundImage: `url(${Background})` }}
-    >
+    <div className="min-h-screen bg-cover bg-center relative" style={{ backgroundImage: `url(${Background})` }}>
+      {/* Logo */}
       <div className="absolute left-[250px] top-[70px]">
         <img src={Logo} alt="Logo" className="w-50 h-auto" draggable={false} />
       </div>
 
+      {/* Instruction Banner */}
       <div className="absolute left-[550px] top-[60px] w-[840px] h-[100px] relative">
         <img src={Instruction} alt="Instruction" className="w-full h-full" draggable={false} />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -141,8 +162,11 @@ function MemoryGame() {
         </div>
       </div>
 
+      {/* Game Content */}
       <div className="flex justify-center items-center h-full">
         <img src={ChoicesBG} alt="Choices Background" className="absolute left-[550px] top-[200px] w-[840px] h-[650px]" draggable={false} />
+        
+        {/* Choices */}
         {choicesData.map((choice) => (
           <div key={choice.id}>
             <img src={Buko} alt={choice.text} className={`absolute ${choice.bukoTop} ${choice.bukoLeft} w-[200px] h-[200px]`} draggable={false} />
@@ -163,6 +187,7 @@ function MemoryGame() {
           </div>
         ))}
 
+        {/* Word / Answer Area */}
         <div className="absolute left-[825px] top-[710px] w-[305px] h-[80px] z-10">
           <img src={Answer} alt="Answer" className="w-full h-full pointer-events-none" draggable={false} />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -174,15 +199,14 @@ function MemoryGame() {
           </div>
         </div>
 
+        {/* Navigation Buttons */}
         <div>
           <button onClick={handlePrev} className="absolute left-[600px] top-[860px] w-[200px] h-[80px]">
             <img src={ButtonPrev} alt="Previous" className="w-full h-full" draggable={false} />
           </button>
-
           <button onClick={handleCheckAnswerClick} className="absolute left-[850px] top-[860px] w-[250px] h-[80px]">
             <img src={ButtonCheckAnswer} alt="Check Answer" className="w-full h-full" draggable={false} />
           </button>
-
           <button onClick={handleNext} className="absolute left-[1120px] top-[860px] w-[200px] h-[80px]">
             <img src={ButtonNext} alt="Next" className="w-full h-full" draggable={false} />
           </button>
@@ -239,12 +263,11 @@ function MemoryGame() {
           })}
         </div>
 
-        {/* Hint and Submit */}
+        {/* Hint and Submit Buttons */}
         <div>
           <button onClick={handleHintClick} className="absolute left-[1540px] top-[680px] w-[200px] h-[70px]">
             <img src={HintButton} alt="Hint Button" className="w-full h-full" draggable={false} />
           </button>
-
           <button onClick={handleSubmitClick} className="absolute left-[1540px] top-[740px] w-[200px] h-[70px]">
             <img src={SubmitButton} alt="Submit Button" className="w-full h-full" draggable={false} />
           </button>
