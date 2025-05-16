@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Logo from './images/Logo.png';
 import HomeImage from './images/Homepage/Home 1st rec.png';
 import GuessTheWordImage from './images/Homepage/Guess The Word .png';
-import ParkeQuestImage from './images/Homepage/Parke Quest (2).png';
+import ParkeQuestImage from './images/Homepage/Parke Quest.png';
 import PaaralanQuestImage from './images/Homepage/Paaralan Quest Icon.png';
 import MemoryGameImage from './images/Homepage/Memory Game Icon.png';
+import './Homepage.css';
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -36,46 +37,40 @@ const Homepage = () => {
             padding: 0, 
             alignItems: 'center' 
           }}>
-            <li style={{ margin: '0 20px', fontSize: '18px' }}>
-              <a href="#home" style={{ textDecoration: 'none', color: '#000' }}>Home</a>
-            </li>
-            <li style={{ margin: '0 20px', fontSize: '18px' }}>
-              <a href="#about" style={{ textDecoration: 'none', color: '#000' }}>About Us</a>
-            </li>
-            <li style={{ margin: '0 20px', fontSize: '18px' }}>
-              <a href="#games" style={{ textDecoration: 'none', color: '#000' }}>Games</a>
-            </li>
-            <li style={{ margin: '0 20px', fontSize: '18px' }}>
-              <button 
-                onClick={() => navigate('/signup')} 
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: '#000', 
-                  fontSize: '18px', 
-                  cursor: 'pointer', 
-                  textDecoration: 'none' 
-                }}
-              >
-                Sign Up
-              </button>
+            <li style={{ margin: '0 20px' }}>
+              <a href="#home" className="nav-link">Home</a>
             </li>
             <li style={{ margin: '0 20px' }}>
-              <button 
-                onClick={() => navigate('/login')} 
-                style={{
-                  padding: '10px 20px', 
-                  fontSize: '16px', 
-                  backgroundColor: '#06D7A0',
-                  color: '#000', 
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                }}
-              >
-                Log In
-              </button>
+              <a href="#about" className="nav-link">About Us</a>
             </li>
+            <li style={{ margin: '0 20px' }}>
+              <a href="#games" className="nav-link">Games</a>
+            </li>
+            <li style={{ margin: '0 20px' }}>
+            <button 
+              onClick={() => navigate('/signup')} 
+              className="nav-link"
+            >
+              Sign Up
+            </button>
+          </li>
+          <li style={{ margin: '0 20px' }}>
+            <button 
+              onClick={() => navigate('/login')} 
+              style={{
+                padding: '10px 20px', 
+                fontSize: '16px', 
+                backgroundColor: '#06D7A0',
+                color: '#000', 
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+            >
+              Log In
+            </button>
+          </li>
+
           </ul>
         </nav>
       </header>
@@ -215,19 +210,20 @@ const Homepage = () => {
           Ready to Begin?
         </h2>
         <button 
-          style={{
-            padding: '10px 20px',
-            fontSize: '20px',
-            backgroundColor: '#FAB900', 
-            color: '#000', 
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-          onClick={() => alert('Sign Up for Free!')}
-        >
-          Sign Up for Free
+            style={{
+              padding: '10px 20px',
+              fontSize: '20px',
+              backgroundColor: '#FAB900', 
+              color: '#000', 
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+            onClick={() => navigate('/signup')}
+          >
+            Sign Up for Free
         </button>
+
       </div>
 
       {/* Footer Section */}
