@@ -4,6 +4,7 @@ import Logo from "./images/Logo.png";
 import Star from "./images/Log in and sign up/star.png";
 import Cloud from "./images/Log in and sign up/signClouds.png";
 import FlyingKids from "./images/Log in and sign up/flyingkids.png";
+import './Global.css';
 
 const RegisterStudent = () => {
   const [formData, setFormData] = useState({
@@ -67,35 +68,40 @@ const RegisterStudent = () => {
 
   return (
     <div className="bg-[#073A4D] min-h-screen flex p-5 relative overflow-hidden">
-      {/* Logo */}
-      <div className="absolute top-5 left-10 z-20">
-        <img src={Logo} alt="Logo" className="w-64" />
-      </div>
+     {/* Clickable Logo */}
+           <div
+             onClick={() => navigate('/')}
+             className="absolute left-[40px] top-[40px] w-[190px] h-[80px] cursor-pointer z-30"
+           >
+             <img src={Logo} alt="Logo" className="w-full h-full object-contain" />
+           </div>
 
       {/* Flying Kids */}
      <img
       src={FlyingKids}
       alt="Flying Kids"
+      className="flying"
       style={{
         position: "absolute",
         left: "140px",
-        bottom: "80px", // higher than -30px
-        width: "500px", // bigger than 500px
+        bottom: "80px",
+        width: "500px",
         zIndex: 10
       }}
     />
 
 
+
       {/* Stars in curved layout */}
-      <img src={Star} className="absolute bottom-[300px] left-[30px] w-[60px] z-0" />
-      <img src={Star} className="absolute bottom-[550px] left-[100px] w-[60px] z-0" />
-      <img src={Star} className="absolute bottom-[600px] left-[400px] w-[60px] z-0" />
-      <img src={Star} className="absolute bottom-[500px] left-[500px] w-[60px] z-0" />
-      <img src={Star} className="absolute bottom-[500px] left-[600px] w-[60px] z-0" />
+      <img src={Star} className="absolute bottom-[300px] left-[30px] w-[60px] z-0 twinkle" />
+      <img src={Star} className="absolute bottom-[500px] left-[100px] w-[60px] z-0 twinkle" />
+      <img src={Star} className="absolute bottom-[600px] left-[300px] w-[60px] z-0 twinkle" />
+      <img src={Star} className="absolute bottom-[550px] left-[500px] w-[60px] z-0 twinkle" />
+      <img src={Star} className="absolute bottom-[300px] left-[650px] w-[60px] z-0 twinkle" />
 
       {/* Clouds */}
-      <img src={Cloud} className="absolute bottom-[-150px] left-[-60px] w-[500px] z-0" />
-      <img src={Cloud} className="absolute bottom-[-300px] left-[-40px] w-[600px] z-0" />
+      <img src={Cloud} className="absolute bottom-[-150px] left-[-60px] w-[500px] z-0 float-cloud" />
+      <img src={Cloud} className="absolute bottom-[-300px] left-[-40px] w-[600px] z-0 float-cloud" />
 
       {/* Form container */}
       <div className="flex flex-1 w-full justify-end items-center z-20" style={{ marginRight: "100px" }}>
