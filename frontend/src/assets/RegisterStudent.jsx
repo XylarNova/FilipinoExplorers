@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "./images/Logo.png";
-import SignUp from "./images/Log in and sign up/Sign Up.png";
+import Star from "./images/Log in and sign up/star.png";
+import Cloud from "./images/Log in and sign up/signClouds.png";
+import FlyingKids from "./images/Log in and sign up/flyingkids.png";
 
 const RegisterStudent = () => {
   const [formData, setFormData] = useState({
@@ -42,22 +44,16 @@ const RegisterStudent = () => {
           email: formData.email,
           password: formData.password,
           date_of_birth: formData.date_of_birth,
-          role: "STUDENT", // Role added as STUDENT
+          role: "STUDENT",
         }),
       });
 
-      let result;
-      try {
-        result = await response.json();
-      } catch (jsonError) {
-        throw new Error("Invalid JSON response from server.");
-      }
+      const result = await response.json();
 
       if (response.ok) {
-        // ✅ Store the token and optionally email or user info
-        localStorage.setItem("token", result.token); // Store token in localStorage
-        localStorage.setItem("email", formData.email); // Store email in localStorage
-        localStorage.setItem("role", "STUDENT"); // Store role in localStorage
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("email", formData.email);
+        localStorage.setItem("role", "STUDENT");
 
         navigate("/profile-student");
       } else {
@@ -70,29 +66,44 @@ const RegisterStudent = () => {
   };
 
   return (
-    <div className="bg-[#073A4D] h-screen flex flex-col items-start p-5 relative">
+    <div className="bg-[#073A4D] min-h-screen flex p-5 relative overflow-hidden">
       {/* Logo */}
-      <div className="w-full flex justify-start">
-        <img
-          src={Logo}
-          alt="Logo"
-          className="w-64 mb-5"  // Increased size
-          style={{ paddingTop: "1rem", paddingLeft: "2.5rem" }}
-        />
+      <div className="absolute top-5 left-10 z-20">
+        <img src={Logo} alt="Logo" className="w-64" />
       </div>
 
-      {/* Content */}
-      <div className="flex flex-1 w-full relative">
-        <img
-          src={SignUp}
-          alt="Sign Up"
-          className="absolute left-[-50px] top-[-73px] w-[800px] h-[940px]"  // Increased size
-        />
+      {/* Flying Kids */}
+     <img
+      src={FlyingKids}
+      alt="Flying Kids"
+      style={{
+        position: "absolute",
+        left: "140px",
+        bottom: "80px", // higher than -30px
+        width: "500px", // bigger than 500px
+        zIndex: 10
+      }}
+    />
 
+
+      {/* Stars in curved layout */}
+      <img src={Star} className="absolute bottom-[300px] left-[30px] w-[60px] z-0" />
+      <img src={Star} className="absolute bottom-[550px] left-[100px] w-[60px] z-0" />
+      <img src={Star} className="absolute bottom-[600px] left-[400px] w-[60px] z-0" />
+      <img src={Star} className="absolute bottom-[500px] left-[500px] w-[60px] z-0" />
+      <img src={Star} className="absolute bottom-[500px] left-[600px] w-[60px] z-0" />
+
+      {/* Clouds */}
+      <img src={Cloud} className="absolute bottom-[-150px] left-[-60px] w-[500px] z-0" />
+      <img src={Cloud} className="absolute bottom-[-300px] left-[-40px] w-[600px] z-0" />
+
+      {/* Form container */}
+      <div className="flex flex-1 w-full justify-end items-center z-20" style={{ marginRight: "100px" }}>
         <div
-          className="bg-white rounded-[40px] flex flex-col justify-start items-start absolute right-50 top-1/2 transform -translate-y-1/2"
+          className="bg-white rounded-[40px] shadow-xl flex flex-col justify-start items-start relative"
           style={{ width: "540px", height: "635px", padding: "2rem 3rem" }}
         >
+          {/* STUDENT label */}
           <div
             className="absolute top-4 right-4 bg-[#57B4BA] text-black text-sm font-bold flex items-center justify-center"
             style={{
@@ -119,7 +130,11 @@ const RegisterStudent = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="w-full pt-6 px-6" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 200 }}>
+          <form
+            onSubmit={handleSubmit}
+            className="w-full pt-6 px-6"
+            style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 200 }}
+          >
             <div className="flex gap-4 mb-4">
               <input
                 type="text"
@@ -128,7 +143,11 @@ const RegisterStudent = () => {
                 onChange={handleChange}
                 placeholder="First Name"
                 className="w-1/2 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
-                style={{ backgroundColor: "#D9D9D9", boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", height: "50px" }}
+                style={{
+                  backgroundColor: "#D9D9D9",
+                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                  height: "50px",
+                }}
               />
               <input
                 type="text"
@@ -137,7 +156,11 @@ const RegisterStudent = () => {
                 onChange={handleChange}
                 placeholder="Last Name"
                 className="w-1/2 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
-                style={{ backgroundColor: "#D9D9D9", boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", height: "50px" }}
+                style={{
+                  backgroundColor: "#D9D9D9",
+                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                  height: "50px",
+                }}
               />
             </div>
 
@@ -148,7 +171,11 @@ const RegisterStudent = () => {
               onChange={handleChange}
               placeholder="Email"
               className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D] mb-4"
-              style={{ backgroundColor: "#D9D9D9", boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", height: "50px" }}
+              style={{
+                backgroundColor: "#D9D9D9",
+                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                height: "50px",
+              }}
             />
 
             <input
@@ -158,7 +185,11 @@ const RegisterStudent = () => {
               onChange={handleChange}
               placeholder="Date of Birth"
               className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D] mb-4"
-              style={{ backgroundColor: "#D9D9D9", boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", height: "50px" }}
+              style={{
+                backgroundColor: "#D9D9D9",
+                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                height: "50px",
+              }}
             />
 
             <input
@@ -168,7 +199,11 @@ const RegisterStudent = () => {
               onChange={handleChange}
               placeholder="Password"
               className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D] mb-4"
-              style={{ backgroundColor: "#D9D9D9", boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", height: "50px" }}
+              style={{
+                backgroundColor: "#D9D9D9",
+                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                height: "50px",
+              }}
             />
 
             <input
@@ -178,7 +213,11 @@ const RegisterStudent = () => {
               onChange={handleChange}
               placeholder="Confirm Password"
               className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D] mb-4"
-              style={{ backgroundColor: "#D9D9D9", boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)", height: "50px" }}
+              style={{
+                backgroundColor: "#D9D9D9",
+                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                height: "50px",
+              }}
             />
 
             <div className="flex items-center mb-4">

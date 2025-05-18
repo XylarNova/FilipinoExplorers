@@ -109,7 +109,7 @@ const StudentDashboard = () => {
         </nav>
 
         <div className="mt-8 px-6">
-          <WordOfTheDay />
+          <WordOfTheDay darkMode={darkMode} />
         </div>
       </aside>
 
