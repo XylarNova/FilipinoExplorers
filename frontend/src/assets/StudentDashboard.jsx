@@ -109,7 +109,7 @@ const StudentDashboard = () => {
         </nav>
 
         <div className="mt-8 px-6">
-          <WordOfTheDay />
+          <WordOfTheDay darkMode={darkMode} />
         </div>
       </aside>
 
@@ -130,41 +130,46 @@ const StudentDashboard = () => {
 
         {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            {/* Transparent background area to click outside */}
-            <div
-              className="absolute inset-0 bg-black opacity-30"
-              onClick={handleCloseModal}
-            ></div>
+  <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
+    <div className="bg-[#118AB2] rounded-[30px] px-8 py-6 w-[340px] shadow-xl text-white text-center">
+      <h2 className="text-xl font-bold mb-4 font-['Fredoka']">Enter Class Code</h2>
 
-            {/* Modal content */}
-            <div className="relative bg-white rounded-lg p-8 w-96 shadow-lg z-50">
-              <h2 className="text-2xl font-bold mb-4 text-center">Enter Class Code</h2>
-              {errorMessage && <div className="text-red-500 mb-4 text-center">{errorMessage}</div>}
-              <input
-                type="text"
-                value={classCode}
-                onChange={(e) => setClassCode(e.target.value)}
-                placeholder="Class Code"
-                className="w-full p-2 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <div className="flex justify-between">
-                <button
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSubmitClassCode}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-                >
-                  Join
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="text-red-300 font-semibold text-sm mb-3">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Input */}
+      <input
+        type="text"
+        value={classCode}
+        onChange={(e) => setClassCode(e.target.value)}
+        placeholder="Class Code"
+        className="w-full p-3 rounded-xl bg-white text-[#073B4C] text-center mb-6 border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-white"
+      />
+
+      {/* Buttons */}
+      <div className="flex justify-between">
+        <button
+          onClick={handleCloseModal}
+          className="bg-[#EF476F] text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmitClassCode}
+          className="bg-[#06D6A0] text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition"
+        >
+          Join
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
       </main>
 
       {/* Right Sidebar - Timeline */}

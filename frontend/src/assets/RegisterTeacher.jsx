@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "./images/Logo.png";
-import SignUp from "./images/Log in and sign up/Sign Up.png";
+import Star from "./images/Log in and sign up/star.png";
+import Cloud from "./images/Log in and sign up/signClouds.png";
+import FlyingKids from "./images/Log in and sign up/flyingkids.png";
+import './Global.css';
 
 const RegisterTeacher = () => {
   const [formData, setFormData] = useState({
@@ -64,32 +67,47 @@ const RegisterTeacher = () => {
   };
 
   return (
-    <div className="bg-[#073A4D] h-screen flex flex-col items-start p-5 relative overflow-hidden">
-      {/* Logo */}
-      <div className="w-full flex justify-start">
-        <img
-          src={Logo}
-          alt="Logo"
-          className="w-64 mb-5" // increased from w-48 to w-64
-          style={{ paddingTop: "1rem", paddingLeft: "2.5rem" }}
-        />
+    <div className="bg-[#073A4D] min-h-screen flex p-5 relative overflow-hidden">
+      {/* Clickable Logo */}
+      <div
+        onClick={() => navigate('/')}
+        className="absolute left-[40px] top-[40px] w-[190px] h-[80px] cursor-pointer z-30"
+      >
+        <img src={Logo} alt="Logo" className="w-full h-full object-contain" />
       </div>
 
-      {/* Content */}
-      <div className="flex flex-1 w-full relative">
-        {/* Sign-Up Image */}
-        <img
-          src={SignUp}
-          alt="Sign Up"
-          className="absolute left-[-100px] top-[-100px] w-[700px] h-[860px]" // made larger and adjusted position
-        />
+      {/* Flying Kids */}
+      <img
+        src={FlyingKids}
+        alt="Flying Kids"
+        className="flying"
+        style={{
+          position: "absolute",
+          left: "140px",
+          bottom: "80px",
+          width: "500px",
+          zIndex: 10
+        }}
+      />
 
-        {/* White Box */}
+      {/* Stars in curved layout */}
+      <img src={Star} className="absolute bottom-[300px] left-[30px] w-[60px] z-0 twinkle" />
+      <img src={Star} className="absolute bottom-[500px] left-[100px] w-[60px] z-0 twinkle" />
+      <img src={Star} className="absolute bottom-[600px] left-[300px] w-[60px] z-0 twinkle" />
+      <img src={Star} className="absolute bottom-[550px] left-[500px] w-[60px] z-0 twinkle" />
+      <img src={Star} className="absolute bottom-[300px] left-[650px] w-[60px] z-0 twinkle" />
+
+      {/* Clouds */}
+      <img src={Cloud} className="absolute bottom-[-150px] left-[-60px] w-[500px] z-0 float-cloud" />
+      <img src={Cloud} className="absolute bottom-[-300px] left-[-40px] w-[600px] z-0 float-cloud" />
+
+      {/* Form container */}
+      <div className="flex flex-1 w-full justify-end items-center z-20" style={{ marginRight: "100px" }}>
         <div
-          className="bg-white rounded-[40px] flex flex-col justify-start items-start absolute right-20 top-1/2 transform -translate-y-1/2"
+          className="bg-white rounded-[40px] shadow-xl flex flex-col justify-start items-start relative"
           style={{ width: "540px", height: "635px", padding: "2rem 3rem" }}
         >
-          {/* "Teacher" Label */}
+          {/* TEACHER label */}
           <div
             className="absolute top-4 right-4 bg-[#57B4BA] text-black text-sm font-bold flex items-center justify-center"
             style={{
@@ -101,44 +119,26 @@ const RegisterTeacher = () => {
             TEACHER
           </div>
 
-          {/* Form Header */}
-          <div
-            className="w-full"
-            style={{
-              paddingTop: "2rem",
-              paddingBottom: "1rem",
-            }}
-          >
+          <div className="w-full" style={{ paddingTop: "2rem", paddingBottom: "1rem" }}>
             <h1
               className="text-2xl text-[#073A4D] mb-2"
               style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 500 }}
             >
               Create an Account
             </h1>
-            <p
-              className="text-sm text-black mb-5"
-              style={{ fontFamily: "'Poppins', sans-serif" }}
-            >
+            <p className="text-sm text-black mb-5" style={{ fontFamily: "'Poppins', sans-serif" }}>
               Already have an account?{" "}
-              <a
-                href="#"
-                className="text-[#073A4D] font-bold hover:underline"
-              >
+              <a href="#" className="text-[#073A4D] font-bold hover:underline">
                 Log In
               </a>
             </p>
           </div>
 
-          {/* Registration Form */}
           <form
             onSubmit={handleSubmit}
             className="w-full pt-6 px-6"
-            style={{
-              fontFamily: "'Poppins', sans-serif",
-              fontWeight: 200,
-            }}
+            style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 200 }}
           >
-            {/* First Name and Last Name */}
             <div className="flex gap-4 mb-4">
               <input
                 type="text"
@@ -168,7 +168,6 @@ const RegisterTeacher = () => {
               />
             </div>
 
-            {/* Email */}
             <input
               type="email"
               name="email"
@@ -183,7 +182,6 @@ const RegisterTeacher = () => {
               }}
             />
 
-            {/* School */}
             <input
               type="text"
               name="school"
@@ -198,7 +196,6 @@ const RegisterTeacher = () => {
               }}
             />
 
-            {/* Password */}
             <input
               type="password"
               name="password"
@@ -213,7 +210,6 @@ const RegisterTeacher = () => {
               }}
             />
 
-            {/* Confirm Password */}
             <input
               type="password"
               name="confirmPassword"
@@ -228,34 +224,21 @@ const RegisterTeacher = () => {
               }}
             />
 
-            {/* Terms and Conditions */}
             <div className="flex items-center mb-4">
               <input
                 type="checkbox"
                 id="terms"
                 className="mr-2"
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  accentColor: "#073A4D",
-                }}
+                style={{ width: "18px", height: "18px", accentColor: "#073A4D" }}
               />
-              <label
-                htmlFor="terms"
-                className="text-sm text-black"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
-              >
+              <label htmlFor="terms" className="text-sm text-black">
                 I agree to the{" "}
-                <a
-                  href="#"
-                  className="text-[#073A4D] font-bold hover:underline"
-                >
+                <a href="#" className="text-[#073A4D] font-bold hover:underline">
                   Terms & Conditions
                 </a>
               </label>
             </div>
 
-            {/* Submit Button */}
             <div className="flex justify-center">
               <button
                 type="submit"

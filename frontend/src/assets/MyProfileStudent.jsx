@@ -7,6 +7,8 @@ import Profile from './images/Navigation/ProfileIcon.png';
 import Modules from './images/Navigation/ClassIcon.png';
 import LogOut from './images/Navigation/LogOutIcon.png';
 import Children from './images/Log in and sign up/Profile.png';
+import WordOfTheDay from './WordOfTheDay';
+
 
 const MyProfileStudent = () => {
   const navigate = useNavigate();
@@ -111,6 +113,9 @@ const MyProfileStudent = () => {
             </div>
           ))}
         </nav>
+        <div className="mt-8 px-6">
+          <WordOfTheDay darkMode={darkMode} />
+        </div>
       </aside>
 
       {/* Main Content */}

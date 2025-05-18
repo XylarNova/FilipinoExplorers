@@ -24,6 +24,9 @@ import InputsMemoryGame from './assets/InputsMemoryGame';
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
 
+import GroupMode from './assets/Groupmode';
+
+
 // Admin Side
 import AddWordOfTheDay from './adminpages/AddWordOfTheDay';
 
@@ -60,6 +63,9 @@ const App = () => {
 
         {/* Admin Side */}
         <Route path="/add-wotd" element={<AddWordOfTheDay />} />
+
+        <Route path="/groupmode" element={<GroupMode />} />
+
       </Routes>
     </Router>
   );
