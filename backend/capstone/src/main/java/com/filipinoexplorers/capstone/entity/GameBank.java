@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GameSession {
+public class GameBank {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +33,7 @@ public class GameSession {
     private String quarter;
     private Integer gamePoints;
 
-    private String status; // e.g., "Draft", "Published", "Archived"
+    private String status; 
 
     @UpdateTimestamp
     private LocalDateTime lastModified;
@@ -42,6 +42,6 @@ public class GameSession {
     @JoinColumn(name = "classroom_id")
     private ClassRoom classRoom;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Question> questions;
 }

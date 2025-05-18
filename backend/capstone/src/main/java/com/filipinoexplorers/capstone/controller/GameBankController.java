@@ -1,8 +1,8 @@
 package com.filipinoexplorers.capstone.controller;
 
-import com.filipinoexplorers.capstone.entity.GameSession;
+import com.filipinoexplorers.capstone.entity.GameBank;
 import com.filipinoexplorers.capstone.entity.Question;
-import com.filipinoexplorers.capstone.service.GameSessionService;
+import com.filipinoexplorers.capstone.service.GameBankService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,29 +16,29 @@ import java.util.Map;
 @RequestMapping("/api/gamesessions")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
-public class GameSessionController {
+public class GameBankController {
 
-    private final GameSessionService gameSessionService;
+    private final GameBankService gameSessionService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<GameSession>> getAllGameSessions() {
+    public ResponseEntity<List<GameBank>> getAllGameSessions() {
         return ResponseEntity.ok(gameSessionService.getAllGameSessions());
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<GameSession> getGameSessionById(@PathVariable Long id) {
+    public ResponseEntity<GameBank> getGameSessionById(@PathVariable Long id) {
         return gameSessionService.getGameSessionById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/open/vocabulary")
-    public ResponseEntity<List<GameSession>> getOpenVocabularyGames() {
+    public ResponseEntity<List<GameBank>> getOpenVocabularyGames() {
         return ResponseEntity.ok(gameSessionService.getOpenVocabularyGames());
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<GameSession>> getFilteredGameSessions(
+    public ResponseEntity<List<GameBank>> getFilteredGameSessions(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String quarter,
             @RequestParam(required = false) Boolean review,
@@ -75,14 +75,14 @@ public class GameSessionController {
     }
 
     @PostMapping("/post")
-    public ResponseEntity<GameSession> createGameSession(@RequestBody GameSession gameSession) {
+    public ResponseEntity<GameBank> createGameSession(@RequestBody GameBank gameSession) {
         return ResponseEntity.ok(gameSessionService.createGameSession(gameSession));
     }
 
     @PutMapping("/put/{id}")
-    public ResponseEntity<GameSession> updateGameSession(
+    public ResponseEntity<GameBank> updateGameSession(
             @PathVariable Long id,
-            @RequestBody GameSession updatedSession
+            @RequestBody GameBank updatedSession
     ) {
         updatedSession.setLastModified(LocalDateTime.now());
         return ResponseEntity.ok(gameSessionService.updateGameSession(id, updatedSession));
@@ -95,7 +95,7 @@ public class GameSessionController {
     }
 
     @GetMapping("/classroom/{classRoomId}")
-    public ResponseEntity<List<GameSession>> getSessionsByClassRoom(@PathVariable Long classRoomId) {
+    public ResponseEntity<List<GameBank>> getSessionsByClassRoom(@PathVariable Long classRoomId) {
         return ResponseEntity.ok(gameSessionService.getByClassRoomId(classRoomId));
     }
 
@@ -105,14 +105,14 @@ public class GameSessionController {
         if (newStatus == null) {
             return ResponseEntity.badRequest().body("Missing status value");
         }
-        GameSession session = gameSessionService.getGameSessionById(id)
+        GameBank session = gameSessionService.getGameSessionById(id)
                 .orElseThrow(() -> new RuntimeException("GameSession not found"));
         session.setStatus(newStatus);
         return ResponseEntity.ok(gameSessionService.createGameSession(session));
     }
 
     @PutMapping("/updateStatus/{id}")
-    public ResponseEntity<GameSession> updateGameSessionStatus(@PathVariable Long id, @RequestBody Map<String, String> status) {
+    public ResponseEntity<GameBank> updateGameSessionStatus(@PathVariable Long id, @RequestBody Map<String, String> status) {
         return gameSessionService.getGameSessionById(id)
                 .map(gameSession -> {
                     gameSession.setStatus(status.get("status"));
@@ -129,4 +129,9 @@ public class GameSessionController {
         return ResponseEntity.ok(questions);
     }
 
+    @PutMapping("/updateClass/{gameId}")
+    public ResponseEntity<?> updateClass(@PathVariable Long gameId, @RequestBody Map<String, String> body) {
+        String classId = body.get("classId");
+        return ResponseEntity.ok().build();
+    }
 }

@@ -25,5 +25,5 @@ public class Question {
     private String hint;
 
     @ManyToMany(mappedBy = "questions")
-    private List<GameSession> gameSessions;
+    private List<GameBank> gameSessions;
 }

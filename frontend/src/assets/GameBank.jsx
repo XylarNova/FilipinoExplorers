@@ -9,6 +9,7 @@ import GameEditor from './images/Navigation/GameEditorIcon.png';
 import LogOut from './images/Navigation/LogOutIcon.png';
 
 const GameBank = () => {
+  
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [gameTitle, setGameTitle] = useState('');
@@ -27,11 +28,10 @@ const GameBank = () => {
   const [gamePoints, setGamePoints] = useState('');
   const [savedGames, setSavedGames] = useState([]);
   const [dropdownOpenId, setDropdownOpenId] = useState(null);
-  const [classId, setClassId] = useState('');
+  const [classSelections, setClassSelections] = useState({});
   const [classes, setClasses] = useState([]);
   const [editingGameId, setEditingGameId] = useState(null);
 
-  // TODO: Replace this with your actual auth token retrieval method
   const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
@@ -85,6 +85,17 @@ const GameBank = () => {
     }
   };
 
+  const handleSaveClassSelection = async (gameId, classId) => {
+    try {
+      await axios.put(`http://localhost:8080/api/gamesessions/updateClass/${gameId}`, { classId });
+      fetchSavedGames();
+    } catch (error) {
+      console.error('Error updating class for game:', error);
+      alert('Failed to update class. Please try again.');
+    }
+  };
+  
+
   const resetForm = () => {
     setGameTitle('');
     setSelectedCategory('');
@@ -93,9 +104,14 @@ const GameBank = () => {
     setQuarter('');
     setSetTime('');
     setGamePoints('');
-    setClassId('');
+    setClassSelections((prev) => {
+      const updated = { ...prev };
+      if (editingGameId) delete updated[editingGameId];
+      return updated;
+    });
     setEditingGameId(null);
   };
+  
 
   const handleCategoryChange = (e) => setSelectedCategory(e.target.value);
   const handleQuarterChange = (e) => setQuarter(e.target.value);
@@ -124,7 +140,7 @@ const GameBank = () => {
 
   const handleChoiceChange = (qIndex, cIndex, value) => {
     const updated = [...vocabularyQuestions];
-    const isCurrentlyCorrect = updated[qIndex].correctAnswer === updated[qIndex].choices[cIndex];
+    const isCurrentlyCorrect = updated[qIndex].correctAnswer === cIndex;
     updated[qIndex].choices[cIndex] = value;
   
     if (isCurrentlyCorrect) {
@@ -158,8 +174,8 @@ const GameBank = () => {
       quarter,
       setTime,
       gamePoints,
-      classId,
-      status: 'Closed', // default status on creation
+      classId: classSelections[editingGameId] || '', 
+      status: 'Closed',
     };
 
     try {
@@ -199,8 +215,16 @@ const GameBank = () => {
     setQuarter(game.quarter);
     setSetTime(game.setTime);
     setGamePoints(game.gamePoints);
-    setClassId(game.classId);
+    setClassSelections((prev) => ({ ...prev, [game.id]: game.classId || '' }));
     setIsPanelOpen(true);
+  };
+
+  const handlePerGameClassChange = (gameId, value) => {
+    setClassSelections((prev) => ({
+      ...prev,
+      [gameId]: value,
+    }));
+    handleSaveClassSelection(gameId, value); 
   };
 
   const handleStatusChange = async (gameId, newStatus) => {
@@ -283,31 +307,29 @@ className="bg-white border border-[#108AB1] rounded px-2 py-1 cursor-pointer"
 </select>
 </div>
 <div className="border-r border-[#108AB1] text-center">
-<select
-  value={classId}
-  onChange={handleClassChange}
-  className="border border-gray-300 rounded p-2"
->
-  <option value="">Select a Class</option>
-  {classes.map((c) => (
-    <option key={c.id} value={c.id}>
-      {c.name}
-    </option>
-  ))}
-</select>
-
+  <select
+    value={classSelections[game.id] || ''} 
+    onChange={(e) => handlePerGameClassChange(game.id, e.target.value)} 
+    className="border border-gray-300 rounded p-2"
+  >
+    <option value="">Select a Class</option>
+    {classes.map((c) => (
+      <option key={c.id} value={c.id}>
+        {c.name}
+      </option>
+    ))}
+  </select>
 </div>
 <div className="border-r border-[#108AB1] text-center">
 {game.lastModified
   ? new Date(game.lastModified).toLocaleString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    })
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
   : 'N/A'}
 
 </div>
