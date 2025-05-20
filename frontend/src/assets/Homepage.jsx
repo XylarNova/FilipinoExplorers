@@ -41,22 +41,30 @@ const Homepage = () => {
 
   return (
     <div id="home">
-      <header style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '20px 40px', backgroundColor: '#ffffff', borderBottom: '1px solid #ddd',
-        fontFamily: "'Fredoka', sans-serif", fontWeight: '600'
-      }}>
-        <img src={Logo} alt="Filipino Explorers Logo" style={{ width: '150px' }} />
-        <nav style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-          <ul style={{ display: 'inline-flex', listStyle: 'none', margin: 0, padding: 0, alignItems: 'center' }}>
-            <li style={{ margin: '0 20px' }}><a href="#home" className="nav-link">Home</a></li>
-            <li style={{ margin: '0 20px' }}><a href="#about" className="nav-link">About Us</a></li>
-            <li style={{ margin: '0 20px' }}><a href="#games" className="nav-link">Games</a></li>
-            <li style={{ margin: '0 20px' }}><button onClick={() => navigate('/signup')} className="nav-link">Sign Up</button></li>
-            <li style={{ margin: '0 20px' }}><button onClick={() => navigate('/login')} className="nav-link" style={{ backgroundColor: '#06D7A0' }}>Log In</button></li>
-          </ul>
-        </nav>
-      </header>
+      <header
+  className="sticky-header"
+>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '20px 40px',
+    fontFamily: "'Fredoka', sans-serif",
+    fontWeight: 600
+  }}>
+    <img src={Logo} alt="Filipino Explorers Logo" style={{ width: '150px' }} />
+    <nav style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+      <ul style={{ display: 'inline-flex', listStyle: 'none', margin: 0, padding: 0, alignItems: 'center' }}>
+        <li style={{ margin: '0 20px' }}><a href="#home" className="nav-link">Home</a></li>
+        <li style={{ margin: '0 20px' }}><a href="#about" className="nav-link">About Us</a></li>
+        <li style={{ margin: '0 20px' }}><a href="#games" className="nav-link">Games</a></li>
+        <li style={{ margin: '0 20px' }}><button onClick={() => navigate('/signup')} className="nav-link">Sign Up</button></li>
+        <li style={{ margin: '0 20px' }}><button onClick={() => navigate('/login')} className="nav-link" style={{ backgroundColor: '#06D7A0' }}>Log In</button></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '40px', backgroundColor: '#118AB2', color: '#000' }}>
         <div style={{ flex: 1, textAlign: 'center', paddingRight: '20px' }}>
@@ -74,6 +82,86 @@ const Homepage = () => {
           <img src={HomeImage} alt="Home Illustration" style={{ width: '100%', maxWidth: '400px', borderRadius: '10px' }} />
         </div>
       </div>
+
+      <div id="about" style={{ backgroundColor: '#FDFBEE', padding: '60px 40px', textAlign: 'center' }}>
+      <h2 style={{
+        fontSize: '46px',
+        fontWeight: '700',
+        color: '#073A4D',
+        fontFamily: "'Fredoka', sans-serif",
+        marginBottom: '30px'
+      }}>
+        📘 About FilipinoExplorers
+      </h2>
+
+      <p style={{
+        fontSize: '20px',
+        lineHeight: '1.8',
+        maxWidth: '900px',
+        margin: '0 auto',
+        color: '#213547',
+        fontFamily: "'Poppins', sans-serif"
+      }}>
+        <strong>FilipinoExplorers</strong> is a gamified e-learning platform made especially for <strong>Grade 5 learners</strong>. 
+        It helps students build their Filipino language skills through fun games in vocabulary, sentence construction, and reading comprehension — all aligned with the <strong>DepEd K–12 curriculum</strong> and <strong>MELCs</strong>. 🎓📚
+      </p>
+
+      <p style={{
+        fontSize: '18px',
+        marginTop: '20px',
+        color: '#444',
+        fontFamily: "'Poppins', sans-serif"
+      }}>
+        The platform is also designed to assist <strong>teachers</strong> in delivering engaging, curriculum-based Filipino lessons whether in face-to-face or digital classrooms.
+      </p>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '40px', flexWrap: 'wrap' }}>
+        {/* For Students */}
+        <div style={{
+          backgroundColor: '#57B4BA',
+          borderRadius: '20px',
+          padding: '30px 20px',
+          width: '280px',
+          boxShadow: '0px 4px 8px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#073A4D' }}>🧒🏻 For Learners</h3>
+          <p style={{ fontSize: '14px', color: '#333' }}>
+            Learning Filipino becomes exciting and meaningful with colorful, interactive games.
+          </p>
+        </div>
+
+        {/* MELCs */}
+        <div style={{
+          backgroundColor: '#015551',
+          color: '#fff',
+          borderRadius: '20px',
+          padding: '30px 20px',
+          width: '280px',
+          boxShadow: '0px 4px 8px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '700' }}>📖 Curriculum-Aligned</h3>
+          <p style={{ fontSize: '14px' }}>
+            Each activity supports the Grade 5 Filipino Most Essential Learning Competencies (MELCs).
+          </p>
+        </div>
+
+        {/* For Teachers */}
+        <div style={{
+          backgroundColor: '#FF6B4A',
+          borderRadius: '20px',
+          padding: '30px 20px',
+          width: '280px',
+          color: '#fff',
+          boxShadow: '0px 4px 8px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '700' }}>👩‍🏫 For Teachers</h3>
+          <p style={{ fontSize: '14px' }}>
+            Helps teachers guide students with ready-to-use, class-friendly Filipino learning tools.
+          </p>
+        </div>
+      </div>
+    </div>
+
 
       <div id="games" style={{ padding: '40px', backgroundColor: '#ffffff' }}>
         <h2 style={{ fontSize: '46px', fontWeight: '700', color: '#073A4D', fontFamily: "'Fredoka', sans-serif", textAlign: 'center', marginBottom: '40px' }}>Explore Our Games</h2>
