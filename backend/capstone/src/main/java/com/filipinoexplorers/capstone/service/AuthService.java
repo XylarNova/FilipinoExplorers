@@ -149,4 +149,36 @@ public class AuthService {
 
         return getUserDetails(email);  // Return updated user details
     }
+
+    public String logout(String token) {
+        System.out.println("Logging out token: " + token);
+        return "Logout successful.";
+    }
+
+    public boolean changePassword(String email, String currentPassword, String newPassword) {
+        Optional<Teacher> teacherOpt = teacherRepo.findByEmail(email);
+        if (teacherOpt.isPresent()) {
+            Teacher teacher = teacherOpt.get();
+            if (passwordEncoder.matches(currentPassword, teacher.getPassword())) {
+                teacher.setPassword(passwordEncoder.encode(newPassword));
+                teacherRepo.save(teacher);
+                return true;
+            }
+            return false;
+        }
+
+        Optional<Student> studentOpt = studentRepo.findByEmail(email);
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+            if (passwordEncoder.matches(currentPassword, student.getPassword())) {
+                student.setPassword(passwordEncoder.encode(newPassword));
+                studentRepo.save(student);
+                return true;
+            }
+            return false;
+        }
+
+        throw new UsernameNotFoundException("User not found");
+    }
+    
 }

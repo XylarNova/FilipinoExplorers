@@ -1,6 +1,7 @@
 package com.filipinoexplorers.capstone.controller;
 
 import com.filipinoexplorers.capstone.dto.AuthResponse;
+import com.filipinoexplorers.capstone.dto.ChangePasswordRequest;
 import com.filipinoexplorers.capstone.dto.LoginRequest;
 import com.filipinoexplorers.capstone.dto.RegisterRequest;
 import com.filipinoexplorers.capstone.dto.UserDetailsResponse;
@@ -102,6 +103,39 @@ public class AuthController {
         } catch (Exception e) {
             System.err.println("Error updating profile: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Failed to update profile."));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Missing or invalid Authorization header."));
+            }
+
+            String token = authHeader.substring(7); 
+            String message = authService.logout(token);
+            return ResponseEntity.ok().body(new AuthResponse(null, message)); 
+
+        } catch (Exception e) {
+            System.err.println("Error during logout: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(new ErrorResponse("Logout failed."));
+        }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+        boolean success = authService.changePassword(
+            request.getEmail(),
+            request.getCurrentPassword(),
+            request.getNewPassword()
+        );
+
+        if (success) {
+            return ResponseEntity.ok("Password changed successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Current password is incorrect.");
         }
     }
 }
