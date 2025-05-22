@@ -24,6 +24,7 @@ const MyProfileStudent = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [activeTab, setActiveTab] = useState("profile");
 
   // Fetch user details on component mount
   useEffect(() => {
@@ -58,6 +59,8 @@ const MyProfileStudent = () => {
   const sidebarBgClass = darkMode ? 'bg-gray-800' : 'bg-[#FDFBEE]';
   const sidebarBorderClass = darkMode ? 'border-gray-700' : 'border-[#CEC9A8]';
   const textClass = darkMode ? 'text-white' : 'text-[#213547]';
+
+
 
   const handleSave = () => {
     setLoading(true);
@@ -126,9 +129,21 @@ const MyProfileStudent = () => {
             <div className={`w-[247px] h-[230px] ${sidebarBgClass} rounded-[20px] border-[5px] ${sidebarBorderClass} shadow-lg p-4`}>
               <h2 className={`text-[25px] ${textClass} font-['Poppins'] font-extrabold mb-4 text-center`}>Account Details</h2>
               <div className="flex flex-col gap-4 items-center">
-                <button className="w-[190px] h-[49px] bg-[#57B4BA] text-black text-[24px] font-['Inter'] font-bold rounded-[10px]">My Profile</button>
-                <button className="w-[190px] h-[49px] bg-[#57B4BA] text-black text-[24px] font-['Inter'] font-bold rounded-[10px]">My Account</button>
-              </div>
+                  <button
+                    className={`w-[190px] h-[49px] ${activeTab === 'profile' ? 'bg-[#57B4BA]' : 'bg-gray-300'} text-black text-[24px] font-bold rounded-[10px]`}
+                    onClick={() => setActiveTab('profile')}
+                  >
+                    My Profile
+                  </button>
+                  <button
+                    onClick={() => navigate('/account-student')}
+                    className={`w-[190px] h-[49px] bg-gray-300 text-black text-[24px] font-bold rounded-[10px]`}
+                  >
+                    My Account
+                  </button>
+
+
+                </div>
             </div>
           </div>
 

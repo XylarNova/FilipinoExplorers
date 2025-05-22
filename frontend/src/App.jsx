@@ -15,6 +15,7 @@ import GameBank from './assets/GameBank';
 
 import StudentDashboard from './assets/StudentDashboard';
 import MyProfileStudent from './assets/MyProfileStudent';
+import MyAccountStudent from './assets/MyAccountStudent';
 
 import GuessTheWord from './assets/GuessTheWord';
 
@@ -50,6 +51,7 @@ const App = () => {
 
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/profile-student" element={<MyProfileStudent />} />
+        <Route path="/account-student" element={<MyAccountStudent />} />
         
 
         {/* Games Section Path */}

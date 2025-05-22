@@ -16,6 +16,8 @@ const RegisterStudent = () => {
     confirmPassword: "",
   });
 
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -25,8 +27,17 @@ const RegisterStudent = () => {
     }));
   };
 
+  const handleCheckboxChange = (e) => {
+    setAgreedToTerms(e.target.checked);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!agreedToTerms) {
+      alert("Must agree with terms and conditions before registering");
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
@@ -232,6 +243,8 @@ const RegisterStudent = () => {
                 id="terms"
                 className="mr-2"
                 style={{ width: "18px", height: "18px", accentColor: "#073A4D" }}
+                checked={agreedToTerms}
+                onChange={handleCheckboxChange}
               />
               <label htmlFor="terms" className="text-sm text-black">
                 I agree to the{" "}
