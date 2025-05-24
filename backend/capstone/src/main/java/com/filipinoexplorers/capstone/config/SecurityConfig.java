@@ -33,6 +33,7 @@ public class SecurityConfig {
             .cors(withDefaults()) // Enable CORS (cross-origin resource sharing)
          .authorizeHttpRequests(authz -> authz
         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+        .requestMatchers("/api/words/get").permitAll()
         .requestMatchers("/api/gamesessions/**").hasRole("TEACHER")
         .requestMatchers("/api/classes/join").hasRole("STUDENT")
         .requestMatchers("/api/classes/**").hasRole("TEACHER")
