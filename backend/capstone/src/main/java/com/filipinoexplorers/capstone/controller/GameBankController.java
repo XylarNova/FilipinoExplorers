@@ -1,14 +1,19 @@
 package com.filipinoexplorers.capstone.controller;
 
+import com.filipinoexplorers.capstone.dto.GameBankRequestDTO;
+import com.filipinoexplorers.capstone.dto.UpdateGameBankRequestDTO;
 import com.filipinoexplorers.capstone.entity.GameBank;
 import com.filipinoexplorers.capstone.entity.Question;
 import com.filipinoexplorers.capstone.service.GameBankService;
+import com.filipinoexplorers.capstone.repository.TeacherRepository;
+import com.filipinoexplorers.capstone.service.JwtService;
+import com.filipinoexplorers.capstone.entity.ClassRoom;
+import com.filipinoexplorers.capstone.repository.ClassRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +24,27 @@ import java.util.Map;
 public class GameBankController {
 
     private final GameBankService gameSessionService;
+    private final JwtService jwtService;
+    private final TeacherRepository teacherRepository;
+    private final ClassRoomRepository classRoomRepository;
 
     @GetMapping("/all")
     public ResponseEntity<List<GameBank>> getAllGameSessions() {
         return ResponseEntity.ok(gameSessionService.getAllGameSessions());
+    }
+
+    @GetMapping("/my-games")
+    public ResponseEntity<?> getMyGames(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Missing or invalid token");
+        }
+
+        String token = authHeader.substring(7);
+        String email = jwtService.extractUsername(token);
+
+        return teacherRepository.findByEmail(email)
+                .<ResponseEntity<?>>map(t -> ResponseEntity.ok(gameSessionService.getGamesByTeacher(t)))
+                .orElseGet(() -> ResponseEntity.status(404).body("Teacher not found"));
     }
 
     @GetMapping("/get/{id}")
@@ -68,25 +90,26 @@ public class GameBankController {
         } else if (status != null) {
             return ResponseEntity.ok(gameSessionService.getByStatus(status));
         } else if (classRoomId != null) {
-            return ResponseEntity.ok(gameSessionService.getByClassRoomId(classRoomId));
+            return ResponseEntity.ok(gameSessionService.getByClassrooms_Id(classRoomId));
         } else {
             return ResponseEntity.ok(gameSessionService.getAllGameSessions());
         }
     }
 
     @PostMapping("/post")
-    public ResponseEntity<GameBank> createGameSession(@RequestBody GameBank gameSession) {
-        return ResponseEntity.ok(gameSessionService.createGameSession(gameSession));
+    public ResponseEntity<GameBank> createGameSession(@RequestBody GameBankRequestDTO request) {
+        return ResponseEntity.ok(gameSessionService.createGameSessionFromDTO(request));
     }
 
-    @PutMapping("/put/{id}")
-    public ResponseEntity<GameBank> updateGameSession(
-            @PathVariable Long id,
-            @RequestBody GameBank updatedSession
+  @PutMapping("/put/{id}")
+    public ResponseEntity<?> updateGameSession(
+        @PathVariable Long id,
+        @RequestBody UpdateGameBankRequestDTO request
     ) {
-        updatedSession.setLastModified(LocalDateTime.now());
-        return ResponseEntity.ok(gameSessionService.updateGameSession(id, updatedSession));
+        GameBank updated = gameSessionService.updateGameSessionFromDTO(id, request);
+        return ResponseEntity.ok(updated);
     }
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteGameSession(@PathVariable Long id) {
@@ -96,7 +119,7 @@ public class GameBankController {
 
     @GetMapping("/classroom/{classRoomId}")
     public ResponseEntity<List<GameBank>> getSessionsByClassRoom(@PathVariable Long classRoomId) {
-        return ResponseEntity.ok(gameSessionService.getByClassRoomId(classRoomId));
+        return ResponseEntity.ok(gameSessionService.getByClassrooms_Id(classRoomId));
     }
 
     @PatchMapping("/status/{id}")
@@ -130,8 +153,23 @@ public class GameBankController {
     }
 
     @PutMapping("/updateClass/{gameId}")
-    public ResponseEntity<?> updateClass(@PathVariable Long gameId, @RequestBody Map<String, String> body) {
-        String classId = body.get("classId");
-        return ResponseEntity.ok().build();
+public ResponseEntity<?> updateClass(@PathVariable Long gameId, @RequestBody Map<String, List<Long>> body) {
+    List<Long> classIds = body.get("classIds");
+
+    if (classIds == null) {
+        return ResponseEntity.badRequest().body("classIds field is missing");
     }
+
+    return gameSessionService.getGameSessionById(gameId)
+        .map(game -> {
+            List<ClassRoom> classrooms = classRoomRepository.findAllById(classIds);
+            game.setClassrooms(classrooms); // set full list
+            game.setStatus(classrooms.isEmpty() ? "Draft" : "Closed");
+            game.setLastModified(LocalDateTime.now());
+            gameSessionService.saveGameSession(game);
+            return ResponseEntity.ok(game);
+        })
+        .orElse(ResponseEntity.notFound().build());
+}
+
 }

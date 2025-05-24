@@ -2,6 +2,7 @@ package com.filipinoexplorers.capstone.entity;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,7 +34,7 @@ public class ClassRoom {
 
     @ManyToMany(mappedBy = "classrooms")
     private Set<Student> students = new HashSet<>();
-
-    @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "classrooms")
+    @JsonBackReference
     private Set<GameBank> gameSessions = new HashSet<>();
 }

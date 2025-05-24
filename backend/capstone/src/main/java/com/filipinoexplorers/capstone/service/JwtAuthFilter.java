@@ -54,7 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             var userDetails = customUserDetailsService.loadUserByUsername(email);
 
-            if (jwtService.validateToken(jwt)) {
+            if (jwtService.validateToken(jwt, userDetails)) {
                 List<String> roles = jwtService.extractAuthorities(jwt);
                 var authorities = roles.stream()
                         .map(SimpleGrantedAuthority::new)
