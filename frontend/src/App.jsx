@@ -12,6 +12,7 @@ import ClassCreation from './assets/ClassCreation';
 import TeacherClassList from './assets/TeacherClassList';
 import MyProfileTeacher from './assets/MyProfileTeacher';
 import GameBank from './assets/GameBank';
+import TeacherGuessTheWord from './assets/TeacherGuessTheWord';
 
 import StudentDashboard from './assets/StudentDashboard';
 import MyProfileStudent from './assets/MyProfileStudent';
@@ -46,6 +47,7 @@ const App = () => {
         <Route path="/teacher-classlist" element={<TeacherClassList />} />
         <Route path="/profile-teacher" element={<MyProfileTeacher />} />
         <Route path="/gamebank" element={<GameBank />} />
+        <Route path="/guess-the-word-teacher" element={<TeacherGuessTheWord />} />
         
         {/* Student Dashboard Path */}
 
