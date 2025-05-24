@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Getter
 @Setter
@@ -24,6 +26,7 @@ public class Question {
 
     private String hint;
 
-    @ManyToMany(mappedBy = "questions")
+    @ManyToMany(mappedBy = "vocabularyQuestions")
+    @JsonBackReference
     private List<GameBank> gameSessions;
 }

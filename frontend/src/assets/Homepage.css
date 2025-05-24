@@ -1,3 +1,6 @@
+/* Homepage.css */
+
+/* Navigation Link Styles */
 .nav-link {
   text-decoration: none;
   color: #000;
@@ -13,4 +16,25 @@
 
 .nav-link:hover {
   background-color: #06D7A0;
+}
+
+/* Smooth scrolling effect */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Fix scroll jump when navigating to in-page anchors */
+#about,
+#games,
+#join {
+  scroll-margin-top: 100px; /* Adjust to match header height */
+}
+
+/* Sticky header with visual design preserved */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: white;
+  border-bottom: 1px solid #ddd;
 }

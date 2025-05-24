@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import TeacherSidebar from './TeacherSidebar';
 
-import Logo from './images/logo.png';
-import Dashboard from './images/Navigation/DashboardIcon.png';
-import Profile from './images/Navigation/ProfileIcon.png';
-import ClassIcon from './images/Navigation/ClassIcon.png';
-import GameEditor from './images/Navigation/GameEditorIcon.png';
-import LogOut from './images/Navigation/LogOutIcon.png';
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
@@ -37,29 +32,8 @@ const TeacherDashboard = () => {
     <div className={`flex h-screen w-full ${mainBgClass}`}>
       
       {/* Sidebar */}
-      <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-r ${sidebarBorderClass} pt-8`}>
-        <div className="mb-10 flex justify-center">
-          <img src={Logo} alt="Filipino Explorer Logo" className="w-40" />
-        </div>
-        <nav className="space-y-6 pl-6">
-          {[
-            { icon: Dashboard, label: 'Dashboard', path: '/teacher-dashboard' },
-            { icon: Profile, label: 'My Profile', path: '/profile-teacher' },
-            { icon: ClassIcon, label: 'Class', path: '/teacher-classlist' },
-            { icon: GameEditor, label: 'Game Editor', path: '/gamebank' },
-            { icon: LogOut, label: 'Log Out', path: '/logout' }
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className={`flex items-center space-x-4 font-bold text-lg cursor-pointer ${textClass}`}
-              onClick={() => navigate(item.path)}
-            >
-              <img src={item.icon} alt={item.label} className="w-6 h-6" />
-              <span>{item.label}</span>
-            </div>
-          ))}
-        </nav>
-      </aside>
+      <TeacherSidebar />
+
 
       {/* Main Content */}
       <main className={`flex-1 ${mainBgClass} pt-10 px-10`}>

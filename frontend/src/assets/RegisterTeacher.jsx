@@ -16,6 +16,12 @@ const RegisterTeacher = () => {
     confirmPassword: "",
   });
 
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  const handleCheckboxChange = (e) => {
+    setAgreedToTerms(e.target.checked);
+  };
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -27,6 +33,11 @@ const RegisterTeacher = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!agreedToTerms) {
+      alert("Must agree with terms and conditions before registering");
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
@@ -224,20 +235,23 @@ const RegisterTeacher = () => {
               }}
             />
 
-            <div className="flex items-center mb-4">
-              <input
-                type="checkbox"
-                id="terms"
-                className="mr-2"
-                style={{ width: "18px", height: "18px", accentColor: "#073A4D" }}
-              />
-              <label htmlFor="terms" className="text-sm text-black">
-                I agree to the{" "}
-                <a href="#" className="text-[#073A4D] font-bold hover:underline">
-                  Terms & Conditions
-                </a>
-              </label>
-            </div>
+           <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="terms"
+              className="mr-2"
+              style={{ width: "18px", height: "18px", accentColor: "#073A4D" }}
+              checked={agreedToTerms}
+              onChange={handleCheckboxChange}
+            />
+            <label htmlFor="terms" className="text-sm text-black">
+              I agree to the{" "}
+              <a href="#" className="text-[#073A4D] font-bold hover:underline">
+                Terms & Conditions
+              </a>
+            </label>
+          </div>
+
 
             <div className="flex justify-center">
               <button

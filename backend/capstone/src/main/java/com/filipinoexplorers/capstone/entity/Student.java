@@ -43,4 +43,10 @@ public class Student implements User {
     )
     @JsonIgnoreProperties("students")
     private Set<ClassRoom> classrooms = new HashSet<>();
+
+    @Override
+    public Long getId() {
+        return studentId; // or just `id` if that’s your field name
+    }
+
 }

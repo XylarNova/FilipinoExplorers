@@ -62,16 +62,21 @@ public class AuthController {
 
     @GetMapping("/user")
     public ResponseEntity<?> getUserDetails(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("Unauthorized: Invalid or missing token."));
+        }
+
         try {
             String email = authentication.getName();
             UserDetailsResponse userDetails = authService.getUserDetails(email);
-
             return ResponseEntity.ok(userDetails);
         } catch (Exception e) {
-            System.err.println("Error fetching user details: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("User not found."));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("User not found."));
         }
     }
+
 
     @PutMapping(value = "/user/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateUserProfile(

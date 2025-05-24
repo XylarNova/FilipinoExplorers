@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance';
 import jwtDecode from 'jwt-decode';
 import Logo from './images/Logo.png';
-import Dashboard from './images/Navigation/DashboardIcon.png';
-import Profile from './images/Navigation/ProfileIcon.png';
-import ClassIcon from './images/Navigation/ClassIcon.png';
-import GameEditor from './images/Navigation/GameEditorIcon.png';
-import LogOut from './images/Navigation/LogOutIcon.png';
+import { useNavigate } from 'react-router-dom';
+import TeacherSidebar from './TeacherSidebar';
+
 
 const GameBank = () => {
   
@@ -31,53 +29,67 @@ const GameBank = () => {
   const [classSelections, setClassSelections] = useState({});
   const [classes, setClasses] = useState([]);
   const [editingGameId, setEditingGameId] = useState(null);
+  const [teacherId, setTeacherId] = useState(null);
+
+useEffect(() => {
+  axiosInstance
+    .get('/teachers/me')
+    .then((res) => setTeacherId(res.data.teacherId))
+    .catch((err) => console.error("❌ Failed to fetch teacher ID:", err));
+}, []);
+
+
 
   const token = localStorage.getItem('token') || '';
+  const navigate = useNavigate();
+
+
+
 
   useEffect(() => {
     fetchSavedGames();
     fetchClasses();
   }, []);
+  
 
-  const fetchSavedGames = async () => {
-    try {
-      const response = await axios.get('http://localhost:8080/api/gamesessions/all');
-      // Use the status from the backend, do NOT override it here
-      setSavedGames(response.data);
-    } catch (error) {
-      console.error('Error fetching saved games:', error);
+const fetchSavedGames = async () => {
+  try {
+    const response = await axiosInstance.get('/gamesessions/my-games');
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      setSavedGames(data);
+    } else {
+      console.error("Expected an array, got:", data);
+      setSavedGames([]); // fallback
     }
-  };
+  } catch (error) {
+    console.error('❌ Error fetching teacher games:', error);
+    setSavedGames([]); // fallback
+  }
+};
+
+
 
   const fetchClasses = async () => {
-    const token = localStorage.getItem("token");
-    let email;
-  
     try {
+      const token = localStorage.getItem("token");
       const decoded = jwtDecode(token);
-      email = decoded.sub;
+      const email = decoded?.sub;
+
       if (!email) {
-        console.error('Email not found in token');
+        console.error("❌ Email not found in token.");
         return;
       }
-    } catch (err) {
-      console.error('Error decoding token:', err);
-      return;
-    }
-  
-    try {
-      const response = await axios.get(`http://localhost:8080/api/classes/teacher/email/${email}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+
+      const response = await axiosInstance.get(`/classes/teacher/email/${email}`);
       setClasses(response.data);
     } catch (error) {
-      console.error('Error fetching classes:', error);
+      console.error("❌ Error fetching classes:", error);
     }
   };
-  
 
+      
   const togglePanel = () => {
     setIsPanelOpen(!isPanelOpen);
     if (!isPanelOpen) {
@@ -86,14 +98,15 @@ const GameBank = () => {
   };
 
   const handleSaveClassSelection = async (gameId, classId) => {
-    try {
-      await axios.put(`http://localhost:8080/api/gamesessions/updateClass/${gameId}`, { classId });
-      fetchSavedGames();
-    } catch (error) {
-      console.error('Error updating class for game:', error);
-      alert('Failed to update class. Please try again.');
-    }
-  };
+  try {
+    await axiosInstance.put(`/gamesessions/updateClass/${gameId}`, { classIds: [classId] });
+    fetchSavedGames();
+  } catch (error) {
+    console.error('❌ Error updating class for game:', error);
+    alert('Failed to update class. Please try again.');
+  }
+};
+
   
 
   const resetForm = () => {
@@ -165,59 +178,165 @@ const GameBank = () => {
     });
   };
 
-  const handleSaveGame = async () => {
-    const gameSession = {
-      gameTitle,
-      category: selectedCategory,
-      vocabularyQuestions,
-      gameSettings,
-      quarter,
-      setTime,
-      gamePoints,
-      classId: classSelections[editingGameId] || '', 
-      status: 'Closed',
+
+const handleSaveGame = async () => {
+  if (!teacherId) {
+    alert("Please wait for the teacher ID to load.");
+    return;
+  }
+
+  const validQuestions = vocabularyQuestions.filter(
+    (q) => q.tagalogWord && q.choices.filter((c) => c).length === 4 && q.correctAnswer !== null
+  );
+
+  if (validQuestions.length === 0) {
+    alert("Please fill in at least one valid question.");
+    return;
+  }
+
+  const selectedClassroomIds = editingGameId
+    ? classSelections[editingGameId] || []
+    : classSelections['new'] || [];
+
+  const classRoomIds = Array.isArray(selectedClassroomIds)
+    ? selectedClassroomIds
+    : [selectedClassroomIds];
+
+  const gameSession = {
+    gameTitle,
+    category: selectedCategory,
+    leaderboard: gameSettings.leaderboard,
+    hints: gameSettings.hints,
+    review: gameSettings.review,
+    shuffle: gameSettings.shuffle,
+    windowTracking: gameSettings.windowTracking,
+    setTime: parseInt(setTime),
+    quarter,
+    gamePoints: parseInt(gamePoints),
+    status: classRoomIds.length === 0 ? "Draft" : "Closed", // initial
+    classRoomIds,
+    teacherId,
+    vocabularyQuestions: validQuestions,
+  };
+
+  try {
+    if (editingGameId) {
+      // ✅ Update main game
+      await axiosInstance.put(`/gamesessions/put/${editingGameId}`, gameSession);
+
+      // ✅ Assign classrooms
+      await axiosInstance.put(`/gamesessions/updateClass/${editingGameId}`, {
+        classIds: classRoomIds,
+      });
+
+
+      alert("Game updated successfully!");
+    } else {
+      // ✅ Create new game
+      const res = await axiosInstance.post(`/gamesessions/post`, gameSession);
+      const newGameId = res.data.id;
+
+      // ✅ Assign classrooms
+      await axiosInstance.put(`/gamesessions/updateClass/${newGameId}`, {
+        classIds: classRoomIds,
+      });
+
+      // ✅ Update status (now that classrooms exist)
+      await axiosInstance.put(`/gamesessions/updateStatus/${newGameId}`, {
+        status: classRoomIds.length === 0 ? "Draft" : "Closed",
+      });
+
+      alert("Game saved successfully!");
+    }
+
+    fetchSavedGames();
+    resetForm();
+    setIsPanelOpen(false);
+  } catch (error) {
+    console.error("❌ Error saving game:", error);
+    alert("Error saving game!");
+  }
+};
+
+
+const handlePublishGame = async (gameId) => {
+  try {
+    const game = savedGames.find((g) => g.id === gameId);
+
+    // 🔍 Support fallback to either `classSelections[gameId]` or fallback to game.classrooms
+    const selectedClassIds = classSelections[gameId] ??
+      (game?.classrooms?.map(c => c.id) ?? []);
+
+    if (!Array.isArray(selectedClassIds) || selectedClassIds.length === 0) {
+      alert("Please assign at least one class before publishing.");
+      return;
+    }
+
+    // ✅ Check that vocabulary questions exist
+    if (
+      game?.category === "Vocabulary" &&
+      (!game.vocabularyQuestions || game.vocabularyQuestions.length === 0)
+    ) {
+      alert("Cannot publish: No vocabulary questions found.");
+      return;
+    }
+
+    // ✅ Assign class IDs
+    await axiosInstance.put(`/gamesessions/updateClass/${gameId}`, {
+      classIds: selectedClassIds,
+    });
+
+    // ✅ Update status to 'Open'
+    await axiosInstance.put(`/gamesessions/updateStatus/${gameId}`, {
+      status: "Open",
+    });
+
+    alert("Game published successfully!");
+    fetchSavedGames();
+  } catch (error) {
+    console.error("❌ Error publishing game:", error);
+    alert("Failed to publish game. Please try again.");
+  }
+};
+
+
+    const handleDeleteGame = async (gameId) => {
+      try {
+        await axiosInstance.delete(`/gamesessions/delete/${gameId}`);
+        alert('Game deleted successfully!');
+        fetchSavedGames();
+      } catch (error) {
+        alert('Error deleting game!');
+        console.error(error);
+      }
     };
 
-    try {
-      if (editingGameId) {
-        await axios.put(`http://localhost:8080/api/gamesessions/put/${editingGameId}`, gameSession);
-        alert('Game updated successfully!');
-      } else {
-        await axios.post('http://localhost:8080/api/gamesessions/post', gameSession);
-        alert('Game saved successfully!');
-      }
-      fetchSavedGames();
-      resetForm();
-      setIsPanelOpen(false);
-    } catch (error) {
-      alert('Error saving game!');
-      console.error(error);
-    }
-  };
-
-  const handleDeleteGame = async (gameId) => {
-    try {
-      await axios.delete(`http://localhost:8080/api/gamesessions/delete/${gameId}`);
-      alert('Game deleted successfully!');
-      fetchSavedGames();
-    } catch (error) {
-      alert('Error deleting game!');
-      console.error(error);
-    }
-  };
 
   const handleEditGame = (game) => {
     setEditingGameId(game.id);
-    setGameTitle(game.gameTitle);
-    setSelectedCategory(game.category);
-    setVocabularyQuestions(game.vocabularyQuestions);
-    setGameSettings(game.gameSettings);
-    setQuarter(game.quarter);
-    setSetTime(game.setTime);
-    setGamePoints(game.gamePoints);
-    setClassSelections((prev) => ({ ...prev, [game.id]: game.classId || '' }));
+    setGameTitle(game.gameTitle || '');
+    setSelectedCategory(game.category || '');
+    setVocabularyQuestions(game.vocabularyQuestions || [
+      { tagalogWord: '', choices: ['', '', '', '', ''], correctAnswer: null, hint: '' }
+    ]);
+    setGameSettings({
+      leaderboard: game.leaderboard || false,
+      hints: game.hints || false,
+      review: game.review || false,
+      shuffle: game.shuffle || false,
+      windowTracking: game.windowTracking || false,
+    });
+    setQuarter(game.quarter || '');
+    setSetTime(game.setTime || '');
+    setGamePoints(game.gamePoints || '');
+   setClassSelections((prev) => ({
+    ...prev,
+    [game.id]: game.classrooms?.map(c => c.id) || []
+  }));
+
     setIsPanelOpen(true);
   };
+
 
   const handlePerGameClassChange = (gameId, value) => {
     setClassSelections((prev) => ({
@@ -227,7 +346,7 @@ const GameBank = () => {
     handleSaveClassSelection(gameId, value); 
   };
 
-  const handleStatusChange = async (gameId, newStatus) => {
+    const handleStatusChange = async (gameId, newStatus) => {
     try {
       // Optimistically update UI
       const updatedGames = savedGames.map((game) =>
@@ -235,7 +354,7 @@ const GameBank = () => {
       );
       setSavedGames(updatedGames);
 
-      await axios.put(`http://localhost:8080/api/gamesessions/updateStatus/${gameId}`, { status: newStatus });
+      await axiosInstance.put(`/gamesessions/updateStatus/${gameId}`, { status: newStatus });
     } catch (error) {
       console.error('Error updating game status:', error);
       alert('Failed to update game status. Please try again.');
@@ -243,41 +362,38 @@ const GameBank = () => {
     }
   };
 
+
   return (
-    <div className="w-full relative">
-      {/* Top Bar */}
-      <div className="bg-[#108AB1] rounded-b-[50px] h-[100px] px-6 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="h-[56px] w-[56px] ml-10">
-            <img src={Logo} alt="Logo" className="h-full w-full object-contain transform scale-[2.2]" />
-          </div>
-          <h1 className="text-white text-[40px] font-extrabold font-['Poppins'] pl-50">Game Bank</h1>
+      <div className="w-full relative">
+    {/* Top Bar */}
+    <div className="bg-[#108AB1] rounded-b-[50px] h-[100px] px-6 flex items-center justify-between">
+      <div className="flex items-center space-x-4">
+        <div className="h-[56px] w-[56px] ml-10">
+          <img src={Logo} alt="Logo" className="h-full w-full object-contain transform scale-[2.2]" />
         </div>
-        <div className="flex items-center space-x-4">
-          <input
-            type="text"
-            placeholder="Search games..."
-            className="px-4 py-2 rounded-lg border-none outline-none text-[#213547] font-medium w-64 bg-white"
-          />
-          <button
-            onClick={togglePanel}
-            className="bg-[#06D7A0] text-white text-[20px] font-bold font-['Fredoka'] px-6 py-2 rounded-lg shadow-md"
-          >
-            Create Game
-          </button>
-        </div>
+        <h1 className="text-white text-[40px] font-extrabold font-['Poppins'] pl-50">Game Bank</h1>
       </div>
+      <div className="flex items-center space-x-4">
+        <input
+          type="text"
+          placeholder="Search games..."
+          className="px-4 py-2 rounded-lg border-none outline-none text-[#213547] font-medium w-64 bg-white"
+        />
+        <button
+          onClick={togglePanel}
+          className="bg-[#06D7A0] text-white text-[20px] font-bold font-['Fredoka'] px-6 py-2 rounded-lg shadow-md"
+        >
+          Create Game
+        </button>
+      </div>
+    </div>
 
-      {/* Side Navigation */}
-      <div className="flex h-[calc(100vh-100px)]">
-        <div className="w-[100px] bg-white flex flex-col items-center justify-center space-y-10">
-          <img src={Dashboard} alt="Dashboard" className="w-12 h-12 cursor-pointer" />
-          <img src={Profile} alt="Profile" className="w-12 h-12 cursor-pointer" />
-          <img src={ClassIcon} alt="Classes" className="w-12 h-12 cursor-pointer" />
-          <img src={GameEditor} alt="Game Editor" className="w-12 h-12 cursor-pointer" />
-          <img src={LogOut} alt="Logout" className="w-12 h-12 cursor-pointer" />
-        </div>
+    {/* WRAPPER for Sidebar + Main Content */}
+    <div className="flex h-[calc(100vh-100px)]">
+      {/* Sidebar */}
+   <TeacherSidebar />
 
+       
         {/* Main Game List */}
         <div className="flex-1 p-6">
           <p className="text-[#073A4D] text-[50px] font-bold font-['Poppins'] pt-8 pl-10">Game List</p>
@@ -289,88 +405,144 @@ const GameBank = () => {
                   <div className="border-r border-[#108AB1] text-center flex items-center justify-center h-full">Category</div>
                   <div className="border-r border-[#108AB1] text-center flex items-center justify-center h-full">Status</div>
                   <div className="border-r border-[#108AB1] text-center flex items-center justify-center h-full">Class</div>
-<div className="border-r border-[#108AB1] text-center flex items-center justify-center h-full">Last Modified</div>
-<div className="text-center flex items-center justify-center h-full">Actions</div>
-</div>
-{savedGames.map((game) => (
-<div key={game.id} className="grid grid-cols-6 border-t border-[#108AB1] text-[#073A4D] h-[70px] items-center hover:bg-[#E0F2F7]" >
-<div className="border-r border-[#108AB1] text-center">{game.gameTitle}</div>
-<div className="border-r border-[#108AB1] text-center">{game.category}</div>
-<div className="border-r border-[#108AB1] text-center">
-<select
-value={game.status}
-onChange={(e) => handleStatusChange(game.id, e.target.value)}
-className="bg-white border border-[#108AB1] rounded px-2 py-1 cursor-pointer"
->
-<option value="Closed">Closed</option>
-<option value="Open">Open</option>
-</select>
-</div>
-<div className="border-r border-[#108AB1] text-center">
-  <select
-    value={classSelections[game.id] || ''} 
-    onChange={(e) => handlePerGameClassChange(game.id, e.target.value)} 
-    className="border border-gray-300 rounded p-2"
-  >
-    <option value="">Select a Class</option>
-    {classes.map((c) => (
-      <option key={c.id} value={c.id}>
-        {c.name}
-      </option>
-    ))}
-  </select>
-</div>
-<div className="border-r border-[#108AB1] text-center">
-{game.lastModified
-  ? new Date(game.lastModified).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  })
-  : 'N/A'}
+                  <div className="border-r border-[#108AB1] text-center flex items-center justify-center h-full">Last Modified</div>
+                  <div className="text-center flex items-center justify-center h-full">Actions</div>
+                  </div>
+          {savedGames.map((game) => (
+        <div
+          key={game.id}
+          className="grid grid-cols-6 border-t border-[#108AB1] text-[#073A4D] h-[70px] items-center hover:bg-[#E0F2F7]"
+        >
+          {/* Game Title */}
+          <div className="border-r border-[#108AB1] text-center">{game.gameTitle}</div>
 
-</div>
-<div className="text-center space-x-4">
-<button
-onClick={() => handleEditGame(game)}
-className="bg-[#06D7A0] text-white px-4 py-1 rounded"
->
-Edit
-</button>
-<button
-onClick={() => handleDeleteGame(game.id)}
-className="bg-[#FF595E] text-white px-4 py-1 rounded"
->
-Delete
-</button>
-</div>
-</div>
-))}
-</div>
-</div>
-</div>
-</div>
-    {/* Create/Edit Panel */}
-{isPanelOpen && (
-  <div className="fixed top-0 right-0 h-full w-[800px] bg-white shadow-lg p-6 overflow-y-auto z-50">
-    <h2 className="text-[#108AB1] text-3xl font-bold mb-4">
-      {editingGameId ? 'Edit Game' : 'Create Game'}
-    </h2>
+          {/* Category */}
+          <div className="border-r border-[#108AB1] text-center">{game.category}</div>
 
-    {/* Game Title */}
-    <div className="mb-4">
-      <label className="block mb-1 font-semibold">Game Title</label>
-      <input
-        type="text"
-        placeholder="Enter game title"
-        value={gameTitle}
-        onChange={(e) => setGameTitle(e.target.value)}
-        className="w-full border border-gray-300 rounded px-3 py-2"
-      />
+          {/* Status Dropdown */}
+          <div className="border-r border-[#108AB1] text-center">
+            <select
+              value={game.status}
+              onChange={(e) => handleStatusChange(game.id, e.target.value)}
+              className="bg-white border border-[#108AB1] rounded px-2 py-1 cursor-pointer"
+            >
+              <option value="Draft">Draft</option>
+              <option value="Closed">Closed</option>
+              <option value="Open">Open</option>
+            </select>
+          </div>
+
+          {/* Class Column */}
+          <div className="border-r border-[#108AB1] text-center relative">
+            {game.classrooms?.length === 1 ? (
+              <span>{game.classrooms[0].name}</span>
+            ) : game.classrooms?.length > 1 ? (
+              <>
+                <button
+                  onClick={() =>
+                    setDropdownOpenId(dropdownOpenId === `class-${game.id}` ? null : `class-${game.id}`)
+                  }
+                  className="border border-gray-300 px-2 py-1 rounded bg-white text-sm w-[120px] truncate"
+                >
+                  {game.classrooms.length} Classes
+                </button>
+                {dropdownOpenId === `class-${game.id}` && (
+                  <div className="absolute z-50 bg-white border rounded shadow-lg mt-2 p-2 w-[180px] max-h-[150px] overflow-y-auto">
+                    {game.classrooms.map((c) => (
+                      <div key={c.id} className="text-sm py-1 px-2 hover:bg-gray-100 rounded">
+                        {c.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <span className="text-gray-400 italic">None</span>
+            )}
+          </div>
+
+          {/* Last Modified */}
+          <div className="border-r border-[#108AB1] text-center">
+            {game.lastModified
+              ? new Date(game.lastModified).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                })
+              : 'N/A'}
+          </div>
+
+          {/* Actions Dropdown */}
+          <div className="relative text-center">
+            <button
+              onClick={() =>
+                setDropdownOpenId(dropdownOpenId === `action-${game.id}` ? null : `action-${game.id}`)
+              }
+              className="border border-[#108AB1] bg-white text-[#073A4D] rounded px-2 py-1 text-sm"
+            >
+              Actions
+            </button>
+
+            {dropdownOpenId === `action-${game.id}` && (
+              <div className="absolute right-0 z-50 bg-white border rounded shadow-md mt-1 p-1 w-[120px]">
+                <button
+                  onClick={() => {
+                    handleEditGame(game);
+                    setDropdownOpenId(null);
+                  }}
+                  className="block w-full text-left px-2 py-1 text-sm hover:bg-yellow-100 text-yellow-700"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    handleDeleteGame(game.id);
+                    setDropdownOpenId(null);
+                  }}
+                  className="block w-full text-left px-2 py-1 text-sm hover:bg-red-100 text-red-600"
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => {
+                    handlePublishGame(game.id);
+                    setDropdownOpenId(null);
+                  }}
+                  className="block w-full text-left px-2 py-1 text-sm hover:bg-green-100 text-green-600"
+                >
+                  Publish
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+
     </div>
+    </div>
+    </div>
+    </div>
+        {/* Create/Edit Panel */}
+    {isPanelOpen && (
+      <div className="fixed top-0 right-0 h-full w-[800px] bg-white shadow-lg p-6 overflow-y-auto z-50">
+        <h2 className="text-[#108AB1] text-3xl font-bold mb-4">
+          {editingGameId ? 'Edit Game' : 'Create Game'}
+        </h2>
+
+        {/* Game Title */}
+        <div className="mb-4">
+          <label className="block mb-1 font-semibold">Game Title</label>
+          <input
+            type="text"
+            placeholder="Enter game title"
+            value={gameTitle}
+            onChange={(e) => setGameTitle(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </div>
 
     {/* Category */}
     <div className="mb-6">
@@ -446,24 +618,59 @@ Delete
       </div>
     )}
 
-    {/* Game Settings Section */}
-    <div className="mb-6">
-      <h3 className="font-semibold mb-2">Game Settings</h3>
-      <div className="flex flex-col space-y-2">
-        {/* Only show these specific settings */}
-        {['leaderboard', 'hints', 'review', 'shuffle', 'windowTracking'].map((setting) => (
-          <label key={setting} className="flex items-center space-x-2 capitalize">
+{/* Classroom Assignment + Game Settings */}
+<div className="mb-6">
+  <h3 className="font-semibold mb-2">Game Settings</h3>
+
+  {/* Classroom Selection */}
+  <div className="mb-4">
+    <label className="block mb-1 font-semibold">Assign to Classrooms (optional)</label>
+    <div className="border border-gray-300 rounded p-2 max-h-40 overflow-y-auto">
+      <label className="flex items-center space-x-2 mb-1">
+        <input
+          type="checkbox"
+          checked={(classSelections['new'] || []).length === 0}
+          onChange={() => setClassSelections((prev) => ({ ...prev, new: [] }))}
+        />
+        <span>None (Save as Draft)</span>
+      </label>
+      {classes.map((c) => {
+        const selected = classSelections['new'] || [];
+        return (
+          <label key={c.id} className="flex items-center space-x-2 mb-1">
             <input
               type="checkbox"
-              name={setting}
-              checked={gameSettings[setting]}
-              onChange={handleCheckboxChange}
+              checked={selected.includes(c.id)}
+              onChange={(e) => {
+                const updated = e.target.checked
+                  ? [...selected, c.id]
+                  : selected.filter((id) => id !== c.id);
+                setClassSelections((prev) => ({ ...prev, new: updated }));
+              }}
             />
-            <span>{setting.charAt(0).toUpperCase() + setting.slice(1)}</span>
+            <span className="text-sm truncate">{c.name}</span>
           </label>
-        ))}
-      </div>
+        );
+      })}
     </div>
+  </div>
+
+    {/* Game Settings Checkboxes */}
+    <div className="flex flex-col space-y-2">
+      {['leaderboard', 'hints', 'review', 'shuffle', 'windowTracking'].map((setting) => (
+        <label key={setting} className="flex items-center space-x-2 capitalize">
+          <input
+            type="checkbox"
+            name={setting}
+            checked={gameSettings[setting]}
+            onChange={handleCheckboxChange}
+          />
+          <span>{setting.charAt(0).toUpperCase() + setting.slice(1)}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+
 
     {/* Set Time */}
     <div className="mb-5">
@@ -510,6 +717,17 @@ Delete
       className="bg-[#06D7A0] text-white font-bold py-2 px-6 rounded hover:bg-green-600 transition"
     >
       {editingGameId ? 'Update Game' : 'Save Game'}
+    </button>
+    <button
+      onClick={() => {
+        if (window.confirm("Changes will not be saved. Are you sure you want to exit?")) {
+          resetForm();
+          setIsPanelOpen(false);
+        }
+      }}
+      className="ml-4 bg-gray-400 text-white font-bold py-2 px-6 rounded hover:bg-gray-600 transition"
+    >
+      Exit
     </button>
   </div>
 )}

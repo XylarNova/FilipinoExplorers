@@ -31,13 +31,13 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs using JWT
             .cors(withDefaults()) // Enable CORS (cross-origin resource sharing)
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/register", "/api/auth/login", "/api/words/**", "/api/questions/**", "/api/gamesessions/**", "/api/gtw/**").permitAll() // Public endpoints
-                .requestMatchers("/api/classes/join").hasRole("STUDENT")
-                .requestMatchers("/api/classes/**").hasRole("TEACHER")  // Only TEACHER can create class
-                .anyRequest().authenticated() // Any other request requires authentication
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before default auth filter
+         .authorizeHttpRequests(authz -> authz
+        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+        .requestMatchers("/api/gamesessions/**").hasRole("TEACHER")
+        .requestMatchers("/api/classes/join").hasRole("STUDENT")
+        .requestMatchers("/api/classes/**").hasRole("TEACHER")
+        .anyRequest().authenticated()
+    ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before default auth filter
 
         return http.build();
     }

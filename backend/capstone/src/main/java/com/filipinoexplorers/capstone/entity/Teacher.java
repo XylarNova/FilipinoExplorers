@@ -36,5 +36,11 @@ public class Teacher implements User {
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.TEACHER;
+
+    @Override
+        public Long getId() {
+            return teacherId;
+        }
+
 }
 
