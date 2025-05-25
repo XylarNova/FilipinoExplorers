@@ -1,11 +1,11 @@
 package com.filipinoexplorers.capstone.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,11 +22,19 @@ public class Student implements User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long studentId;
 
+    @Column(unique = true)
+    private String customStudentId;
+     
+    @Column(name = "last_password_change")
+    private LocalDateTime lastPasswordChange;
+
+
     private String email;
     private String first_name;
     private String last_name;
     private String password;
     private LocalDate date_Of_birth;
+    
 
     @Lob
     @Column(name = "profile_picture_data")
@@ -46,7 +54,6 @@ public class Student implements User {
 
     @Override
     public Long getId() {
-        return studentId; // or just `id` if that’s your field name
+        return studentId;
     }
-
 }

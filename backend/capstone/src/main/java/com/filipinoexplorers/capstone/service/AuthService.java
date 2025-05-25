@@ -2,6 +2,7 @@ package com.filipinoexplorers.capstone.service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,29 +40,48 @@ public class AuthService {
 
         // Register teacher or student based on the role
         if ("TEACHER".equalsIgnoreCase(req.getRole())) {
-            Teacher teacher = Teacher.builder()
-                    .email(req.getEmail())
-                    .first_name(req.getFirst_name())
-                    .last_name(req.getLast_name())
-                    .password(encodedPassword)
-                    .school(req.getSchool())
-                    .role(Role.TEACHER)
-                    .profilePictureData(profilePictureBytes)
-                    .build();
-            teacherRepo.save(teacher);
-            return new AuthResponse(jwtService.generateToken(teacher), "TEACHER");
+        Teacher teacher = Teacher.builder()
+                .email(req.getEmail())
+                .first_name(req.getFirst_name())
+                .last_name(req.getLast_name())
+                .password(encodedPassword)
+                .school(req.getSchool())
+                .role(Role.TEACHER)
+                .profilePictureData(profilePictureBytes)
+                .build();
+
+        // Save first to get teacherId
+        Teacher savedTeacher = teacherRepo.save(teacher);
+        savedTeacher.setLastPasswordChange(LocalDateTime.now());
+
+        // Generate: FE-TEACH-2025-0001
+        String customTeacherId = String.format("FE-TEACH-%d-%04d", LocalDate.now().getYear(), savedTeacher.getTeacherId());
+        savedTeacher.setCustomTeacherId(customTeacherId);
+        teacherRepo.save(savedTeacher); // Save again with custom ID
+
+        return new AuthResponse(jwtService.generateToken(savedTeacher), "TEACHER");
         } else {
-            Student student = Student.builder()
-                    .email(req.getEmail())
-                    .first_name(req.getFirst_name())
-                    .last_name(req.getLast_name())
-                    .password(encodedPassword)
-                    .date_Of_birth(req.getDate_of_birth())
-                    .role(Role.STUDENT)
-                    .profilePictureData(profilePictureBytes)
-                    .build();
-            studentRepo.save(student);
-            return new AuthResponse(jwtService.generateToken(student), "STUDENT");
+         Student student = Student.builder()
+        .email(req.getEmail())
+        .first_name(req.getFirst_name())
+        .last_name(req.getLast_name())
+        .password(encodedPassword)
+        .date_Of_birth(req.getDate_of_birth())
+        .role(Role.STUDENT)
+        .profilePictureData(profilePictureBytes)
+        .build();
+
+        // Save first to get studentId
+        Student savedStudent = studentRepo.save(student);
+        savedStudent.setLastPasswordChange(LocalDateTime.now());
+
+        // Generate: FILSTUD-2025-0001
+        String customId = String.format("FE-STUD-%d-%04d", LocalDate.now().getYear(), savedStudent.getStudentId());
+        savedStudent.setCustomStudentId(customId);
+        studentRepo.save(savedStudent); // Save again with custom ID
+
+        return new AuthResponse(jwtService.generateToken(savedStudent), "STUDENT");
+
         }
     }
 
@@ -103,11 +123,17 @@ public class AuthService {
             response.setLastName(student.getLast_name());
             response.setDate_Of_birth(student.getDate_Of_birth());
             response.setHasProfilePicture(student.getProfilePictureData() != null);
+            response.setCustomStudentId(student.getCustomStudentId());
+            response.setLastPasswordChange(student.getLastPasswordChange());
+
         } else if (user instanceof Teacher teacher) {
             response.setFirstName(teacher.getFirst_name());
             response.setLastName(teacher.getLast_name());
             response.setSchool(teacher.getSchool());
             response.setHasProfilePicture(teacher.getProfilePictureData() != null);
+            response.setCustomTeacherId(teacher.getCustomTeacherId());
+            response.setLastPasswordChange(teacher.getLastPasswordChange());
+
         }
 
         return response;
@@ -156,29 +182,31 @@ public class AuthService {
     }
 
     public boolean changePassword(String email, String currentPassword, String newPassword) {
-        Optional<Teacher> teacherOpt = teacherRepo.findByEmail(email);
-        if (teacherOpt.isPresent()) {
-            Teacher teacher = teacherOpt.get();
-            if (passwordEncoder.matches(currentPassword, teacher.getPassword())) {
-                teacher.setPassword(passwordEncoder.encode(newPassword));
-                teacherRepo.save(teacher);
-                return true;
-            }
-            return false;
+    Optional<Teacher> teacherOpt = teacherRepo.findByEmail(email);
+    if (teacherOpt.isPresent()) {
+        Teacher teacher = teacherOpt.get();
+        if (passwordEncoder.matches(currentPassword, teacher.getPassword())) {
+            teacher.setPassword(passwordEncoder.encode(newPassword));
+            teacher.setLastPasswordChange(LocalDateTime.now()); // ✅ update timestamp
+            teacherRepo.save(teacher);
+            return true;
         }
-
-        Optional<Student> studentOpt = studentRepo.findByEmail(email);
-        if (studentOpt.isPresent()) {
-            Student student = studentOpt.get();
-            if (passwordEncoder.matches(currentPassword, student.getPassword())) {
-                student.setPassword(passwordEncoder.encode(newPassword));
-                studentRepo.save(student);
-                return true;
-            }
-            return false;
-        }
-
-        throw new UsernameNotFoundException("User not found");
+        return false;
     }
+
+    Optional<Student> studentOpt = studentRepo.findByEmail(email);
+    if (studentOpt.isPresent()) {
+        Student student = studentOpt.get();
+        if (passwordEncoder.matches(currentPassword, student.getPassword())) {
+            student.setPassword(passwordEncoder.encode(newPassword));
+            student.setLastPasswordChange(LocalDateTime.now()); // ✅ update timestamp
+            studentRepo.save(student);
+            return true;
+        }
+        return false;
+    }
+
+    throw new UsernameNotFoundException("User not found");
+}
     
 }
