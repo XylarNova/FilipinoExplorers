@@ -23,12 +23,24 @@ const StudentDashboard = () => {
     if (storedDarkMode) setDarkMode(storedDarkMode === "true");
   }, []);
 
-  useEffect(() => {
-    const storedFirstName = localStorage.getItem("firstname");
-    if (storedFirstName) {
-      setFirstName(storedFirstName);
+useEffect(() => {
+  const fetchUserFirstName = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/auth/user", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+      setFirstName(response.data.firstName || "Student");
+    } catch (error) {
+      console.error("Failed to fetch user info:", error);
+      setFirstName("Student");
     }
-  }, []);
+  };
+
+  fetchUserFirstName();
+}, []);
+
 
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);

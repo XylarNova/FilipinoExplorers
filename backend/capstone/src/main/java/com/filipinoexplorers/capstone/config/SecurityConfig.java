@@ -38,7 +38,7 @@ public class SecurityConfig {
         .requestMatchers("/api/classes/join").hasRole("STUDENT")
         .requestMatchers("/api/classes/**").hasRole("TEACHER")
         .anyRequest().authenticated()
-    ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter before default auth filter
+    ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); 
 
         return http.build();
     }

@@ -6,11 +6,15 @@ import Star from './images/Log in and sign up/star.png';
 import Cloud from './images/Log in and sign up/cloud.png';
 import './Global.css';
 import { useNavigate } from 'react-router-dom';
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate(); // ⬅️ For programmatic navigation
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const innerContentStyle = {
     paddingTop: '40px',
@@ -94,13 +98,22 @@ const LoginPage = () => {
               placeholder="Email"
               className="w-full h-16 px-4 mb-6 rounded-lg bg-[#D9D9D9] shadow-inner text-black placeholder-black placeholder-opacity-50 focus:outline-none"
             />
+            <div className="relative w-full h-16 mb-2">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full h-16 px-4 mt-0 mb-2 rounded-lg bg-[#D9D9D9] shadow-inner text-black placeholder-black placeholder-opacity-50 focus:outline-none"
+              className="w-full h-full px-4 rounded-lg bg-[#D9D9D9] shadow-inner text-black placeholder-black placeholder-opacity-50 focus:outline-none"
             />
+            <span
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+            </span>
+          </div>
+
             <p className="text-black text-xl font-light mb-6">
               Forgot Password?
             </p>

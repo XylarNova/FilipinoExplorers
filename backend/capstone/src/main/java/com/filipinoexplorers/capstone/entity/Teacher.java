@@ -1,5 +1,7 @@
 package com.filipinoexplorers.capstone.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,6 +25,12 @@ public class Teacher implements User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long teacherId;
+
+     @Column(unique = true)
+    private String customTeacherId;
+
+    @Column(name = "last_password_change")
+    private LocalDateTime lastPasswordChange;
 
     private String email;
     private String first_name;

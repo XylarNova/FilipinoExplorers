@@ -5,6 +5,8 @@ import Star from "./images/Log in and sign up/star.png";
 import Cloud from "./images/Log in and sign up/signClouds.png";
 import FlyingKids from "./images/Log in and sign up/flyingkids.png";
 import './Global.css';
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+
 
 const RegisterStudent = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +19,9 @@ const RegisterStudent = () => {
   });
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const navigate = useNavigate();
 
@@ -209,33 +214,53 @@ const RegisterStudent = () => {
               }}
             />
 
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D] mb-4"
-              style={{
-                backgroundColor: "#D9D9D9",
-                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
-                height: "50px",
-              }}
-            />
+            {/* Password field with toggle */}
+            <div className="relative w-full mb-4">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Password"
+                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
+                style={{
+                  backgroundColor: "#D9D9D9",
+                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                  height: "50px",
+                }}
+              />
+              <span
+                className="absolute right-4 top-4 cursor-pointer text-gray-600"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+              </span>
+            </div>
 
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm Password"
-              className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D] mb-4"
-              style={{
-                backgroundColor: "#D9D9D9",
-                boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
-                height: "50px",
-              }}
-            />
+            {/* Confirm Password field with toggle */}
+            <div className="relative w-full mb-4">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm Password"
+                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#073A4D]"
+                style={{
+                  backgroundColor: "#D9D9D9",
+                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+                  height: "50px",
+                }}
+              />
+              <span
+                className="absolute right-4 top-4 cursor-pointer text-gray-600"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+
+              </span>
+            </div>
+
 
             <div className="flex items-center mb-4">
               <input

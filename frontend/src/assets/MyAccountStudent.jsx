@@ -16,8 +16,8 @@ const MyAccountStudent = () => {
   const [userData, setUserData] = useState({
     studentId: '',
     email: '',
+    lastPasswordChange: null,
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('account'); // default tab
 
   useEffect(() => {
@@ -26,9 +26,10 @@ const MyAccountStudent = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       })
       .then((response) => {
-        setUserData({
-          studentId: response.data.studentId || 'FIL2025-XXXX', // fallback if missing
+          setUserData({
+          studentId: response.data.customStudentId || 'FE-STUD-YYYY-0000',
           email: response.data.email,
+          lastPasswordChange: response.data.lastPasswordChange,
         });
       })
       .catch((error) => {
@@ -95,65 +96,60 @@ const MyAccountStudent = () => {
           </div>
 
           {/* My Account Form */}
-          <div className="pt-10">
-            <div className={`w-[676px] h-[430px] ${sidebarBgClass} rounded-[20px] border-[5px] ${sidebarBorderClass} shadow-lg p-8 relative`}>
-              <h2 className={`text-[40px] ${textClass} font-['Poppins'] font-bold mb-8 text-center`}>
-                Account Information
-              </h2>
-              <div className="flex flex-col gap-6 items-center">
-                {/* Student ID */}
-                <div className="flex flex-col">
-                  <label className={`${textClass} opacity-70 font-bold text-[16px] mb-2`}>
-                    Student ID
-                  </label>
-                  <input
-                    type="text"
-                    value={userData.studentId}
-                    disabled
-                    className="w-[350px] h-[40px] bg-gray-100 rounded-[20px] shadow-md px-4 text-lg"
-                  />
-                </div>
+        <div className="pt-10">
+        <div className={`w-[676px] h-[615px] ${sidebarBgClass} rounded-[20px] border-[5px] ${sidebarBorderClass} shadow-lg p-8 relative`}>
+          <h2 className={`text-[40px] ${textClass} font-['Poppins'] font-bold mb-10 text-center`}>
+            Account Information
+          </h2>
 
-                {/* Password */}
-                <div className="flex flex-col">
-                  <label className={`${textClass} opacity-70 font-bold text-[16px] mb-2`}>
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value="************"
-                      disabled
-                      className="w-[350px] h-[40px] bg-gray-100 rounded-[20px] shadow-md px-4 text-lg pr-12"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-2"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        {showPassword ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-.708.066-1.4.192-2.075M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        )}
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Change Password Button */}
-                <button
-                  onClick={() => navigate('/change-password')} // create this route separately
-                  className="w-[180px] h-[44px] bg-[#0AD4A1] text-black text-[20px] font-semibold rounded-[20px] mt-6"
-                >
-                  Change Password
-                </button>
-              </div>
-
-              <img src={Children} alt="Children" className="absolute left-[300px] bottom-0 w-[400px] h-[120px]" />
+          <div className="flex flex-col items-center gap-8">
+            {/* Student ID */}
+            <div className="flex flex-col">
+              <label className={`${textClass} opacity-70 font-['Inter'] font-bold text-[16px] mb-2`}>
+                Student ID
+              </label>
+              <input
+                type="text"
+                value={userData.studentId}
+                disabled
+                className="w-[350px] h-[40px] bg-white rounded-[20px] shadow-md px-4 text-lg font-['Inter']"
+              />
             </div>
+
+            {/* Password */}
+            <div className="flex flex-col">
+              <label className={`${textClass} opacity-70 font-['Inter'] font-bold text-[16px] mb-2`}>
+                Password
+              </label>
+              <input
+                type="password"
+                value="************"
+                disabled
+                className="w-[350px] h-[40px] bg-white rounded-[20px] shadow-md px-4 text-lg font-['Inter']"
+              />
+              <p className="text-sm text-gray-600 mt-2 font-['Inter']">
+                Last changed: {userData.lastPasswordChange ? new Date(userData.lastPasswordChange).toLocaleDateString() : 'N/A'}
+              </p>
+            </div>
+
+            {/* Change Password Button */}
+            <button
+              onClick={() => navigate('/change-password')}
+              className="w-[180px] h-[44px] bg-[#0AD4A1] text-black text-[20px] font-['Inter'] font-semibold rounded-[20px] mt-4"
+            >
+              Change Password
+            </button>
+
+            {/* Centered Children Image */}
+            <img
+              src={Children}
+              alt="Children"
+              className="mt-1 w-[500px] h-[150px] object-contain"
+            />
           </div>
+        </div>
+      </div>
+
         </div>
       </main>
 
