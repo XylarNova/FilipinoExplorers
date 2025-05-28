@@ -7,6 +7,7 @@ import Profile from './images/Navigation/ProfileIcon.png';
 import ClassIcon from './images/Navigation/ClassIcon.png';
 import GameEditor from './images/Navigation/GameEditorIcon.png';
 import LogOut from './images/Navigation/LogOutIcon.png';
+import CollapseMenuIcon from './images/Buttons and Other/collapseMenu.png';
 
 const TeacherSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -40,8 +41,13 @@ const TeacherSidebar = () => {
       <div className="flex items-center justify-between px-4 mb-6">
         {!collapsed && <img src={Logo} alt="Logo" className="w-40" />}
         <button onClick={() => setCollapsed(!collapsed)} className="text-gray-500">
-          {collapsed ? '➡️' : '⬅️'}
+          <img
+            src={CollapseMenuIcon}
+            alt="Toggle Menu"
+            className={`w-6 h-6 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
+          />
         </button>
+
       </div>
 
       <nav className="space-y-6 px-4">

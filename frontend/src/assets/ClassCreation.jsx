@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Logo from './images/logo.png';
 import Dashboard from './images/Navigation/DashboardIcon.png';
 import Profile from './images/Navigation/ProfileIcon.png';
 import ClassIcon from './images/Navigation/ClassIcon.png';
 import GameEditor from './images/Navigation/GameEditorIcon.png';
 import LogOut from './images/Navigation/LogOutIcon.png';
+import TeacherSidebar from './TeacherSidebar';
 
 const ClassCreation = () => {
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -23,56 +27,61 @@ const ClassCreation = () => {
   const sidebarBgClass = darkMode ? "bg-gray-800" : "bg-[#FDFBEE]";
   const sidebarBorderClass = darkMode ? "border-gray-700" : "border-[#CEC9A8]";
   const textClass = darkMode ? "text-white" : "text-[#213547]";
+  
+
 
   const handleFileChange = (e) => {
     setBannerFile(e.target.files[0]);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('No token found');
-      setErrorMessage('No token found.');
-      return;
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.error('No token found');
+    setErrorMessage('No token found.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("info", new Blob([JSON.stringify({ name, description, enrollmentMethod })], { type: "application/json" }));
+
+  if (bannerFile) {
+    formData.append("banner", bannerFile);
+  }
+
+  try {
+    const response = await fetch('http://localhost:8080/api/classes/createclass', {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (!response.ok) throw new Error(`Failed to create class. Status: ${response.status}`);
+
+    const data = await response.json();
+    console.log("Class created successfully:", data);
+
+    setName('');
+    setDescription('');
+    setEnrollmentMethod('');
+    setBannerFile(null);
+    setErrorMessage('');
+
+    if (students.length > 0) {
+      await addStudentsToClass(students, data.classCode);
     }
 
-    const formData = new FormData();
-    formData.append("info", new Blob([JSON.stringify({ name, description, enrollmentMethod })], { type: "application/json" }));
+    // ✅ Navigate to teacher class list
+    navigate('/teacher-classlist');
+  } catch (error) {
+    console.error("Error:", error);
+    setErrorMessage(`Failed to create class: ${error.message}`);
+  }
+};
 
-    if (bannerFile) {
-      formData.append("banner", bannerFile);
-    }
 
-    try {
-      const response = await fetch('http://localhost:8080/api/classes/createclass', {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error(`Failed to create class. Status: ${response.status}`);
-
-      const data = await response.json();
-      console.log("Class created successfully:", data);
-
-      // Reset form fields after success
-      setName('');
-      setDescription('');
-      setEnrollmentMethod('');
-      setBannerFile(null);
-      setErrorMessage('');
-
-      // Add students if provided
-      if (students.length > 0) {
-        await addStudentsToClass(students, data.classCode);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setErrorMessage(`Failed to create class: ${error.message}`);
-    }
-  };
 
   const handleEnrollmentChange = (e) => {
     const value = e.target.value;
@@ -126,20 +135,9 @@ const ClassCreation = () => {
 
   return (
     <div className={`flex h-screen w-full ${mainBgClass} relative`}>
-      <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-r ${sidebarBorderClass} pt-8`}>
-        <div className="mb-10 flex justify-center">
-          <img src={Logo} alt="Filipino Explorer Logo" className="w-40" />
-        </div>
-        <nav className="space-y-6 pl-6">
-          {[{ icon: Dashboard, text: 'Dashboard' }, { icon: Profile, text: 'My Profile' }, { icon: ClassIcon, text: 'Class' }, { icon: GameEditor, text: 'Game Editor' }, { icon: LogOut, text: 'Log Out' }]
-            .map(({ icon, text }) => (
-              <div key={text} className={`flex items-center space-x-4 font-bold text-lg ${textClass}`}>
-                <img src={icon} alt={text} className="w-6 h-6" />
-                <span>{text}</span>
-              </div>
-            ))}
-        </nav>
-      </aside>
+   <TeacherSidebar />
+
+
 
       <main className={`flex-1 ${mainBgClass} pt-10 px-10`}>
         <h1 className={`text-[40px] font-bold font-['Fredoka'] ${textClass} mb-8`}>Create Class Form</h1>

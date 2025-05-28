@@ -12,4 +12,6 @@ public interface ClassRoomRepository extends JpaRepository<ClassRoom, Long> {
     List<ClassRoom> findByTeacher(Teacher teacher);
     boolean existsByClassCode(String classCode); 
     Optional<ClassRoom> findByClassCode(String classCode);
+    int countByTeacher(Teacher teacher);
+
 }

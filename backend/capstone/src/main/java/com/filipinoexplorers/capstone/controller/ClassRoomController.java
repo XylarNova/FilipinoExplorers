@@ -254,4 +254,24 @@ public ResponseEntity<?> addStudentToClass(
     return ResponseEntity.ok(Collections.singletonMap("message", "Student added to class successfully"));
 }
 
+// Count number of classes for the logged-in teacher
+@GetMapping("/count-by-teacher")
+public ResponseEntity<?> countClassesForTeacher(@RequestHeader("Authorization") String token) {
+    try {
+        String email = jwtService.extractUsername(token.replace("Bearer ", ""));
+        Optional<Teacher> teacherOpt = teacherRepository.findByEmail(email);
+        if (teacherOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+
+        Teacher teacher = teacherOpt.get();
+        int count = classRoomRepository.countByTeacher(teacher);
+        return ResponseEntity.ok(count);
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to count classes.");
+    }
+}
+
+
 }
