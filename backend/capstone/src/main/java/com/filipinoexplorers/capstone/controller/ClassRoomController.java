@@ -98,6 +98,11 @@ public class ClassRoomController {
         Student student = studentOpt.get();
         ClassRoom classRoom = classRoomOpt.get();
 
+        // Check if student already joined any class
+        if (!student.getClassrooms().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("You have already enrolled in a class");
+        }
+
         if (student.getClassrooms().contains(classRoom)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Student already joined this class");
         }

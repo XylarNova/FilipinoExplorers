@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import Logo from './images/logo.png';
@@ -9,20 +9,10 @@ import GameEditor from './images/Navigation/GameEditorIcon.png';
 import LogOut from './images/Navigation/LogOutIcon.png';
 import CollapseMenuIcon from './images/Buttons and Other/collapseMenu.png';
 
-const TeacherSidebar = () => {
+const TeacherSidebar = ({ darkMode }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    const stored = localStorage.getItem("darkMode");
-    if (stored) setDarkMode(stored === "true");
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("darkMode", darkMode);
-  }, [darkMode]);
 
   const bgClass = darkMode ? "bg-gray-800" : "bg-[#FDFBEE]";
   const borderClass = darkMode ? "border-gray-700" : "border-[#CEC9A8]";
@@ -47,7 +37,6 @@ const TeacherSidebar = () => {
             className={`w-6 h-6 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
           />
         </button>
-
       </div>
 
       <nav className="space-y-6 px-4">

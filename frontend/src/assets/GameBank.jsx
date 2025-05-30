@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import jwtDecode from 'jwt-decode';
 import Logo from './images/Logo.png';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import TeacherSidebar from './TeacherSidebar';
 
 
@@ -42,7 +42,15 @@ useEffect(() => {
 
   const token = localStorage.getItem('token') || '';
   const navigate = useNavigate();
+  const location = useLocation();
 
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const createFlag = params.get('create');
+  if (createFlag === 'true') {
+    setIsPanelOpen(true);
+  }
+}, [location.search]);
 
 
 

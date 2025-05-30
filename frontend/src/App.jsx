@@ -19,6 +19,8 @@ import MyAccountTeacher from './assets/MyAccountTeacher';
 import StudentDashboard from './assets/StudentDashboard';
 import MyProfileStudent from './assets/MyProfileStudent';
 import MyAccountStudent from './assets/MyAccountStudent';
+import StudentModule from './assets/StudentModule';
+
 
 import GuessTheWord from './assets/GuessTheWord';
 
@@ -44,6 +46,7 @@ const App = () => {
         <Route path="/register-student" element={<RegisterStudent />} />
         <Route path="/login" element={<LoginPage />} />
 
+         {/* Teacher Side Path */}
         <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
         <Route path="/class-creation" element={<ClassCreation />} />
         <Route path="/teacher-classlist" element={<TeacherClassList />} />
@@ -52,11 +55,13 @@ const App = () => {
         <Route path="/gamebank" element={<GameBank />} />
         <Route path="/guess-the-word-teacher" element={<TeacherGuessTheWord />} />
         
-        {/* Student Dashboard Path */}
+        {/* Student Side Path */}
 
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/profile-student" element={<MyProfileStudent />} />
         <Route path="/account-student" element={<MyAccountStudent />} />
+        <Route path="/modules/:gameType" element={<StudentModule />} />
+
         
 
         {/* Games Section Path */}

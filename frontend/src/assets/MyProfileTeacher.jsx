@@ -109,17 +109,16 @@ const MyProfileTeacher = () => {
               <h2 className={`text-[25px] ${textClass} font-['Poppins'] font-extrabold mb-4 text-center`}>Account Details</h2>
               <div className="flex flex-col gap-4 items-center">
                <button
-  onClick={() => navigate('/profile-teacher')}
-  className="w-[190px] h-[49px] bg-[#57B4BA] text-black text-[24px] font-['Inter'] font-bold rounded-[10px]">
-  My Profile
-</button>
+                onClick={() => navigate('/profile-teacher')}
+                className="w-[190px] h-[49px] bg-[#57B4BA] text-black text-[24px] font-['Inter'] font-bold rounded-[10px]">
+                My Profile
+              </button>
 
-<button
-  onClick={() => navigate('/my-account-teacher')}
-  className="w-[190px] h-[49px] bg-[#57B4BA] text-black text-[24px] font-['Inter'] font-bold rounded-[10px]">
-  My Account
-</button>
-
+              <button
+                onClick={() => navigate('/my-account-teacher')}
+                className="w-[190px] h-[49px] bg-[#57B4BA] text-black text-[24px] font-['Inter'] font-bold rounded-[10px]">
+                My Account
+              </button>
               </div>
             </div>
           </div>
