@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 //import axios from "axios";
 import axiosInstance from '../utils/axiosInstance';
 import StudentSidebar from './StudentSidebar';
-
-
 import JoinClass from "./images/Dashboard/JoinClass.png";
 import GuessTheWordImage from "./images/Homepage/Guess The Word .png";
 import ParkeQuestImage from "./images/Homepage/Parke Quest.png";
@@ -21,6 +19,31 @@ const StudentDashboard = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [classRoomId, setClassRoomId] = useState(null);
   const [assignedGames, setAssignedGames] = useState([]);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+
+
+
+  const fetchClassAndGames = async () => {
+  try {
+    const classRes = await axiosInstance.get('/classes/student/joined');
+    const joinedClasses = classRes.data;
+
+    if (joinedClasses.length > 0) {
+      const roomId = joinedClasses[0].id;
+      setIsEnrolled(true);
+      setClassRoomId(roomId);
+
+      const gameRes = await axiosInstance.get(`/gamesessions/classroom/${roomId}`);
+      setAssignedGames(gameRes.data);
+    } else {
+      setIsEnrolled(false);
+      setAssignedGames([]);
+    }
+  } catch (err) {
+    console.error("Error fetching joined class or games:", err);
+    setIsEnrolled(false);
+  }
+};
 
 
   useEffect(() => {
@@ -43,21 +66,9 @@ useEffect(() => {
   fetchUserFirstName();
 }, []);
 
-useEffect(() => {
-  const fetchEnrolledClassroomAndGames = async () => {
-    try {
-      const res = await axiosInstance.get("/auth/user");
-      if (res.data.classRoomId) {
-        setClassRoomId(res.data.classRoomId);
-        const gameRes = await axiosInstance.get(`/gamesessions/classroom/${res.data.classRoomId}`);
-        setAssignedGames(gameRes.data);
-      }
-    } catch (error) {
-      console.error("Error loading class or games on refresh:", error);
-    }
-  };
 
-  fetchEnrolledClassroomAndGames();
+useEffect(() => {
+  fetchClassAndGames();
 }, []);
 
 
@@ -109,32 +120,25 @@ useEffect(() => {
 ];
 
 
- const handleSubmitClassCode = async () => {
-  try {
-    const token = localStorage.getItem("token");
+   const handleSubmitClassCode = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axiosInstance.post(
+        "/classes/join",
+        { classCode },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    const response = await axiosInstance.post(
-      "/classes/join",
-      { classCode },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+     await fetchClassAndGames(); // ✅ Refresh UI with joined class and modules
 
-    const classRoomId = response.data.classRoomId;
-    setClassRoomId(classRoomId);
+      setShowModal(false);
+      setClassCode("");
 
-    // fetch assigned games
-    const gameResponse = await axiosInstance.get(`/gamesessions/classroom/${classRoomId}`);
-    setAssignedGames(gameResponse.data);
-
-    setShowModal(false);
-    setClassCode("");
-
-  } catch (error) {
-    console.error("Failed to join class:", error);
-    setErrorMessage("Invalid class code or join failed.");
-  }
-};
-
+    } catch (error) {
+      console.error("Failed to join class:", error);
+      setErrorMessage("Invalid class code or join failed.");
+    }
+  };
 
   const mainBgClass = darkMode ? "bg-gray-900" : "bg-white";
   const sidebarBgClass = darkMode ? "bg-gray-800" : "bg-[#FDFBEE]";
@@ -154,39 +158,44 @@ useEffect(() => {
     Magandang Araw {firstName || "Student"},
   </h1>
 
-  {assignedGames.length === 0 ? (
-    <div className="flex flex-col items-center justify-center h-[300px]">
-      <img
-        src={JoinClass}
-        alt="Join Class Button"
-        className="w-[150px] h-[40px] cursor-pointer"
-        onClick={handleOpenModal}
-      />
-      <p className={`mt-4 ${textClass}`}>Join a class to see your modules.</p>
+   {!classRoomId && assignedGames.length === 0 ?  (
+  <div className="flex flex-col items-center justify-center h-[300px]">
+    <img
+      src={JoinClass}
+      alt="Join Class Button"
+      className="w-[150px] h-[40px] cursor-pointer"
+      onClick={handleOpenModal}
+    />
+    <p className={`mt-4 ${textClass}`}>Join a class to see your modules.</p>
+  </div>
+) : (
+  <div>
+    <h2 className={`text-[28px] font-semibold mb-6 ${textClass}`}>Your Modules</h2>
+    <div className="grid grid-cols-2 gap-6">
+      {assignedGames.map((game, idx) => {
+        const matched = gameData.find(g => g.name === game.gameTitle);
+        if (!matched) return null;
+        return (
+          <div
+            key={idx}
+            className="p-4 rounded-xl shadow-md cursor-pointer"
+            style={{ backgroundColor: matched.color }}
+            onClick={() => navigate(`/${matched.name.toLowerCase().replace(/\s/g, "-")}`)}
+          >
+            <img
+              src={matched.image}
+              alt={matched.name}
+              className="w-full h-40 object-contain rounded-lg mb-2"
+            />
+            <h3 className="font-bold text-xl text-white">{matched.name}</h3>
+            <p className="text-white text-sm">{matched.description}</p>
+          </div>
+        );
+      })}
     </div>
-  ) : (
-    <div>
-      <h2 className={`text-[28px] font-semibold mb-6 ${textClass}`}>Your Modules</h2>
-      <div className="grid grid-cols-2 gap-6">
-        {assignedGames.map((game, idx) => {
-          const matched = gameData.find(g => g.name === game.gameTitle);
-          if (!matched) return null;
-          return (
-            <div
-              key={idx}
-              className="p-4 rounded-xl shadow-md cursor-pointer"
-              style={{ backgroundColor: matched.color }}
-              onClick={() => navigate(`/${matched.name.toLowerCase().replace(/\s/g, '-')}`)}
-            >
-              <img src={matched.image} alt={matched.name} className="w-full h-40 object-contain rounded-lg mb-2" />
-              <h3 className="font-bold text-xl text-white">{matched.name}</h3>
-              <p className="text-white text-sm">{matched.description}</p>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  )}
+  </div>
+)}
+
 </div>
 
 

@@ -32,14 +32,20 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs using JWT
             .cors(withDefaults()) // Enable CORS (cross-origin resource sharing)
          .authorizeHttpRequests(authz -> authz
-        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-        .requestMatchers("/api/words/get").permitAll()
-        .requestMatchers("/api/gamesessions/**").hasRole("TEACHER")
-        .requestMatchers("/api/teacher-dashboard/**").hasRole("TEACHER")
-        .requestMatchers("/api/classes/join").hasRole("STUDENT")
-        .requestMatchers("/api/classes/**").hasRole("TEACHER")
-        .requestMatchers("/api/classroom/**").hasRole("TEACHER")
-        .anyRequest().authenticated()
+            .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+            .requestMatchers("/api/words/get").permitAll()
+            
+            // Teacher routes
+            .requestMatchers("/api/gamesessions/**").hasAnyRole("TEACHER", "STUDENT")
+            .requestMatchers("/api/teacher-dashboard/**").hasRole("TEACHER")
+            .requestMatchers("/api/classes/**").hasRole("TEACHER")
+            .requestMatchers("/api/classroom/**").hasRole("TEACHER")
+
+            // Student routes
+            .requestMatchers("/api/classes/join").hasRole("STUDENT")
+            .requestMatchers("/api/classes/student/joined").hasRole("STUDENT")
+            
+            .anyRequest().authenticated()
     ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); 
 
         return http.build();
