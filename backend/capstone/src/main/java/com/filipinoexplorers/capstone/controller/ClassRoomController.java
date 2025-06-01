@@ -79,9 +79,9 @@ public class ClassRoomController {
     }
 
     // Student joins class
-    @PostMapping("/join")
+  @PostMapping("/join")
     public ResponseEntity<?> joinClass(@RequestHeader("Authorization") String token,
-                                       @RequestBody Map<String, String> payload) {
+                                    @RequestBody Map<String, String> payload) {
 
         String email = jwtService.extractUsername(token.replace("Bearer ", ""));
         Optional<Student> studentOpt = studentRepository.findByEmail(email);
@@ -112,8 +112,14 @@ public class ClassRoomController {
         studentRepository.save(student);
         classRoomRepository.save(classRoom);
 
-        return ResponseEntity.ok("Student successfully joined the class!");
+        // ✅ Return success message with classRoomId
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Student successfully joined the class!");
+        response.put("classRoomId", classRoom.getId());
+
+        return ResponseEntity.ok(response);
     }
+
 
     // Generate unique code
     private String generateClassCode() {
