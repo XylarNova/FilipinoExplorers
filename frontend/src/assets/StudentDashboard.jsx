@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+//import axios from "axios";
+import axiosInstance from '../utils/axiosInstance';
+import StudentSidebar from './StudentSidebar';
 
-import Logo from "./images/logo.png";
-import Dashboard from "./images/Navigation/DashboardIcon.png";
-import Profile from "./images/Navigation/ProfileIcon.png";
-import Modules from "./images/Navigation/ClassIcon.png";
-import LogOut from "./images/Navigation/LogOutIcon.png";
+
 import JoinClass from "./images/Dashboard/JoinClass.png";
-import WordOfTheDay from "./WordOfTheDay";
+import GuessTheWordImage from "./images/Homepage/Guess The Word .png";
+import ParkeQuestImage from "./images/Homepage/Parke Quest.png";
+import PaaralanQuestImage from "./images/Homepage/Paaralan Quest Icon.png";
+import MemoryGameImage from "./images/Homepage/Memory Game Icon.png";
+
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -17,6 +19,9 @@ const StudentDashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [classCode, setClassCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [classRoomId, setClassRoomId] = useState(null);
+  const [assignedGames, setAssignedGames] = useState([]);
+
 
   useEffect(() => {
     const storedDarkMode = localStorage.getItem("darkMode");
@@ -25,21 +30,36 @@ const StudentDashboard = () => {
 
 useEffect(() => {
   const fetchUserFirstName = async () => {
-    try {
-      const response = await axios.get("http://localhost:8080/api/auth/user", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
-      setFirstName(response.data.firstName || "Student");
-    } catch (error) {
-      console.error("Failed to fetch user info:", error);
-      setFirstName("Student");
-    }
-  };
+  try {
+    const response = await axiosInstance.get("/auth/user");
+    setFirstName(response.data.firstName || "Student");
+  } catch (error) {
+    console.error("Failed to fetch user info:", error);
+    setFirstName("Student");
+  }
+};
+
 
   fetchUserFirstName();
 }, []);
+
+useEffect(() => {
+  const fetchEnrolledClassroomAndGames = async () => {
+    try {
+      const res = await axiosInstance.get("/auth/user");
+      if (res.data.classRoomId) {
+        setClassRoomId(res.data.classRoomId);
+        const gameRes = await axiosInstance.get(`/gamesessions/classroom/${res.data.classRoomId}`);
+        setAssignedGames(gameRes.data);
+      }
+    } catch (error) {
+      console.error("Error loading class or games on refresh:", error);
+    }
+  };
+
+  fetchEnrolledClassroomAndGames();
+}, []);
+
 
 
   useEffect(() => {
@@ -61,33 +81,60 @@ useEffect(() => {
     setErrorMessage("");
   };
 
-  const handleSubmitClassCode = async () => {
-    try {
-      const token = localStorage.getItem("token"); // get your JWT token
-  
-      if (!token) {
-        console.error("No token found. User might not be authenticated.");
-        return;
-      }
-  
-      const response = await axios.post(
-        "http://localhost:8080/api/classes/join",
-        { classCode }, // send the classCode in the body
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // attach the token here
-            "Content-Type": "application/json"
-          }
-        }
-      );
-  
-      console.log("Joined class successfully:", response.data);
-      setShowModal(false);
-      setClassCode(""); // Clear input after submitting
-    } catch (error) {
-      console.error("Failed to join class:", error);
-    }
-  };
+  const gameData = [
+  {
+    name: 'Guess The Word',
+    color: '#F3668A',
+    image: GuessTheWordImage,
+    description: 'Hulaan ang tamang salita! Arrange the jumbled letters...'
+  },
+  {
+    name: 'Parke Quest',
+    color: '#4092AD',
+    image: ParkeQuestImage,
+    description: 'Ayusin ang magulong pangungusap! Drag and drop...'
+  },
+  {
+    name: 'Paaralan Quest',
+    color: '#06D7A0',
+    image: PaaralanQuestImage,
+    description: 'Basahin at intindihin, tanong sagutin natin! Read a story...'
+  },
+  {
+    name: 'Memory Game',
+    color: '#FAB869',
+    image: MemoryGameImage,
+    description: 'Hanapin ang tamang salin! A Filipino word will appear...'
+  }
+];
+
+
+ const handleSubmitClassCode = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosInstance.post(
+      "/classes/join",
+      { classCode },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const classRoomId = response.data.classRoomId;
+    setClassRoomId(classRoomId);
+
+    // fetch assigned games
+    const gameResponse = await axiosInstance.get(`/gamesessions/classroom/${classRoomId}`);
+    setAssignedGames(gameResponse.data);
+
+    setShowModal(false);
+    setClassCode("");
+
+  } catch (error) {
+    console.error("Failed to join class:", error);
+    setErrorMessage("Invalid class code or join failed.");
+  }
+};
+
 
   const mainBgClass = darkMode ? "bg-gray-900" : "bg-white";
   const sidebarBgClass = darkMode ? "bg-gray-800" : "bg-[#FDFBEE]";
@@ -98,87 +145,90 @@ useEffect(() => {
   return (
     <div className={`flex h-screen w-full ${mainBgClass}`}>
       {/* Sidebar */}
-      <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-r ${sidebarBorderClass} pt-8`}>
-        <div className="mb-10 flex justify-center">
-          <img src={Logo} alt="Filipino Explorer Logo" className="w-40" />
-        </div>
-        <nav className="space-y-6 pl-6">
-          {[
-            { icon: Dashboard, label: "Dashboard", path: "/student-dashboard" },
-            { icon: Profile, label: "My Profile", path: "/profile-student" },
-            { icon: Modules, label: "Modules", path: "/" },
-            { icon: LogOut, label: "Log Out", path: "/logout" }
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className={`flex items-center space-x-4 font-bold text-lg cursor-pointer ${textClass}`}
-              onClick={() => navigate(item.path)}
-            >
-              <img src={item.icon} alt={item.label} className="w-6 h-6" />
-              <span>{item.label}</span>
-            </div>
-          ))}
-        </nav>
-
-        <div className="mt-8 px-6">
-          <WordOfTheDay darkMode={darkMode} />
-        </div>
-      </aside>
+       <StudentSidebar darkMode={darkMode} />
 
       {/* Main Content */}
       <main className={`flex-1 ${mainBgClass} pt-10 px-10 relative`}>
-        <div className={`w-full h-full ${sidebarBgClass} border-[5px] ${sidebarBorderClass} rounded-[20px] relative`}>
-          <h1 className={`text-[40px] font-bold font-['Poppins'] ${textClass} mb-8 pt-6 pl-6`}>
-            Magandang Araw {firstName || "Student"},
-          </h1>
+        <div className={`w-full h-full ${sidebarBgClass} border-[5px] ${sidebarBorderClass} rounded-[20px] p-6 relative`}>
+  <h1 className={`text-[40px] font-bold font-['Poppins'] ${textClass} mb-8`}>
+    Magandang Araw {firstName || "Student"},
+  </h1>
 
-          <img
-            src={JoinClass}
-            alt="Join Class Button"
-            className="absolute left-[370px] top-[170px] w-[150px] h-[40px] cursor-pointer"
-            onClick={handleOpenModal}
-          />
-        </div>
+  {assignedGames.length === 0 ? (
+    <div className="flex flex-col items-center justify-center h-[300px]">
+      <img
+        src={JoinClass}
+        alt="Join Class Button"
+        className="w-[150px] h-[40px] cursor-pointer"
+        onClick={handleOpenModal}
+      />
+      <p className={`mt-4 ${textClass}`}>Join a class to see your modules.</p>
+    </div>
+  ) : (
+    <div>
+      <h2 className={`text-[28px] font-semibold mb-6 ${textClass}`}>Your Modules</h2>
+      <div className="grid grid-cols-2 gap-6">
+        {assignedGames.map((game, idx) => {
+          const matched = gameData.find(g => g.name === game.gameTitle);
+          if (!matched) return null;
+          return (
+            <div
+              key={idx}
+              className="p-4 rounded-xl shadow-md cursor-pointer"
+              style={{ backgroundColor: matched.color }}
+              onClick={() => navigate(`/${matched.name.toLowerCase().replace(/\s/g, '-')}`)}
+            >
+              <img src={matched.image} alt={matched.name} className="w-full h-40 object-contain rounded-lg mb-2" />
+              <h3 className="font-bold text-xl text-white">{matched.name}</h3>
+              <p className="text-white text-sm">{matched.description}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  )}
+</div>
+
 
         {/* Modal */}
         {showModal && (
-  <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
-    <div className="bg-[#118AB2] rounded-[30px] px-8 py-6 w-[340px] shadow-xl text-white text-center">
-      <h2 className="text-xl font-bold mb-4 font-['Fredoka']">Enter Class Code</h2>
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
+        <div className="bg-[#118AB2] rounded-[30px] px-8 py-6 w-[340px] shadow-xl text-white text-center">
+          <h2 className="text-xl font-bold mb-4 font-['Fredoka']">Enter Class Code</h2>
 
-      {/* Error Message */}
-      {errorMessage && (
-        <div className="text-red-300 font-semibold text-sm mb-3">
-          {errorMessage}
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="text-red-300 font-semibold text-sm mb-3">
+              {errorMessage}
+            </div>
+          )}
+
+          {/* Input */}
+          <input
+            type="text"
+            value={classCode}
+            onChange={(e) => setClassCode(e.target.value)}
+            placeholder="Class Code"
+            className="w-full p-3 rounded-xl bg-white text-[#073B4C] text-center mb-6 border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-white"
+          />
+
+          {/* Buttons */}
+          <div className="flex justify-between">
+            <button
+              onClick={handleCloseModal}
+              className="bg-[#EF476F] text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmitClassCode}
+              className="bg-[#06D6A0] text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition"
+            >
+              Join
+            </button>
+          </div>
         </div>
-      )}
-
-      {/* Input */}
-      <input
-        type="text"
-        value={classCode}
-        onChange={(e) => setClassCode(e.target.value)}
-        placeholder="Class Code"
-        className="w-full p-3 rounded-xl bg-white text-[#073B4C] text-center mb-6 border-none shadow-sm focus:outline-none focus:ring-2 focus:ring-white"
-      />
-
-      {/* Buttons */}
-      <div className="flex justify-between">
-        <button
-          onClick={handleCloseModal}
-          className="bg-[#EF476F] text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSubmitClassCode}
-          className="bg-[#06D6A0] text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition"
-        >
-          Join
-        </button>
       </div>
-    </div>
-  </div>
 )}
 
 

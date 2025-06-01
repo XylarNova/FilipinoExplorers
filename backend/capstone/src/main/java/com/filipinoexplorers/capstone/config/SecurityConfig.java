@@ -35,8 +35,10 @@ public class SecurityConfig {
         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
         .requestMatchers("/api/words/get").permitAll()
         .requestMatchers("/api/gamesessions/**").hasRole("TEACHER")
+        .requestMatchers("/api/teacher-dashboard/**").hasRole("TEACHER")
         .requestMatchers("/api/classes/join").hasRole("STUDENT")
         .requestMatchers("/api/classes/**").hasRole("TEACHER")
+        .requestMatchers("/api/classroom/**").hasRole("TEACHER")
         .anyRequest().authenticated()
     ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); 
 
