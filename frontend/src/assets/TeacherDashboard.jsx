@@ -68,7 +68,7 @@ const TeacherDashboard = () => {
         <h2 className={`text-[30px] font-bold font-['Fredoka'] ${textClass} mb-4`}>SUMMARY</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="p-6 rounded-xl border-2 border-yellow-400 bg-white text-center shadow">
-            <p className="text-md font-semibold text-[#073B4C] mb-2">📋 Total Classes</p>
+            <p className="text-md font-semibold text-[#073B4C] mb-2">📋 Total Classrooms</p>
             <p className="text-[32px] font-bold text-[#073B4C]">{summary.totalClasses}</p>
           </div>
           <div className="p-6 rounded-xl border-2 border-teal-400 bg-white text-center shadow">

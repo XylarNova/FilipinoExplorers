@@ -106,19 +106,27 @@ const MyProfileTeacher = () => {
           {/* Sidebar Card */}
           <div className="pt-10">
             <div className={`w-[247px] h-[230px] ${sidebarBgClass} rounded-[20px] border-[5px] ${sidebarBorderClass} shadow-lg p-4`}>
-              <h2 className={`text-[25px] ${textClass} font-['Poppins'] font-extrabold mb-4 text-center`}>Account Details</h2>
+              <h2 className={`text-[25px] ${textClass} font-['Poppins'] font-extrabold mb-4 text-center`}>
+                Account Details
+              </h2>
               <div className="flex flex-col gap-4 items-center">
-               <button
-                onClick={() => navigate('/profile-teacher')}
-                className="w-[190px] h-[49px] bg-[#57B4BA] text-black text-[24px] font-['Inter'] font-bold rounded-[10px]">
-                My Profile
-              </button>
+                <button
+                  onClick={() => navigate('/profile-teacher')}
+                  className={`w-[190px] h-[49px] ${
+                    location.pathname === '/profile-teacher' ? 'bg-gray-300' : 'bg-[#57B4BA]'
+                  } text-black text-[24px] font-['Inter'] font-bold rounded-[10px]`}
+                >
+                  My Profile
+                </button>
 
-              <button
-                onClick={() => navigate('/my-account-teacher')}
-                className="w-[190px] h-[49px] bg-[#57B4BA] text-black text-[24px] font-['Inter'] font-bold rounded-[10px]">
-                My Account
-              </button>
+                <button
+                  onClick={() => navigate('/my-account-teacher')}
+                  className={`w-[190px] h-[49px] ${
+                    location.pathname === '/my-account-teacher' ? 'bg-gray-300' : 'bg-[#57B4BA]'
+                  } text-black text-[24px] font-['Inter'] font-bold rounded-[10px]`}
+                >
+                  My Account
+                </button>
               </div>
             </div>
           </div>
