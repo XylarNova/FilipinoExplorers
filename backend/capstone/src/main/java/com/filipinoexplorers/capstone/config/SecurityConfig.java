@@ -33,12 +33,14 @@ public class SecurityConfig {
             .cors(withDefaults()) // Enable CORS (cross-origin resource sharing)
          .authorizeHttpRequests(authz -> authz
             .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+            .requestMatchers("/api/auth/change-password").authenticated()
+
             .requestMatchers("/api/words/get").permitAll()
             
             // Teacher routes
             .requestMatchers("/api/gamesessions/**").hasAnyRole("TEACHER", "STUDENT")
             .requestMatchers("/api/teacher-dashboard/**").hasRole("TEACHER")
-            .requestMatchers("/api/classes/**").hasRole("TEACHER")
+            .requestMatchers("/api/classes/**").hasAnyRole("TEACHER" ,"STUDENT")
             .requestMatchers("/api/classroom/**").hasRole("TEACHER")
 
             // Student routes

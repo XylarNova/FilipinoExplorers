@@ -28,7 +28,7 @@ const StudentSidebar = ({ darkMode }) => {
         {[ 
           { icon: Dashboard, label: "Dashboard", path: "/student-dashboard" },
           { icon: Profile, label: "My Profile", path: "/profile-student" },
-          { icon: Modules, label: "Modules", path: "/student-module" },
+          { icon: Modules, label: "Modules", path: "/student-modules" },
           { icon: LogOut, label: "Log Out", action: handleLogout }
         ].map((item, idx) => (
           <div

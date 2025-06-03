@@ -3,7 +3,12 @@ import axiosInstance from '../utils/axiosInstance';
 import jwtDecode from 'jwt-decode';
 import Logo from './images/Logo.png';
 import { useNavigate, useLocation } from 'react-router-dom';
-import TeacherSidebar from './TeacherSidebar';
+import TeacherSidebarIcon from './TeacherSidebarIcon';
+import GuessTheWordImage from './images/Homepage/Guess The Word .png';
+import ParkeQuestImage from './images/Homepage/Parke Quest.png';
+import PaaralanQuestImage from './images/Homepage/Paaralan Quest Icon.png';
+import MemoryGameImage from './images/Homepage/Memory Game Icon.png';
+
 
 
 const GameBank = () => {
@@ -218,10 +223,10 @@ const handleSaveGame = async () => {
     review: gameSettings.review,
     shuffle: gameSettings.shuffle,
     windowTracking: gameSettings.windowTracking,
-    setTime: parseInt(setTime),
+    setTime: parseInt(setTime) * 60, // convert minutes to seconds
     quarter,
     gamePoints: parseInt(gamePoints),
-    status: classRoomIds.length === 0 ? "Draft" : "Closed", // initial
+    status: classRoomIds.length === 0 ? "Draft" : "Closed",
     classRoomIds,
     teacherId,
     vocabularyQuestions: validQuestions,
@@ -229,27 +234,19 @@ const handleSaveGame = async () => {
 
   try {
     if (editingGameId) {
-      // ✅ Update main game
       await axiosInstance.put(`/gamesessions/put/${editingGameId}`, gameSession);
-
-      // ✅ Assign classrooms
       await axiosInstance.put(`/gamesessions/updateClass/${editingGameId}`, {
         classIds: classRoomIds,
       });
-
-
       alert("Game updated successfully!");
     } else {
-      // ✅ Create new game
       const res = await axiosInstance.post(`/gamesessions/post`, gameSession);
       const newGameId = res.data.id;
 
-      // ✅ Assign classrooms
       await axiosInstance.put(`/gamesessions/updateClass/${newGameId}`, {
         classIds: classRoomIds,
       });
 
-      // ✅ Update status (now that classrooms exist)
       await axiosInstance.put(`/gamesessions/updateStatus/${newGameId}`, {
         status: classRoomIds.length === 0 ? "Draft" : "Closed",
       });
@@ -265,6 +262,7 @@ const handleSaveGame = async () => {
     alert("Error saving game!");
   }
 };
+
 
 
 const handlePublishGame = async (gameId) => {
@@ -379,7 +377,6 @@ const handlePublishGame = async (gameId) => {
         <div className="h-[56px] w-[56px] ml-10">
           <img src={Logo} alt="Logo" className="h-full w-full object-contain transform scale-[2.2]" />
         </div>
-        <h1 className="text-white text-[40px] font-extrabold font-['Poppins'] pl-50">Game Bank</h1>
       </div>
       <div className="flex items-center space-x-4">
         <input
@@ -399,15 +396,29 @@ const handlePublishGame = async (gameId) => {
     {/* WRAPPER for Sidebar + Main Content */}
     <div className="flex h-[calc(100vh-100px)]">
       {/* Sidebar */}
-   <TeacherSidebar />
+    <TeacherSidebarIcon/>
 
        
         {/* Main Game List */}
-        <div className="flex-1 p-6">
-          <p className="text-[#073A4D] text-[50px] font-bold font-['Poppins'] pt-8 pl-10">Game List</p>
+           <div className="flex-1 pl-[120px] pr-6 pt-6">
+  {/* Horizontal Row with Images and Center Title */}
+  <div className="flex items-center justify-center gap-8 mt-10 mb-12 flex-wrap">
+    {/* Left Side Images */}
+    <img src={GuessTheWordImage} alt="Guess the Word" className="w-[100px] h-auto drop-shadow-md hover:scale-105 transition" />
+    <img src={ParkeQuestImage} alt="Parke Quest" className="w-[100px] h-auto drop-shadow-md hover:scale-105 transition" />
+
+    {/* Center Title */}
+    <h1 className="text-[#073A4D] text-[40px] font-bold font-['Fredoka'] mx-4 whitespace-nowrap">
+      Game Bank
+    </h1>
+
+    {/* Right Side Images */}
+    <img src={PaaralanQuestImage} alt="Paaralan Quest" className="w-[100px] h-auto drop-shadow-md hover:scale-105 transition" />
+    <img src={MemoryGameImage} alt="Memory Game" className="w-[100px] h-auto drop-shadow-md hover:scale-105 transition" />
+  </div>
           <div className="mt-10 flex justify-center">
             <div className="border-4 border-[#108AB1] rounded-[50px] w-[90%] p-6 bg-white">
-              <div className="border-4 border-[#108AB1] rounded-[50px] bg-white">
+              <div className="border-4 border-[#108AB1] rounded-[50px] bg-white overflow-hidden">
                 <div className="grid grid-cols-6 text-[#073A4D] font-semibold text-lg h-[60px] items-center">
                   <div className="border-r border-[#108AB1] text-center flex items-center justify-center h-full">Game Title</div>
                   <div className="border-r border-[#108AB1] text-center flex items-center justify-center h-full">Category</div>
@@ -417,117 +428,97 @@ const handlePublishGame = async (gameId) => {
                   <div className="text-center flex items-center justify-center h-full">Actions</div>
                   </div>
           {savedGames.map((game) => (
-        <div
-          key={game.id}
-          className="grid grid-cols-6 border-t border-[#108AB1] text-[#073A4D] h-[70px] items-center hover:bg-[#E0F2F7]"
+  <div key={game.id} className="relative">
+    {/* Row */}
+    <div className="grid grid-cols-6 border-t border-[#108AB1] text-[#073A4D] h-[70px] items-center hover:bg-[#E0F2F7] relative z-0">
+      {/* Game Title */}
+      <div className="border-r border-[#108AB1] text-center">{game.gameTitle}</div>
+
+      {/* Category */}
+      <div className="border-r border-[#108AB1] text-center">{game.category}</div>
+
+      {/* Status Dropdown */}
+      <div className="border-r border-[#108AB1] text-center">
+        <select
+          value={game.status}
+          onChange={(e) => handleStatusChange(game.id, e.target.value)}
+          className="bg-white border border-[#108AB1] rounded px-2 py-1 cursor-pointer"
         >
-          {/* Game Title */}
-          <div className="border-r border-[#108AB1] text-center">{game.gameTitle}</div>
+          <option value="Draft">Draft</option>
+          <option value="Closed">Closed</option>
+          <option value="Open">Open</option>
+        </select>
+      </div>
 
-          {/* Category */}
-          <div className="border-r border-[#108AB1] text-center">{game.category}</div>
+      {/* Classrooms Button */}
+      <div className="border-r border-[#108AB1] text-center">
+        {game.classrooms?.length === 1 ? (
+          <span>{game.classrooms[0].name}</span>
+        ) : game.classrooms?.length > 1 ? (
+          <button
+            onClick={() =>
+              setDropdownOpenId(dropdownOpenId === `class-${game.id}` ? null : `class-${game.id}`)
+            }
+            className="border border-gray-300 px-2 py-1 rounded bg-white text-sm w-[120px] truncate"
+          >
+            {game.classrooms.length} Classes
+          </button>
+        ) : (
+          <span className="text-gray-400 italic">None</span>
+        )}
+      </div>
 
-          {/* Status Dropdown */}
-          <div className="border-r border-[#108AB1] text-center">
-            <select
-              value={game.status}
-              onChange={(e) => handleStatusChange(game.id, e.target.value)}
-              className="bg-white border border-[#108AB1] rounded px-2 py-1 cursor-pointer"
-            >
-              <option value="Draft">Draft</option>
-              <option value="Closed">Closed</option>
-              <option value="Open">Open</option>
-            </select>
+      {/* Last Modified */}
+      <div className="border-r border-[#108AB1] text-center">
+        {game.lastModified
+          ? new Date(game.lastModified).toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            })
+          : 'N/A'}
+      </div>
+
+{/* Actions Column */}
+<div className="border-r border-[#108AB1] text-center">
+  <select
+    onChange={(e) => {
+      const action = e.target.value;
+      if (action === "edit") handleEditGame(game);
+      else if (action === "delete") handleDeleteGame(game.id);
+      else if (action === "publish") handlePublishGame(game.id);
+      e.target.selectedIndex = 0; // Reset back to "Actions"
+    }}
+    className="bg-white border border-[#108AB1] text-[#073A4D] rounded px-2 py-1 text-sm cursor-pointer w-[110px] font-medium"
+  >
+    <option value="">Actions</option>
+    <option value="edit" className="text-yellow-600">✏️ Edit</option>
+    <option value="delete" className="text-red-600">🗑️ Delete</option>
+    <option value="publish" className="text-green-600">🚀 Publish</option>
+  </select>
+</div>
+
+
+    </div>
+
+    {/* ✅ Classrooms Dropdown (OUTSIDE grid row) */}
+    {dropdownOpenId === `class-${game.id}` && (
+      <div className="absolute left-1/2 translate-x-[-50%] mt-1 z-50 bg-white border rounded shadow-md w-[180px] max-h-[150px] overflow-y-auto">
+        {game.classrooms.map((c) => (
+          <div
+            key={c.id}
+            className="text-sm py-1 px-2 hover:bg-gray-100 rounded"
+          >
+            {c.name}
           </div>
-
-          {/* Class Column */}
-          <div className="border-r border-[#108AB1] text-center relative">
-            {game.classrooms?.length === 1 ? (
-              <span>{game.classrooms[0].name}</span>
-            ) : game.classrooms?.length > 1 ? (
-              <>
-                <button
-                  onClick={() =>
-                    setDropdownOpenId(dropdownOpenId === `class-${game.id}` ? null : `class-${game.id}`)
-                  }
-                  className="border border-gray-300 px-2 py-1 rounded bg-white text-sm w-[120px] truncate"
-                >
-                  {game.classrooms.length} Classes
-                </button>
-                {dropdownOpenId === `class-${game.id}` && (
-                  <div className="absolute z-50 bg-white border rounded shadow-lg mt-2 p-2 w-[180px] max-h-[150px] overflow-y-auto">
-                    {game.classrooms.map((c) => (
-                      <div key={c.id} className="text-sm py-1 px-2 hover:bg-gray-100 rounded">
-                        {c.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <span className="text-gray-400 italic">None</span>
-            )}
-          </div>
-
-          {/* Last Modified */}
-          <div className="border-r border-[#108AB1] text-center">
-            {game.lastModified
-              ? new Date(game.lastModified).toLocaleString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                  hour: 'numeric',
-                  minute: '2-digit',
-                  hour12: true,
-                })
-              : 'N/A'}
-          </div>
-
-          {/* Actions Dropdown */}
-          <div className="relative text-center">
-            <button
-              onClick={() =>
-                setDropdownOpenId(dropdownOpenId === `action-${game.id}` ? null : `action-${game.id}`)
-              }
-              className="border border-[#108AB1] bg-white text-[#073A4D] rounded px-2 py-1 text-sm"
-            >
-              Actions
-            </button>
-
-            {dropdownOpenId === `action-${game.id}` && (
-              <div className="absolute right-0 z-50 bg-white border rounded shadow-md mt-1 p-1 w-[120px]">
-                <button
-                  onClick={() => {
-                    handleEditGame(game);
-                    setDropdownOpenId(null);
-                  }}
-                  className="block w-full text-left px-2 py-1 text-sm hover:bg-yellow-100 text-yellow-700"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => {
-                    handleDeleteGame(game.id);
-                    setDropdownOpenId(null);
-                  }}
-                  className="block w-full text-left px-2 py-1 text-sm hover:bg-red-100 text-red-600"
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => {
-                    handlePublishGame(game.id);
-                    setDropdownOpenId(null);
-                  }}
-                  className="block w-full text-left px-2 py-1 text-sm hover:bg-green-100 text-green-600"
-                >
-                  Publish
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
+    )}
+  </div>
+))}
 
     </div>
     </div>
@@ -630,20 +621,34 @@ const handlePublishGame = async (gameId) => {
 <div className="mb-6">
   <h3 className="font-semibold mb-2">Game Settings</h3>
 
-  {/* Classroom Selection */}
-  <div className="mb-4">
+    {/* Classroom Selector */}
+    <div className="mb-4">
     <label className="block mb-1 font-semibold">Assign to Classrooms (optional)</label>
     <div className="border border-gray-300 rounded p-2 max-h-40 overflow-y-auto">
       <label className="flex items-center space-x-2 mb-1">
         <input
           type="checkbox"
-          checked={(classSelections['new'] || []).length === 0}
-          onChange={() => setClassSelections((prev) => ({ ...prev, new: [] }))}
+          checked={
+            (editingGameId
+              ? (classSelections[editingGameId] || []).length
+              : (classSelections['new'] || []).length) === 0
+          }
+          onChange={() =>
+            setClassSelections((prev) => ({
+              ...prev,
+              [editingGameId || 'new']: [],
+            }))
+          }
         />
         <span>None (Save as Draft)</span>
       </label>
+
       {classes.map((c) => {
-        const selected = classSelections['new'] || [];
+        const selected =
+          editingGameId && classSelections[editingGameId]
+            ? classSelections[editingGameId]
+            : classSelections['new'] || [];
+
         return (
           <label key={c.id} className="flex items-center space-x-2 mb-1">
             <input
@@ -653,7 +658,10 @@ const handlePublishGame = async (gameId) => {
                 const updated = e.target.checked
                   ? [...selected, c.id]
                   : selected.filter((id) => id !== c.id);
-                setClassSelections((prev) => ({ ...prev, new: updated }));
+                setClassSelections((prev) => ({
+                  ...prev,
+                  [editingGameId || 'new']: updated,
+                }));
               }}
             />
             <span className="text-sm truncate">{c.name}</span>
@@ -662,6 +670,8 @@ const handlePublishGame = async (gameId) => {
       })}
     </div>
   </div>
+
+
 
     {/* Game Settings Checkboxes */}
     <div className="flex flex-col space-y-2">
@@ -682,7 +692,7 @@ const handlePublishGame = async (gameId) => {
 
     {/* Set Time */}
     <div className="mb-5">
-      <label className="block mb-2 font-semibold">Set Time (seconds)</label>
+      <label className="block mb-2 font-semibold">Set Time (minutes)</label>
       <input
         type="number"
         min="0"

@@ -60,7 +60,9 @@ const App = () => {
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/profile-student" element={<MyProfileStudent />} />
         <Route path="/account-student" element={<MyAccountStudent />} />
-        <Route path="/modules/:gameType" element={<StudentModule />} />
+        <Route path="/student-modules" element={<StudentModule />} />
+
+
 
         
 
