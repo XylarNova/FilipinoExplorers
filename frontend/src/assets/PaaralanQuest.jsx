@@ -134,7 +134,6 @@ const storyData = [
   }
 ];
 
-
 const PaaralanQuest = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedChoice, setSelectedChoice] = useState(null);
@@ -167,27 +166,26 @@ const PaaralanQuest = () => {
   };
 
   const handleCheckAnswer = () => {
-  if (selectedChoice === null) {
-    setFeedback("Please select an answer.");
-    return;
-  }
-
-  if (!answeredQuestions[currentIndex]) {
-    if (selectedChoice === current.correctAnswer) {
-      setScore(prev => prev + (usedHint ? 1 : 2));
-      setFeedback("CORRECT ANSWER");
-    } else {
-      setFeedback("WRONG ANSWER");
+    if (selectedChoice === null) {
+      setFeedback("Please select an answer.");
+      return;
     }
 
-    const updatedAnswers = [...answeredQuestions];
-    updatedAnswers[currentIndex] = true;
-    setAnsweredQuestions(updatedAnswers);
-  } else {
-    setFeedback("You already answered this question.");
-  }
-};
+    if (!answeredQuestions[currentIndex]) {
+      if (selectedChoice === current.correctAnswer) {
+        setScore((prev) => prev + (usedHint ? 1 : 2));
+        setFeedback("CORRECT ANSWER");
+      } else {
+        setFeedback("WRONG ANSWER");
+      }
 
+      const updatedAnswers = [...answeredQuestions];
+      updatedAnswers[currentIndex] = true;
+      setAnsweredQuestions(updatedAnswers);
+    } else {
+      setFeedback("You already answered this question.");
+    }
+  };
 
   const handleHint = () => {
     if (!usedHint) {
@@ -197,78 +195,143 @@ const PaaralanQuest = () => {
   };
 
   return (
-    <div style={{ backgroundImage: `url(${Background})`, backgroundSize: 'cover', minHeight: '100vh', paddingTop: '100px', position: 'relative' }}>
-      <img src={Logo} alt="Logo" style={{ position: 'absolute', top: '20px', left: '30px', width: '160px' }} />
-
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-        <div style={{ position: 'relative', marginRight: '-25px' }}>
-          <img src={StickImage} alt="Timer" style={{ height: '150px', transform: 'rotate(90deg)' }} />
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '50px', height: '320px', backgroundColor: 'lightgreen', borderRadius: '50px' }} />
+    <div
+      className="bg-cover min-h-screen pt-24 px-8 flex flex-col items-center gap-6"
+      style={{ backgroundImage: `url(${Background})` }}
+    >
+      {/* Logo */}
+      <img src={Logo} alt="Logo" className="absolute top-5 left-8 w-40" />
+  
+      {/* Timer Panel */}
+      <div className="absolute top-[180px] left-10 mt-45">
+        <div className="relative w-40 h-40">
+          <img
+            src={StickImage}
+            alt="Timer"
+            className="w-full h-full object-contain rotate-90"
+          />
+          <div className="absolute top-[24%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-12 h-80 bg-green-200 rounded-full" />
         </div>
-
-        <div style={{ display: 'flex', border: '4px solid #8B4513', backgroundColor: '#f5e5c0', borderRadius: '12px', padding: '20px', height: '600px', minWidth: '600px' }}>
-          <div style={{ flex: 1, paddingRight: '20px' }}>
-            <h2>Kuwento #{currentIndex + 1}</h2>
-            <div style={{ backgroundColor: '#fff8e1', padding: '15px', borderRadius: '8px', height: '100%', overflowY: 'auto' }}>{current.story}</div>
+      </div>
+  
+      {/* Main Content Wrapper */}
+      <div className="flex flex-row gap-5 w-full max-w-[1300px] pl-40">
+        {/* Left Side: Story */}
+        <div className="flex-1 flex border-8 border-[#71361F] bg-[#f5e5c0] h-[570px]">
+          {/* Story */}
+          <div className="flex-1 pr-5 bg-[#F4D2A3]">
+            <div className="p-4 rounded-lg h-full overflow-y-auto text-justify">
+              {current.story}
+            </div>
           </div>
-
-          <div style={{ width: '8px', backgroundColor: '#8B4513' }} />
-
-          <div style={{ flex: 1, paddingLeft: '20px' }}>
-            <h2>{current.question}</h2>
-                          {showHint && (
-                <div style={popoverStyle}>
-                  <span style={iconStyle}>📘</span>
+  
+          {/* Divider */}
+          <div className="w-2 bg-[#71361F]" />
+  
+          {/* Question & Choices */}
+          <div className="flex-1 pl-5 p-4 bg-[#F4D2A3] flex flex-col justify-between">
+            <div>
+              <h2 className="font-bold text-lg mb-3">{current.question}</h2>
+  
+              {showHint && (
+                <div className="animate-fadeIn bg-[#fff8e1] border border-gray-300 rounded-lg p-3 mb-3 text-gray-800 shadow-md">
+                  <span className="inline-block mr-2 text-xl">📘</span>
                   {current.hint}
                 </div>
               )}
-
-            
-            {current.choices.map((choice, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedChoice(index)}
-                style={{ backgroundColor: selectedChoice === index ? '#d1e7dd' : '#fff', marginBottom: '8px', padding: '10px', borderRadius: '8px', border: '2px solid #ccc', cursor: 'pointer', width: '100%', textAlign: 'left' }}
-              >
-                {choice}
-              </button>
-            ))}
+  
+              {current.choices.map((choice, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedChoice(index)}
+                  className={`mb-2 p-2 rounded-lg border-2 border-gray-300 cursor-pointer w-full text-left transition ${
+                    selectedChoice === index ? "bg-green-100" : "bg-white"
+                  }`}
+                >
+                  {choice}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '600px', width: '220px' }}>
-          <div style={{ padding: '20px', borderRadius: '10px', border: '4px solid #8B4513', backgroundColor: '#f5e5c0', textAlign: 'center', fontWeight: 'bold', color: feedback === "CORRECT ANSWER" ? 'green' : feedback === "WRONG ANSWER" ? 'red' : '#333' }}>
-            Score: {score} <br />
+  
+        {/* Side Panel */}
+        <div className="w-[220px] flex flex-col justify-between mr-[-60px]">
+          {/* Feedback & Score */}
+          <div 
+            className={`p-5 rounded-lg border-4 text-center font-bold ${
+              feedback === "CORRECT ANSWER"
+                ? "border-[#8B4513] bg-[#f5e5c0] text-green-500"
+                : feedback === "WRONG ANSWER"
+                ? "border-[#8B4513] bg-[#f5e5c0] text-red-500"
+                : "border-[#8B4513] bg-[#f5e5c0] text-gray-800"
+            }`}
+          >
+            Score: {score}
+            <br />
             {feedback}
           </div>
-
-          <div style={{ backgroundColor: '#8B4513', padding: '20px', borderRadius: '10px', display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
-            {Array.from({ length: 15 }).map((_, i) => (
+  
+          {/* Question Dots */}
+          <div className="bg-[#8B4513] p-5 rounded-lg flex flex-wrap gap-2 justify-center">
+            {storyData.map((_, i) => (
               <div
                 key={i}
-                style={{
-                  width: '32px', height: '32px', borderRadius: '50%',
-                  backgroundColor: i === currentIndex ? '#FFD700' : '#f5e5c0',
-                  color: '#000', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center'
-                }}>
+                className={`w-8 h-8 rounded-full font-bold flex justify-center items-center ${
+                  i === currentIndex ? "bg-yellow-400" : "bg-[#f5e5c0]"
+                }`}
+              >
                 {i + 1}
               </div>
             ))}
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-            <button onClick={handleHint} disabled={usedHint} style={{ padding: '10px 20px', borderRadius: '30px', backgroundColor: usedHint ? '#aaa' : '#007BFF', color: '#fff', fontWeight: 'bold', cursor: usedHint ? 'not-allowed' : 'pointer' }}>HINT</button>
-            <button onClick={handleCheckAnswer} style={{ padding: '10px 20px', borderRadius: '10px', backgroundColor: '#FFD700', border: '2px solid #D4AC0D', color: '#fff', fontWeight: 'bold' }}>CHECK ANSWER</button>
-          </div>
+  
+          {/* Hint Button */}
+          <button
+            onClick={handleHint}
+            disabled={usedHint}
+            className={`px-5 py-2 rounded-full font-bold text-white ${
+              usedHint
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+            }`}
+          >
+            HINT
+          </button>
         </div>
       </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '40px' }}>
-        <img src={LeftArrow} alt="Previous" onClick={handlePrev} style={{ width: '60px', height: '60px', cursor: currentIndex > 0 ? 'pointer' : 'not-allowed', opacity: currentIndex > 0 ? 1 : 0.5 }} />
-        <img src={RightArrow} alt="Next" onClick={handleNext} style={{ width: '60px', height: '60px', cursor: currentIndex < storyData.length - 1 ? 'pointer' : 'not-allowed', opacity: currentIndex < storyData.length - 1 ? 1 : 0.5 }} />
+  
+      {/* Navigation Buttons */}
+      <div className="flex justify-center items-center gap-10 mt-4">
+        <img
+          src={LeftArrow}
+          alt="Previous"
+          onClick={handlePrev}
+          className={`w-14 h-14 ${
+            currentIndex > 0
+              ? "cursor-pointer opacity-100"
+              : "cursor-not-allowed opacity-50"
+          }`}
+        />
+        <button
+          onClick={handleCheckAnswer}
+          className="px-6 py-3 rounded-lg bg-yellow-400 border-2 border-yellow-600 text-white font-bold hover:bg-yellow-500 transition"
+        >
+          CHECK ANSWER
+        </button>
+        <img
+          src={RightArrow}
+          alt="Next"
+          onClick={handleNext}
+          className={`w-14 h-14 ${
+            currentIndex < storyData.length - 1
+              ? "cursor-pointer opacity-100"
+              : "cursor-not-allowed opacity-50"
+          }`}
+        />
       </div>
     </div>
-  );
+  );  
 };
 
 export default PaaralanQuest;
