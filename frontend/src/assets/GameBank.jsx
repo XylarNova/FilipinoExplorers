@@ -226,7 +226,9 @@ const handleSaveGame = async () => {
     setTime: parseInt(setTime) * 60, // convert minutes to seconds
     quarter,
     gamePoints: parseInt(gamePoints),
-    status: classRoomIds.length === 0 ? "Draft" : "Closed",
+    status: editingGameId 
+  ? savedGames.find(g => g.id === editingGameId)?.status || "Closed"
+  : (classRoomIds.length === 0 ? "Draft" : "Closed"),
     classRoomIds,
     teacherId,
     vocabularyQuestions: validQuestions,
