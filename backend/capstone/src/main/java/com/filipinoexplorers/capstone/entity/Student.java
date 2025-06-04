@@ -52,6 +52,16 @@ public class Student implements User {
     @JsonIgnoreProperties("students")
     private Set<ClassRoom> classrooms = new HashSet<>();
 
+    //relationship to puzzles that student has played
+    @ManyToMany
+    @JoinTable(
+        name = "student_puzzle",
+        joinColumns = @JoinColumn(name = "student_id"),
+        inverseJoinColumns = @JoinColumn(name = "puzzle_id")
+    )
+    @JsonIgnoreProperties("playedByStudents")
+    private Set<GuessTheWordEntity> playedPuzzles = new HashSet<>();
+
     @Override
     public Long getId() {
         return studentId;

@@ -1,9 +1,15 @@
 package com.filipinoexplorers.capstone.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -23,6 +29,10 @@ public class GuessTheWordEntity {
     private Integer score = 10; // Default score of 10
     private Boolean active = false; // Flag to mark puzzles selected for gameplay
     private Boolean hintEnabled = true; // Default to enabled
+
+    @ManyToMany(mappedBy = "playedPuzzles")
+    @JsonIgnoreProperties("playedPuzzles")
+    private Set<Student> playedByStudents = new HashSet<>();
     
     // Default constructor
     public GuessTheWordEntity() {}
@@ -109,5 +119,13 @@ public class GuessTheWordEntity {
     
     public void setHintEnabled(Boolean hintEnabled) {
         this.hintEnabled = hintEnabled;
+    }
+
+    public Set<Student> getPlayedByStudents() {
+        return playedByStudents;
+    }
+    
+    public void setPlayedByStudents(Set<Student> playedByStudents) {
+        this.playedByStudents = playedByStudents;
     }
 }

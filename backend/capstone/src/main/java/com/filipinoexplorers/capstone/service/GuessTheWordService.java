@@ -1,7 +1,9 @@
 package com.filipinoexplorers.capstone.service;
 
 import com.filipinoexplorers.capstone.entity.GuessTheWordEntity;
+import com.filipinoexplorers.capstone.entity.Student;
 import com.filipinoexplorers.capstone.repository.GuessTheWordRepository;
+import com.filipinoexplorers.capstone.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,9 @@ import java.util.Optional;
 public class GuessTheWordService {
     @Autowired
     private GuessTheWordRepository guessRepo;
+    
+    @Autowired
+    private StudentRepository studentRepo;
     
     public List<GuessTheWordEntity> getAllPuzzles() {
         return guessRepo.findAll();
@@ -58,13 +63,39 @@ public class GuessTheWordService {
         return false;
     }
     
+    // Enhanced checkAnswer method that also records student progress
+    public boolean checkAnswerWithStudentTracking(Long puzzleId, String answer, Long studentId) {
+        Optional<GuessTheWordEntity> puzzleOpt = guessRepo.findById(puzzleId);
+        Optional<Student> studentOpt = studentRepo.findById(studentId);
+        
+        if (puzzleOpt.isPresent() && studentOpt.isPresent()) {
+            GuessTheWordEntity puzzle = puzzleOpt.get();
+            Student student = studentOpt.get();
+            
+            boolean isCorrect = puzzle.getWord().equalsIgnoreCase(answer);
+            
+            if (isCorrect) {
+                // Add the puzzle to student's played puzzles
+                student.getPlayedPuzzles().add(puzzle);
+                puzzle.getPlayedByStudents().add(student);
+                
+                // Save both entities to update the relationship
+                studentRepo.save(student);
+                guessRepo.save(puzzle);
+            }
+            
+            return isCorrect;
+        }
+        return false;
+    }
+    
     public String getHint(Long puzzleId) {
         Optional<GuessTheWordEntity> puzzle = guessRepo.findById(puzzleId);
         return puzzle.map(GuessTheWordEntity::getHint).orElse("No hint available");
     }
     
-    // Get next active puzzle for gameplay
-    public Optional<GuessTheWordEntity> getNextPuzzle(Long currentPuzzleId) {
+    // Get next active puzzle for gameplay, excluding already played puzzles for a student
+    public Optional<GuessTheWordEntity> getNextPuzzle(Long currentPuzzleId, Long studentId) {
         List<GuessTheWordEntity> activePuzzles = getActivePuzzles();
         
         // If no active puzzles defined, get all puzzles (for backward compatibility)
@@ -72,16 +103,35 @@ public class GuessTheWordService {
             activePuzzles = getAllPuzzles();
         }
         
+        // Get student's played puzzles if studentId is provided
+        List<GuessTheWordEntity> playedPuzzles = new ArrayList<>();
+        if (studentId != null) {
+            Optional<Student> studentOpt = studentRepo.findById(studentId);
+            if (studentOpt.isPresent()) {
+                playedPuzzles = new ArrayList<>(studentOpt.get().getPlayedPuzzles());
+            }
+        }
+        
         for (int i = 0; i < activePuzzles.size(); i++) {
             if (activePuzzles.get(i).getId().equals(currentPuzzleId)) {
-                if (i + 1 < activePuzzles.size()) {
-                    return Optional.of(activePuzzles.get(i + 1));
+                // Look for next unplayed puzzle
+                for (int j = i + 1; j < activePuzzles.size(); j++) {
+                    GuessTheWordEntity nextPuzzle = activePuzzles.get(j);
+                    // Check if student hasn't played this puzzle yet
+                    if (studentId == null || !playedPuzzles.contains(nextPuzzle)) {
+                        return Optional.of(nextPuzzle);
+                    }
                 }
                 break;
             }
         }
         
         return Optional.empty();
+    }
+    
+    // Get next active puzzle for gameplay (original method for backward compatibility)
+    public Optional<GuessTheWordEntity> getNextPuzzle(Long currentPuzzleId) {
+        return getNextPuzzle(currentPuzzleId, null);
     }
     
     // Set active puzzles for gameplay
@@ -106,21 +156,41 @@ public class GuessTheWordService {
         }
     }
     
-    // Get the first active puzzle for gameplay
-    public Optional<GuessTheWordEntity> getFirstActivePuzzle() {
+    // Get the first active puzzle for gameplay, excluding already played puzzles for a student
+    public Optional<GuessTheWordEntity> getFirstActivePuzzle(Long studentId) {
         List<GuessTheWordEntity> activePuzzles = getActivePuzzles();
         
-        if (!activePuzzles.isEmpty()) {
-            return Optional.of(activePuzzles.get(0));
-        } else {
-            // Fallback to first puzzle in the database if no active puzzles
-            List<GuessTheWordEntity> allPuzzles = getAllPuzzles();
-            if (!allPuzzles.isEmpty()) {
-                return Optional.of(allPuzzles.get(0));
+        if (activePuzzles.isEmpty()) {
+            // Fallback to all puzzles if no active puzzles
+            activePuzzles = getAllPuzzles();
+        }
+        
+        if (studentId != null) {
+            // Get student's played puzzles
+            Optional<Student> studentOpt = studentRepo.findById(studentId);
+            if (studentOpt.isPresent()) {
+                List<GuessTheWordEntity> playedPuzzles = new ArrayList<>(studentOpt.get().getPlayedPuzzles());
+                
+                // Find the first unplayed puzzle
+                for (GuessTheWordEntity puzzle : activePuzzles) {
+                    if (!playedPuzzles.contains(puzzle)) {
+                        return Optional.of(puzzle);
+                    }
+                }
             }
         }
         
+        // If no student specified or all puzzles played, return first active puzzle
+        if (!activePuzzles.isEmpty()) {
+            return Optional.of(activePuzzles.get(0));
+        }
+        
         return Optional.empty();
+    }
+    
+    // Get the first active puzzle for gameplay (original method for backward compatibility)
+    public Optional<GuessTheWordEntity> getFirstActivePuzzle() {
+        return getFirstActivePuzzle(null);
     }
     
     // Update puzzle score
@@ -143,6 +213,70 @@ public class GuessTheWordService {
             return guessRepo.save(puzzle);
         }
         return null;
+    }
+    
+    // Get student's progress - puzzles they have completed
+    public List<GuessTheWordEntity> getStudentCompletedPuzzles(Long studentId) {
+        Optional<Student> studentOpt = studentRepo.findById(studentId);
+        if (studentOpt.isPresent()) {
+            return new ArrayList<>(studentOpt.get().getPlayedPuzzles());
+        }
+        return new ArrayList<>();
+    }
+    
+    // Get puzzles not yet played by a student
+    public List<GuessTheWordEntity> getUnplayedPuzzlesForStudent(Long studentId) {
+        List<GuessTheWordEntity> allActivePuzzles = getActivePuzzles();
+        if (allActivePuzzles.isEmpty()) {
+            allActivePuzzles = getAllPuzzles();
+        }
+        
+        List<GuessTheWordEntity> playedPuzzles = getStudentCompletedPuzzles(studentId);
+        
+        List<GuessTheWordEntity> unplayedPuzzles = new ArrayList<>();
+        for (GuessTheWordEntity puzzle : allActivePuzzles) {
+            if (!playedPuzzles.contains(puzzle)) {
+                unplayedPuzzles.add(puzzle);
+            }
+        }
+        
+        return unplayedPuzzles;
+    }
+    
+    // Check if student has completed a specific puzzle
+    public boolean hasStudentCompletedPuzzle(Long studentId, Long puzzleId) {
+        Optional<Student> studentOpt = studentRepo.findById(studentId);
+        if (studentOpt.isPresent()) {
+            return studentOpt.get().getPlayedPuzzles().stream()
+                    .anyMatch(puzzle -> puzzle.getId().equals(puzzleId));
+        }
+        return false;
+    }
+    
+    // Get student's total score from completed puzzles
+    public Integer getStudentTotalScore(Long studentId) {
+        List<GuessTheWordEntity> completedPuzzles = getStudentCompletedPuzzles(studentId);
+        return completedPuzzles.stream()
+                .mapToInt(puzzle -> puzzle.getScore() != null ? puzzle.getScore() : 0)
+                .sum();
+    }
+    
+    // Reset student's progress (remove all played puzzles)
+    public void resetStudentProgress(Long studentId) {
+        Optional<Student> studentOpt = studentRepo.findById(studentId);
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+            
+            // Remove student from all puzzles' playedByStudents set
+            for (GuessTheWordEntity puzzle : student.getPlayedPuzzles()) {
+                puzzle.getPlayedByStudents().remove(student);
+                guessRepo.save(puzzle);
+            }
+            
+            // Clear student's played puzzles
+            student.getPlayedPuzzles().clear();
+            studentRepo.save(student);
+        }
     }
     
     // Shuffle a word and ensure all letters are included
