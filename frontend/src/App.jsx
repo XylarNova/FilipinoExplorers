@@ -54,6 +54,7 @@ const App = () => {
         <Route path="/my-account-teacher" element={<MyAccountTeacher />} />
         <Route path="/gamebank" element={<GameBank />} />
         <Route path="/guess-the-word-teacher" element={<TeacherGuessTheWord />} />
+        <Route path="/progress-tracking" element={<ProgressTracking />} />
         
         {/* Student Side Path */}
 

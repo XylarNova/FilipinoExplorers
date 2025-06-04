@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 import TeacherSidebar from './TeacherSidebar';
+import TotalClassIcon from '../assets/images/Buttons and Other/TotalClassroom.png';
+import TotalStudentIcon from '../assets/images/Buttons and Other/TotalStudent.png';
+import ActiveModulesIcon from '../assets/images/Buttons and Other/ActiveModules.png';
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
@@ -68,48 +71,53 @@ const TeacherDashboard = () => {
         <h2 className={`text-[30px] font-bold font-['Fredoka'] ${textClass} mb-4`}>SUMMARY</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="p-6 rounded-xl border-2 border-yellow-400 bg-white text-center shadow">
-            <p className="text-md font-semibold text-[#073B4C] mb-2">📋 Total Classrooms</p>
+            <img src={TotalClassIcon} alt="Total Classrooms" className="h-10 mx-auto mb-2" />
+            <p className="text-md font-semibold text-[#073B4C] mb-2">Total Classrooms</p>
             <p className="text-[32px] font-bold text-[#073B4C]">{summary.totalClasses}</p>
           </div>
           <div className="p-6 rounded-xl border-2 border-teal-400 bg-white text-center shadow">
-            <p className="text-md font-semibold text-[#073B4C] mb-2">👥 Total Student</p>
+            <img src={TotalStudentIcon} alt="Total Student" className="h-10 mx-auto mb-2" />
+            <p className="text-md font-semibold text-[#073B4C] mb-2">Total Student</p>
             <p className="text-[32px] font-bold text-[#073B4C]">{summary.totalStudents}</p>
           </div>
           <div className="p-6 rounded-xl border-2 border-pink-400 bg-white text-center shadow">
-            <p className="text-md font-semibold text-[#073B4C] mb-2">🎮 Active Modules</p>
+            <img src={ActiveModulesIcon} alt="Active Modules" className="h-10 mx-auto mb-2" />
+            <p className="text-md font-semibold text-[#073B4C] mb-2">Active Modules</p>
             <p className="text-[32px] font-bold text-[#073B4C]">{summary.activeModules}</p>
           </div>
         </div>
 
         <h2 className={`text-[30px] font-bold font-['Fredoka'] ${textClass} mb-4`}>CLASS OVERVIEW</h2>
-        <div className="bg-white rounded-xl p-6 border-2 border-[#118AB2] shadow">
-          <div className="grid grid-cols-4 text-center font-semibold text-[#073B4C] mb-4">
-            <div>Class</div>
-            <div>Number of Student</div>
-            <div>Modules</div>
-            <div>Status</div>
+
+    <div className="bg-white rounded-xl border-2 border-[#118AB2] shadow overflow-hidden">
+      <div className="grid grid-cols-4 bg-[#E0F2F7] text-[#073B4C] font-semibold text-lg h-[60px] items-center">
+        <div className="border-r border-[#118AB2] text-center">Class</div>
+        <div className="border-r border-[#118AB2] text-center">Number of Students</div>
+        <div className="border-r border-[#118AB2] text-center">Modules</div>
+        <div className="text-center">Status</div>
+      </div>
+      {classOverview.length === 0 ? (
+        <div className="text-center text-gray-500 py-4">No classes found.</div>
+      ) : (
+        classOverview.map((item, idx) => (
+          <div key={idx} className="grid grid-cols-4 border-t border-[#118AB2] text-[#073B4C] text-md h-[60px] items-center hover:bg-[#F1FAFF]">
+            <div className="border-r border-[#118AB2] text-center">
+              <span className="truncate block px-2 font-medium">{item.className}</span>
+            </div>
+            <div className="border-r border-[#118AB2] text-center">
+              <span>{item.studentCount}</span>
+            </div>
+            <div className="border-r border-[#118AB2] text-center">
+              <span>{item.moduleCount}</span>
+            </div>
+            <div className="text-center">
+              <span className={`px-4 py-1 rounded-full text-white font-medium ${item.status === 'Active' ? 'bg-[#06D6A0]' : 'bg-gray-400'}`}>{item.status}</span>
+            </div>
           </div>
-          {classOverview.length === 0 ? (
-            <div className="text-center text-gray-500 py-4">No classes found.</div>
-          ) : (
-            classOverview.map((item, idx) => (
-              <div key={idx} className="grid grid-cols-4 text-center mb-3">
-                <div>
-                  <span className="bg-white border border-[#118AB2] px-4 py-2 rounded-full shadow">{item.className}</span>
-                </div>
-                <div>
-                  <span className="bg-white border border-[#118AB2] px-4 py-2 rounded-full shadow">{item.studentCount}</span>
-                </div>
-                <div>
-                  <span className="bg-white border border-[#118AB2] px-4 py-2 rounded-full shadow">{item.moduleCount}</span>
-                </div>
-                <div>
-                  <span className={`px-4 py-2 rounded-full shadow text-white ${item.status === 'Active' ? 'bg-[#06D6A0]' : 'bg-gray-400'}`}>{item.status}</span>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+        ))
+      )}
+    </div>
+
       </main>
 
       <aside className={`w-[292px] ${sidebarBgClass} shadow-md border-l ${sidebarBorderClass} pt-10 px-6 relative`}>
