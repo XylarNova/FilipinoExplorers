@@ -66,7 +66,7 @@ useEffect(() => {
   return (
     <div className={`flex h-screen w-full ${mainBgClass}`}>
       {/* Sidebar */}
-      <TeacherSidebar />
+           <TeacherSidebar darkMode={darkMode} />
 
       {/* Main Content */}
       <main className={`flex-1 ${mainBgClass} pt-10 px-10`}>

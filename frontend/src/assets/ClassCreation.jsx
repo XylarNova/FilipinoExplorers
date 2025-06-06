@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import class1 from '../assets/images/ClassroomBanner/class1.jpg';
+import class2 from '../assets/images/ClassroomBanner/class2.jpg';
+import class3 from '../assets/images/ClassroomBanner/class3.jpg';
+import class4 from '../assets/images/ClassroomBanner/class4.jpg';
+import class5 from '../assets/images/ClassroomBanner/class5.jpg';
+import class6 from '../assets/images/ClassroomBanner/class6.jpg';
+import class7 from '../assets/images/ClassroomBanner/class7.jpg';
+import class8 from '../assets/images/ClassroomBanner/class8.jpg';
+import class9 from '../assets/images/ClassroomBanner/class9.jpg';
+import class10 from '../assets/images/ClassroomBanner/class10.jpg';
 
-import Logo from './images/logo.png';
-import Dashboard from './images/Navigation/DashboardIcon.png';
-import Profile from './images/Navigation/ProfileIcon.png';
-import ClassIcon from './images/Navigation/ClassIcon.png';
-import GameEditor from './images/Navigation/GameEditorIcon.png';
-import LogOut from './images/Navigation/LogOutIcon.png';
 import TeacherSidebar from './TeacherSidebar';
 
 const ClassCreation = () => {
@@ -44,8 +48,14 @@ const ClassCreation = () => {
     return;
   }
 
+  // Prepare bannerUrl if selectedBannerIndex is set
+  let bannerUrl = null;
+  if (selectedBannerIndex !== null) {
+    bannerUrl = `class${selectedBannerIndex + 1}.jpg`;
+  }
+
   const formData = new FormData();
-  formData.append("info", new Blob([JSON.stringify({ name, description, enrollmentMethod })], { type: "application/json" }));
+  formData.append("info", new Blob([JSON.stringify({ name, description, enrollmentMethod, bannerUrl })], { type: "application/json" }));
 
   if (bannerFile) {
     formData.append("banner", bannerFile);
@@ -67,6 +77,7 @@ const ClassCreation = () => {
     setDescription('');
     setEnrollmentMethod('');
     setBannerFile(null);
+    setSelectedBannerIndex(null);
     setErrorMessage('');
 
     if (students.length > 0) {
@@ -133,9 +144,17 @@ const ClassCreation = () => {
     }
   };
 
+ const [selectedBannerIndex, setSelectedBannerIndex] = useState(null);
+
+const bannerOptions = [
+  class1, class2, class3, class4, class5,
+  class6, class7, class8, class9, class10,
+];
+
+
   return (
     <div className={`flex h-screen w-full ${mainBgClass} relative`}>
-   <TeacherSidebar />
+        <TeacherSidebar darkMode={darkMode} />
 
 
 
@@ -160,14 +179,38 @@ const ClassCreation = () => {
             </div>
 
             <div>
-              <label className="block font-bold text-[20px] text-[#073A4D] mb-2">Upload Class Banner</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-[441px] h-[32px] rounded-[10px] border-[2px] border-[#06D7A0] text-gray-500 font-light text-[15px] p-1"
-              />
-            </div>
+              <label className="block font-bold text-[20px] text-[#073A4D] mb-2">
+                Choose a Class Banner <span className="font-normal text-sm text-gray-500">(optional)</span>
+              </label>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {bannerOptions.map((img, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedBannerIndex(selectedBannerIndex === index ? null : index)} // allow deselect
+                    className={`rounded-lg border-4 transition-all duration-150 ${
+                      selectedBannerIndex === index
+                        ? 'border-[#06D7A0] shadow-lg scale-105'
+                        : 'border-transparent hover:border-gray-300'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`Banner ${index + 1}`}
+                      className="w-28 h-20 object-cover rounded-md"
+                    />
+                  </button>
+                ))}
+              </div>
+
+                {selectedBannerIndex !== null && (
+                  <p className="text-sm mt-2 text-[#073A4D]">
+                    Selected: <span className="font-semibold">Banner {selectedBannerIndex + 1}</span>
+                  </p>
+                )}
+              </div>
+
           </div>
 
           <div className="flex gap-8">

@@ -62,6 +62,9 @@ public class ClassRoomController {
             Files.createDirectories(path.getParent());
             Files.write(path, banner.getBytes());
             classRoom.setBannerUrl("/uploads/" + fileName);
+        } else if (request.getBannerUrl() != null && !request.getBannerUrl().isEmpty()) {
+            // Set bannerUrl from request if no banner file uploaded
+            classRoom.setBannerUrl("/assets/images/ClassroomBanner/" + request.getBannerUrl());
         }
 
         return ResponseEntity.ok(classRoomRepository.save(classRoom));
