@@ -26,6 +26,8 @@ import StudentModule from './assets/StudentModule';
 import GuessTheWord from './assets/GuessTheWord';
 
 import MemoryGame from './assets/MemoryGame';
+import MemoryGameGroup from './assets/MemoryGameGroup';
+
 import InputsMemoryGame from './assets/InputsMemoryGame';
 
 import PaaralanQuest from './assets/PaaralanQuest';
@@ -70,6 +72,7 @@ const App = () => {
 
         {/* Games Section Path */}
         <Route path="/guesstheword" element={<GuessTheWord />} />
+        <Route path="/memorygamegroup" element={<MemoryGameGroup />} />wd
 
         <Route path="/memorygame/:sessionId?" element={<MemoryGame />} />
         <Route path="/inputmemorygame" element={<InputsMemoryGame />} />
