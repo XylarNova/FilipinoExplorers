@@ -3,6 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';
 import axios from 'axios';
 import TeacherSidebar from './TeacherSidebar';
+import class1 from '../assets/images/ClassroomBanner/class1.jpg';
+import class2 from '../assets/images/ClassroomBanner/class2.jpg';
+import class3 from '../assets/images/ClassroomBanner/class3.jpg';
+import class4 from '../assets/images/ClassroomBanner/class4.jpg';
+import class5 from '../assets/images/ClassroomBanner/class5.jpg';
+import class6 from '../assets/images/ClassroomBanner/class6.jpg';
+import class7 from '../assets/images/ClassroomBanner/class7.jpg';
+import class8 from '../assets/images/ClassroomBanner/class8.jpg';
+import class9 from '../assets/images/ClassroomBanner/class9.jpg';
+import class10 from '../assets/images/ClassroomBanner/class10.jpg';
 
 const TeacherClassList = () => {
   const navigate = useNavigate();
@@ -14,12 +24,23 @@ const TeacherClassList = () => {
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
   const [copySuccess, setCopySuccess] = useState('');
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+
 
   // Dark Mode Setup
   useEffect(() => {
     const storedDarkMode = localStorage.getItem("darkMode");
     if (storedDarkMode) setDarkMode(storedDarkMode === "true");
   }, []);
+
+  const vibrantColors = [
+  'bg-[#EF476F]', // Red
+  'bg-[#FFD166]', // Yellow
+  'bg-[#06D6A0]', // Teal
+  'bg-[#118AB2]', // Blue
+  'bg-[#073B4C]', // Dark Blue
+];
+
 
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);
@@ -169,10 +190,22 @@ const TeacherClassList = () => {
   const sidebarBorderClass = darkMode ? "border-gray-700" : "border-[#CEC9A8]";
   const textClass = darkMode ? "text-white" : "text-[#213547]";
 
+  useEffect(() => {
+  const handleClickOutside = (e) => {
+    // If click is outside any dropdown, close it
+    if (!e.target.closest('.dropdown-wrapper')) {
+      setOpenDropdownId(null);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
+
   return (
     <div className={`flex h-screen w-full ${mainBgClass} relative`}>
       {/* Sidebar */}
-      <TeacherSidebar />
+          <TeacherSidebar darkMode={darkMode} />
 
       {/* Main Content */}
       <main className={`flex-1 ${mainBgClass} pt-15 px-10`}>
@@ -192,32 +225,78 @@ const TeacherClassList = () => {
             <p>Loading classes...</p>
           ) : classes.length > 0 ? (
             classes.map((classItem, idx) => (
-              <div
+             <div
                 key={idx}
-                className={`w-[220px] flex items-center p-3 rounded-[10px] shadow-md relative ${idx % 2 === 0 ? 'bg-blue-100' : 'bg-green-100'}`}
+                className={`w-[220px] flex items-center p-3 rounded-[10px] shadow-md relative ${vibrantColors[idx % vibrantColors.length]}`}
                 style={{ height: '100px' }}
               >
-                <div className="w-[70px] h-[70px] rounded-lg flex-shrink-0 overflow-hidden bg-gray-300 flex items-center justify-center text-white font-bold text-xl">
-                  {classItem.bannerUrl ? (
-                    <img src={classItem.bannerUrl} alt={classItem.name} className="object-cover w-full h-full" />
-                  ) : (
-                    <span>{classItem.name?.charAt(0).toUpperCase()}</span>
-                  )}
-                </div>
+
+             <div className="w-[70px] h-[70px] rounded-xl flex-shrink-0 bg-white flex items-center justify-center text-[#073B4C] text-3xl font-bold shadow-md overflow-hidden">
+                {classItem.bannerUrl ? (
+                  <img
+                    src={
+                      classItem.bannerUrl.startsWith('/assets')
+                        ? classItem.bannerUrl
+                        : `/assets/images/ClassroomBanner/${classItem.bannerUrl}`
+                    }
+                    alt={classItem.name}
+                    className="object-cover w-full h-full rounded-xl"
+                  />
+                ) : (
+                  <span>{classItem.name?.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+
+
                 <div className="flex-1 pl-4 overflow-hidden">
                   <h2 className="text-base font-bold font-['Poppins'] truncate">{classItem.name}</h2>
                 </div>
-                <div className="absolute top-2 right-2 group">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h.01M12 12h.01M18 12h.01" />
-                  </svg>
-                  <div className="hidden group-hover:block absolute right-0 top-6 bg-white shadow-md rounded-lg w-36 z-10">
-                    <button onClick={() => openManageModal(classItem)} className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Manage Class</button>
-                    <button className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Add Student</button>
-                    <button onClick={() => openGetCodeModal(classItem)} className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Get Code</button>
-                    <button onClick={() => openDeleteConfirmationModal(classItem)} className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">Delete Class</button>
-                  </div>
-                </div>
+                <div className="absolute top-2 right-2 dropdown-wrapper">
+  <svg
+    onClick={() =>
+      setOpenDropdownId(openDropdownId === classItem.id ? null : classItem.id)
+    }
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5 text-gray-700 cursor-pointer"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M6 12h.01M12 12h.01M18 12h.01"
+    />
+        </svg>
+
+        {openDropdownId === classItem.id && (
+          <div className="absolute right-0 top-6 bg-white shadow-md rounded-lg w-36 z-10">
+            <button
+              onClick={() => openManageModal(classItem)}
+              className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+            >
+              Manage Class
+            </button>
+            <button className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100">
+              Add Student
+            </button>
+            <button
+              onClick={() => openGetCodeModal(classItem)}
+              className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+            >
+              Get Code
+            </button>
+            <button
+              onClick={() => openDeleteConfirmationModal(classItem)}
+              className="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+            >
+              Delete Class
+            </button>
+          </div>
+        )}
+      </div>
+
               </div>
             ))
           ) : (
@@ -284,13 +363,28 @@ const TeacherClassList = () => {
                 />
               </div>
               <div>
-                <label className="block font-medium">Banner URL</label>
-                <input
-                  type="text"
-                  className="w-full border p-2 rounded"
-                  value={selectedClass.bannerUrl || ''}
-                  onChange={(e) => setSelectedClass({ ...selectedClass, bannerUrl: e.target.value })}
-                />
+                <label className="block font-medium mb-2">Choose a Class Banner</label>
+                <div className="grid grid-cols-3 gap-3 max-h-48 overflow-y-auto">
+                  {[
+                    'class1.jpg', 'class2.jpg', 'class3.jpg', 'class4.jpg', 'class5.jpg',
+                    'class6.jpg', 'class7.jpg', 'class8.jpg', 'class9.jpg', 'class10.jpg'
+                  ].map((banner, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setSelectedClass({ ...selectedClass, bannerUrl: banner })}
+                      className={`border-4 rounded-md overflow-hidden ${
+                        selectedClass.bannerUrl === banner ? 'border-[#06D7A0] shadow-lg scale-105' : 'border-transparent hover:border-gray-300'
+                      }`}
+                    >
+                      <img
+                        src={`/assets/images/ClassroomBanner/${banner}`}
+                        alt={`Banner ${index + 1}`}
+                        className="w-full h-20 object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
               <div>
                 <label className="block font-medium">Class Code</label>

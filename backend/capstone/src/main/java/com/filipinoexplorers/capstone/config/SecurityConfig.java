@@ -42,6 +42,8 @@ public class SecurityConfig {
             .requestMatchers("/api/teacher-dashboard/**").hasRole("TEACHER")
             .requestMatchers("/api/classes/**").hasAnyRole("TEACHER" ,"STUDENT")
             .requestMatchers("/api/classroom/**").hasRole("TEACHER")
+            .requestMatchers("/api/progress-tracking/**").hasAnyRole("TEACHER", "STUDENT")
+
 
             // Student routes
             .requestMatchers("/api/classes/join").hasRole("STUDENT")
