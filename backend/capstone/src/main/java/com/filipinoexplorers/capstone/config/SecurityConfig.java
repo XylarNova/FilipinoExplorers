@@ -48,6 +48,10 @@ public class SecurityConfig {
             // Student routes
             .requestMatchers("/api/classes/join").hasRole("STUDENT")
             .requestMatchers("/api/classes/student/joined").hasRole("STUDENT")
+
+            // Permit all for memory game API endpoints to avoid 403
+            .requestMatchers("/api/session/**").permitAll()
+            .requestMatchers("/api/questions/**").permitAll()
             
             .anyRequest().authenticated()
     ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); 
