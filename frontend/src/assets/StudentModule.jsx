@@ -55,14 +55,18 @@ const StudentModule = ({ darkMode = false }) => {
 const renderGameButton = (game) => {
   const hasPlayed = playedGameIds.includes(game.id);
 
-if (game.status === 'Open') {
+  if (game.status === 'Open') {
     return (
       <button
         onClick={() => {
           if (game.category === 'Vocabulary') {
-            navigate(`/guesstheword/${game.id}`);
-          } else if (game.category === 'Memory') {
-            navigate(`/memorygame/${game.id}`);
+            if (game.gameType === 'GuessTheWord') {
+              navigate(`/guesstheword/${game.id}`);
+            } else if (game.gameType === 'MemoryGame') {
+              navigate(`/memorygame/${game.id}`);
+            } else {
+              alert('Unsupported game type: ' + game.gameType);
+            }
           } else {
             alert('Unsupported game category: ' + game.category);
           }
@@ -83,6 +87,7 @@ if (game.status === 'Open') {
     );
   }
 };
+
 
   // Unified dark/light mode styles
   const mainBgClass = darkMode ? 'bg-gray-900' : 'bg-white';

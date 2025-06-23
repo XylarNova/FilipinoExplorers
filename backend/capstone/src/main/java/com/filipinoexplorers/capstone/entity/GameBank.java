@@ -35,6 +35,7 @@ public class GameBank {
     private Integer gamePoints;
 
     private String status;
+    private String gameType;
 
     @UpdateTimestamp
     private LocalDateTime lastModified;

@@ -217,6 +217,7 @@ const handleSaveGame = async () => {
 
   const gameSession = {
     gameTitle,
+    gameType,
     category: selectedCategory,
     leaderboard: gameSettings.leaderboard,
     hints: gameSettings.hints,
