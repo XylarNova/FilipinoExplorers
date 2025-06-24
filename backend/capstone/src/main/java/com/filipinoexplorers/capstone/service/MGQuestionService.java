@@ -1,7 +1,7 @@
 package com.filipinoexplorers.capstone.service;
 
-import com.filipinoexplorers.capstone.entity.Question;
-import com.filipinoexplorers.capstone.repository.QuestionRepository;
+import com.filipinoexplorers.capstone.entity.MGQuestion;
+import com.filipinoexplorers.capstone.repository.MGQuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,19 +9,19 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class QuestionService {
+public class MGQuestionService {
 
-    private final QuestionRepository questionRepository;
+    private final MGQuestionRepository questionRepository;
 
-    public List<Question> getAllQuestions() {
+    public List<MGQuestion> getAllQuestions() {
         return questionRepository.findAll();
     }
 
-    public Question createQuestion(Question question) {
+    public MGQuestion createQuestion(MGQuestion question) {
         return questionRepository.save(question);
     }
 
-    public Question updateQuestion(Long id, Question updatedQuestion) {
+    public MGQuestion updateQuestion(Long id, MGQuestion updatedQuestion) {
         return questionRepository.findById(id)
                 .map(question -> {
                     question.setTagalogWord(updatedQuestion.getTagalogWord());

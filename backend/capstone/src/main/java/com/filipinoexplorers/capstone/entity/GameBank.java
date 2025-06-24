@@ -55,7 +55,7 @@ public class GameBank {
         inverseJoinColumns = @JoinColumn(name = "question_id")
     )
     @JsonManagedReference
-    private List<Question> vocabularyQuestions;
+    private List<MGQuestion> vocabularyQuestions;
 
 
     // ✅ NEW: Track the teacher who created this game

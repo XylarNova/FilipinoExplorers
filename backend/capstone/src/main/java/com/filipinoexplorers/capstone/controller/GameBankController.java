@@ -3,7 +3,7 @@ package com.filipinoexplorers.capstone.controller;
 import com.filipinoexplorers.capstone.dto.GameBankRequestDTO;
 import com.filipinoexplorers.capstone.dto.UpdateGameBankRequestDTO;
 import com.filipinoexplorers.capstone.entity.GameBank;
-import com.filipinoexplorers.capstone.entity.Question;
+import com.filipinoexplorers.capstone.entity.MGQuestion;
 import com.filipinoexplorers.capstone.service.GameBankService;
 import com.filipinoexplorers.capstone.repository.TeacherRepository;
 import com.filipinoexplorers.capstone.service.JwtService;
@@ -147,8 +147,8 @@ public class GameBankController {
     }
 
     @GetMapping("/{id}/vocabulary-questions")
-    public ResponseEntity<List<Question>> getVocabularyQuestionsByGameSessionId(@PathVariable Long id) {
-        List<Question> questions = gameSessionService.getVocabularyQuestionsByGameSessionId(id);
+    public ResponseEntity<List<MGQuestion>> getVocabularyQuestionsByGameSessionId(@PathVariable Long id) {
+        List<MGQuestion> questions = gameSessionService.getVocabularyQuestionsByGameSessionId(id);
         return ResponseEntity.ok(questions);
     }
 
