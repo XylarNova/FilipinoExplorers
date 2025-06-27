@@ -3,8 +3,8 @@ package com.filipinoexplorers.capstone.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import com.filipinoexplorers.capstone.entity.Question;
-import com.filipinoexplorers.capstone.service.QuestionService;
+import com.filipinoexplorers.capstone.entity.MGQuestion;
+import com.filipinoexplorers.capstone.service.MGQuestionService;
 
 import java.util.List;
 
@@ -12,22 +12,22 @@ import java.util.List;
 @RequestMapping("/api/questions")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
-public class QuestionController {
+public class MGQuestionController {
 
-    private final QuestionService service;
+    private final MGQuestionService service;
 
     @GetMapping("/get")
-    public List<Question> getQuestions() {
+    public List<MGQuestion> getQuestions() {
         return service.getAllQuestions();
     }
 
     @PostMapping("/post")
-    public Question addQuestion(@RequestBody Question question) {
+    public MGQuestion addQuestion(@RequestBody MGQuestion question) {
         return service.createQuestion(question);
     }
 
     @PutMapping("/update/{id}")
-    public Question updateQuestion(@PathVariable Long id, @RequestBody Question question) {
+    public MGQuestion updateQuestion(@PathVariable Long id, @RequestBody MGQuestion question) {
         return service.updateQuestion(id, question);
     }
 

@@ -26,7 +26,7 @@ public class GroupGameSession {
         joinColumns = @JoinColumn(name = "game_session_id"),
         inverseJoinColumns = @JoinColumn(name = "question_id")
     )
-    private List<Question> questions;
+    private List<MGQuestion> questions;
 
     @ManyToMany
     @JoinTable(

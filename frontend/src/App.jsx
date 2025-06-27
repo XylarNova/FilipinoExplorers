@@ -25,8 +25,8 @@ import StudentModule from './assets/StudentModule';
 
 import GuessTheWord from './assets/GuessTheWord';
 
-import MemoryGame from './assets/MemoryGame';
-import MemoryGameGroup from './assets/MemoryGameGroup';
+import MemoryGame from './assets/MGMemoryGame';
+import MemoryGameGroup from './assets/MGMemoryGameGroup';
 
 import InputsMemoryGame from './assets/InputsMemoryGame';
 

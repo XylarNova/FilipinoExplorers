@@ -3,10 +3,10 @@ package com.filipinoexplorers.capstone.service;
 import com.filipinoexplorers.capstone.dto.GameBankRequestDTO;
 import com.filipinoexplorers.capstone.entity.ClassRoom;
 import com.filipinoexplorers.capstone.entity.GameBank;
-import com.filipinoexplorers.capstone.entity.Question;
+import com.filipinoexplorers.capstone.entity.MGQuestion;
 import com.filipinoexplorers.capstone.repository.ClassRoomRepository;
 import com.filipinoexplorers.capstone.repository.GameBankRepository;
-import com.filipinoexplorers.capstone.repository.QuestionRepository;
+import com.filipinoexplorers.capstone.repository.MGQuestionRepository;
 import com.filipinoexplorers.capstone.repository.TeacherRepository;
 import com.filipinoexplorers.capstone.dto.QuestionRequestDTO;
 import com.filipinoexplorers.capstone.dto.UpdateGameBankRequestDTO;
@@ -28,7 +28,7 @@ public class GameBankService {
 
     private final GameBankRepository gameSessionRepository;
     private final ClassRoomRepository classRoomRepository;
-    private final QuestionRepository questionRepository;
+    private final MGQuestionRepository questionRepository;
     private final TeacherRepository teacherRepository;
 
     public List<GameBank> getAllGameSessions() {
@@ -66,10 +66,10 @@ public class GameBankService {
         }
 
         // ✅ Convert vocabulary questions from DTOs
-        List<Question> questions = Collections.emptyList();
+        List<MGQuestion> questions = Collections.emptyList();
         if (request.getVocabularyQuestions() != null && !request.getVocabularyQuestions().isEmpty()) {
             questions = request.getVocabularyQuestions().stream()
-                    .map(dto -> Question.builder()
+                    .map(dto -> MGQuestion.builder()
                             .tagalogWord(dto.getTagalogWord())
                             .choices(dto.getChoices())
                             .correctAnswer(dto.getCorrectAnswer())
@@ -130,7 +130,7 @@ public class GameBankService {
     }
 
     // ✅ Handle vocabulary questions
-    List<Question> updatedQuestions = request.getVocabularyQuestions().stream().map(dto -> {
+    List<MGQuestion> updatedQuestions = request.getVocabularyQuestions().stream().map(dto -> {
         if (dto.getId() != null) {
             // Updating existing question
             return questionRepository.findById(dto.getId()).map(existingQ -> {
@@ -142,7 +142,7 @@ public class GameBankService {
             }).orElseThrow(() -> new RuntimeException("Question not found: " + dto.getId()));
         } else {
             // Creating new question
-            return Question.builder()
+            return MGQuestion.builder()
                     .tagalogWord(dto.getTagalogWord())
                     .choices(dto.getChoices())
                     .correctAnswer(dto.getCorrectAnswer())
@@ -234,7 +234,7 @@ public class GameBankService {
         return gameSessionRepository.findByStatusAndCategory("Open", "Vocabulary");
     }
 
-   public List<Question> getVocabularyQuestionsByGameSessionId(Long id) {
+   public List<MGQuestion> getVocabularyQuestionsByGameSessionId(Long id) {
     return gameSessionRepository.findById(id)
             .map(GameBank::getVocabularyQuestions) // ✅ correct getter
             .orElse(Collections.emptyList());
@@ -259,7 +259,7 @@ public class GameBankService {
     return gameSessionRepository.findByTeacher(teacher);
 }
 
-    public List<Question> getQuestionsByIds(List<Long> questionIds) {
+    public List<MGQuestion> getQuestionsByIds(List<Long> questionIds) {
             return questionRepository.findAllById(questionIds);
         }
 
