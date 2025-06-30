@@ -1,23 +1,13 @@
 package com.filipinoexplorers.capstone.controller;
 
-import com.filipinoexplorers.capstone.dto.AuthResponse;
-import com.filipinoexplorers.capstone.dto.ChangePasswordRequest;
-import com.filipinoexplorers.capstone.dto.LoginRequest;
-import com.filipinoexplorers.capstone.dto.RegisterRequest;
-import com.filipinoexplorers.capstone.dto.UserDetailsResponse;
-import com.filipinoexplorers.capstone.dto.ErrorResponse;
+import com.filipinoexplorers.capstone.dto.*;
 import com.filipinoexplorers.capstone.service.AuthService;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -26,20 +16,10 @@ public class AuthController {
 
     @Autowired private AuthService authService;
 
-    @PostMapping(value = "/register", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<?> register(
-            @RequestPart(value = "data", required = false) RegisterRequest multipartData,
-            @RequestPart(value = "profilePicture", required = false) MultipartFile profilePicture,
-            @RequestBody(required = false) RegisterRequest jsonData
-    ) {
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
-            RegisterRequest request = multipartData != null ? multipartData : jsonData;
-
-            if (request == null) {
-                return ResponseEntity.badRequest().body(new ErrorResponse("Invalid registration data."));
-            }
-
-            AuthResponse response = authService.register(request, profilePicture);
+            AuthResponse response = authService.register(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.err.println("Error during registration: " + e.getMessage());
@@ -78,38 +58,31 @@ public class AuthController {
     }
 
 
-    @PutMapping(value = "/user/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/user/update")
     public ResponseEntity<?> updateUserProfile(
             Authentication authentication,
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String school,
-            @RequestParam(required = false) String dateOfBirth,
-            @RequestParam(required = false) MultipartFile profilePicture
+            @RequestBody UserDetailsResponse request
     ) {
         try {
             String email = authentication.getName();
-            LocalDate dob = null;
-
-            if (dateOfBirth != null && !dateOfBirth.isBlank()) {
-                try {
-                    dob = LocalDate.parse(dateOfBirth); // Format: yyyy-MM-dd
-                } catch (DateTimeParseException e) {
-                    return ResponseEntity.badRequest().body(new ErrorResponse("Invalid date format. Use yyyy-MM-dd."));
-                }
-            }
 
             UserDetailsResponse updatedUser = authService.updateProfile(
-                    email, firstName, lastName, school, dob, profilePicture
+                    email,
+                    request.getFirstName(),
+                    request.getLastName(),
+                    request.getSchool(),
+                    request.getProfilePictureUrl()
             );
 
             return ResponseEntity.ok(updatedUser);
 
         } catch (Exception e) {
             System.err.println("Error updating profile: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("Failed to update profile."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Failed to update profile."));
         }
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
@@ -118,23 +91,23 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(new ErrorResponse("Missing or invalid Authorization header."));
             }
 
-            String token = authHeader.substring(7); 
+            String token = authHeader.substring(7);
             String message = authService.logout(token);
-            return ResponseEntity.ok().body(new AuthResponse(null, message)); 
+            return ResponseEntity.ok().body(new AuthResponse(null, message));
 
         } catch (Exception e) {
             System.err.println("Error during logout: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                .body(new ErrorResponse("Logout failed."));
+                    .body(new ErrorResponse("Logout failed."));
         }
     }
 
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
         boolean success = authService.changePassword(
-            request.getEmail(),
-            request.getCurrentPassword(),
-            request.getNewPassword()
+                request.getEmail(),
+                request.getCurrentPassword(),
+                request.getNewPassword()
         );
 
         if (success) {

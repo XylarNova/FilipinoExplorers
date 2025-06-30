@@ -32,7 +32,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs using JWT
             .cors(withDefaults()) // Enable CORS (cross-origin resource sharing)
          .authorizeHttpRequests(authz -> authz
-            .requestMatchers("/api/auth/register", "/api/auth/login", "/api/group-games/**").permitAll()
+            .requestMatchers("/api/auth/register", "/api/auth/login", "/api/group-games/**", "/api/auth/profile-picture").permitAll()
             .requestMatchers("/api/group-progress/**").permitAll()
             .requestMatchers("/api/auth/change-password").authenticated()
 

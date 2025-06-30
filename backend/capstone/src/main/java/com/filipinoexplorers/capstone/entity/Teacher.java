@@ -2,10 +2,12 @@ package com.filipinoexplorers.capstone.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,9 +40,8 @@ public class Teacher implements User {
     private String password;
     private String school;
 
-    @Lob
     @Column(name = "profile_picture_data")
-    private byte[] profilePictureData;
+    private String profilePictureUrl;
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.TEACHER;
