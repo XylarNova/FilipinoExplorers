@@ -24,6 +24,6 @@ public class MGQuestion {
 
     private String hint;
 
-    @ManyToMany(mappedBy = "questions")
+    @ManyToMany(mappedBy = "vocabularyQuestions")
     private List<GameBank> gameSessions;
 }
