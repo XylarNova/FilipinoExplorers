@@ -6,7 +6,10 @@ import GuessTheWordImage from './images/Homepage/Guess The Word .png';
 import ParkeQuestImage from './images/Homepage/Parke Quest.png';
 import PaaralanQuestImage from './images/Homepage/Paaralan Quest Icon.png';
 import MemoryGameImage from './images/Homepage/Memory Game Icon.png';
+
 import './Homepage.css';
+
+
 
 const Homepage = () => {
   const navigate = useNavigate();

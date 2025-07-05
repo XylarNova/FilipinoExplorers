@@ -694,3 +694,4 @@ const PaaralanQuest = () => {
     </div>
   );
 };
+export default PaaralanQuest;

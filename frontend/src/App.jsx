@@ -29,7 +29,7 @@ import MemoryGame from './assets/MGMemoryGame';
 import MemoryGameGroup from './assets/MGMemoryGameGroup';
 
 import InputsMemoryGame from './assets/InputsMemoryGame';
-
+import PaaralanQuestGroup from './assets/PaaralanQuestGroup';
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
 
@@ -76,7 +76,8 @@ const App = () => {
 
         <Route path="/memorygame/:sessionId?" element={<MemoryGame />} />
         <Route path="/inputmemorygame" element={<InputsMemoryGame />} />
-
+        <Route path="/paaralanquest-individual" element={<PaaralanQuest />} />
+        <Route path="/paaralanquest-group" element={<PaaralanQuestGroup />} />
         <Route path="/paaralanquest" element={<PaaralanQuest />} />
         <Route path="/parkequest" element={<ParkeQuest />} />
 
