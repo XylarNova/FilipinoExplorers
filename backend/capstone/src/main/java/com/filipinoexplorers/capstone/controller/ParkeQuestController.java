@@ -1,7 +1,10 @@
 package com.filipinoexplorers.capstone.controller;
+import java.util.Optional;
+
 
 
 import com.filipinoexplorers.capstone.dto.ParkeQuestResultDTO;
+import com.filipinoexplorers.capstone.dto.ParkeQuestStudentScoreRequest;
 import com.filipinoexplorers.capstone.dto.ParkeQuestAnswerDTO;
 
 
@@ -15,12 +18,13 @@ import com.filipinoexplorers.capstone.repository.ParkeQuestQuestionRepository;
 import com.filipinoexplorers.capstone.repository.ParkeQuestScoreRepository;
 import com.filipinoexplorers.capstone.service.ParkeQuestService;
 
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -157,6 +161,31 @@ public class ParkeQuestController {
             return ResponseEntity.ok(parkeQuestScoreRepository.findAll());
         }
 
+
+    @PutMapping("/scores/{id}")
+        public ResponseEntity<?> updateScore(@PathVariable Long id, @RequestBody ParkeQuestStudentScoreRequest request) {
+            Optional<ParkeQuestScore> optional = parkeQuestScoreRepository.findById(id);
+            if (optional.isEmpty()) return ResponseEntity.notFound().build();
+
+            ParkeQuestScore score = optional.get();
+
+                score.setStudentName(request.getStudentName());
+                score.setScore(request.getScore());
+                score.setTimestamp(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+                parkeQuestScoreRepository.save(score);
+
+            return ResponseEntity.ok("✅ Score updated.");
+        }
+
+        @DeleteMapping("/scores/{id}")
+            public ResponseEntity<?> deleteScore(@PathVariable Long id) {
+                if (!parkeQuestScoreRepository.existsById(id)) {
+                    return ResponseEntity.notFound().build();
+                }
+
+                parkeQuestScoreRepository.deleteById(id);
+                return ResponseEntity.ok("🗑️ Score deleted.");
+            }
 
 
 

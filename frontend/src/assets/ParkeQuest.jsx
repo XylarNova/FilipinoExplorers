@@ -7,10 +7,10 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import Logo from "../assets/images/Logo.png";
 import Background from "../assets/images/Parke Game/Parke Quest BG.png";
-import WoodPanel from "../assets/images/Parke Game/wood-panel.png";
+import WoodPanel from "../assets/images/Parke Game/wood-panel2.png";
 import ButtonNext from "../assets/images/Buttons and Other/button next.png";
 import ButtonPrev from "../assets/images/Buttons and Other/button prev.png";
-import TimerLog from "../assets/images/Buttons and Other/Timer Log.png";
+import TimerLog from "../assets/images/Parke Game/Timer Log.png";
 
 
 
@@ -174,32 +174,37 @@ const ParkeQuest = () => {
   };
 
 
-  const checkAnswer = async () => {
-     if (secondsLeft === 0) return; // ⛔ Prevent checking if time is up
-     if (answeredIndices.includes(currentIndex)) return;
-    const current = questions[currentIndex];
-    const studentAnswer = selectedOrder.join(" ");
-    try {
-      const res = await axios.post("http://localhost:8080/api/parkequest/check", {
-        questionId: current.id,
-        selectedAnswer: studentAnswer,
-        usedHint,
-      });
+      const checkAnswer = async () => {
+      if (secondsLeft === 0) return;
 
-      setResultMessage(res.data.message);
+      const current = questions[currentIndex];
+      const studentAnswer = selectedOrder.join(" ");
 
-      if (!answeredIndices.includes(currentIndex)) {
-        const newScore = score + res.data.score;
-        const newAnswered = [...answeredIndices, currentIndex];
-        setScore(newScore);
-        setAnsweredIndices(newAnswered);
-        localStorage.setItem("pq_score", newScore.toString());
-        localStorage.setItem("pq_answered", JSON.stringify(newAnswered));
+      try {
+        const res = await axios.post("http://localhost:8080/api/parkequest/check", {
+          questionId: current.id,
+          selectedAnswer: studentAnswer,
+          usedHint,
+        });
+
+        setResultMessage(res.data.message);
+
+        const alreadyAnswered = answeredIndices.includes(currentIndex);
+
+        if (!alreadyAnswered && res.data.score > 0) {
+          const newScore = score + res.data.score;
+          const newAnswered = [...answeredIndices, currentIndex];
+          setScore(newScore);
+          setAnsweredIndices(newAnswered);
+          localStorage.setItem("pq_score", newScore.toString());
+          localStorage.setItem("pq_answered", JSON.stringify(newAnswered));
+        }
+
+      } catch (err) {
+        console.error("Check answer failed:", err);
       }
-    } catch (err) {
-      console.error("Check answer failed:", err);
-    }
-  };
+    };
+
 
   const goToNext = async () => {
     if (secondsLeft === 0) return; // ⛔ Prevent navigation if time is up
@@ -266,11 +271,11 @@ const ParkeQuest = () => {
 
       <div className="flex flex-1 justify-center items-center gap-10 px-6 py-12">
         {/* Timer Stick */}
-        <div className="relative w-[140px] h-[300px] flex items-center justify-center">
+        <div className="relative w-[140px] h-[320px] flex items-center justify-center">
           <img
             src={TimerLog}
             alt="Timer Stick"
-            className="absolute w-[160px] h-[400px] object-contain z-10"
+            className="absolute w-[180px] h-[420px] object-contain z-10"
           />
           <div
             className="absolute bottom-[20px] w-[20px] bg-emerald-400 z-20 transition-all duration-1000 ease-linear rounded-full"

@@ -15,6 +15,10 @@ const ParkeQuestTeacher = () => {
   const [editingId, setEditingId] = useState(null);
   const [globalTimer, setGlobalTimer] = useState(5); // 🌍 Global game timer in minutes
   const [scores, setScores] = useState([]);
+  const [editingScore, setEditingScore] = useState(null);
+  const [editedName, setEditedName] = useState("");
+  const [editedScore, setEditedScore] = useState(0);
+
 
   const fetchScores = async () => {
   try {
@@ -23,7 +27,39 @@ const ParkeQuestTeacher = () => {
   } catch (error) {
     console.error("❌ Failed to fetch scores:", error);
   }
+    };
+
+    const handleDeleteScore = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this score?")) return;
+  try {
+    await axios.delete(`http://localhost:8080/api/parkequest/scores/${id}`);
+    fetchScores();
+  } catch (err) {
+    console.error("Delete score failed", err);
+  }
 };
+
+const handleEditScore = (score) => {
+  setEditingScore(score.id);
+  setEditedName(score.studentName);
+  setEditedScore(score.score);
+};
+
+const handleUpdateScore = async () => {
+  try {
+    await axios.put(`http://localhost:8080/api/parkequest/scores/${editingScore}`, {
+      studentName: editedName,
+      score: editedScore,
+    });
+    setEditingScore(null);
+    fetchScores();
+  } catch (err) {
+    console.error("Update score failed", err);
+  }
+};
+
+
+  
 
 
   useEffect(() => {
@@ -296,17 +332,65 @@ const ParkeQuestTeacher = () => {
               <th className="p-2 text-left">Student Name</th>
               <th className="p-2 text-left">Score</th>
               <th className="p-2 text-left">Submitted At</th>
+              <th className="p-2 text-left">Actions</th> {/* ✅ Add this */}
             </tr>
           </thead>
+
           <tbody>
-            {scores.map((s, i) => (
-              <tr key={i} className="border-t">
-                <td className="p-2">{s.studentName || "Anonymous"}</td>
-                <td className="p-2">{s.score}</td>
-                <td className="p-2">{new Date(s.timestamp).toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
+          {scores.map((s, i) => (
+            <tr key={i} className="border-t">
+              <td className="p-2">
+                {editingScore === s.id ? (
+                  <input
+                    type="text"
+                    className="border px-2 py-1 rounded w-full"
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                  />
+                ) : (
+                  s.studentName || "Anonymous"
+                )}
+              </td>
+              <td className="p-2">
+                {editingScore === s.id ? (
+                  <input
+                    type="number"
+                    className="border px-2 py-1 rounded w-full"
+                    value={editedScore}
+                    onChange={(e) => setEditedScore(Number(e.target.value))}
+                  />
+                ) : (
+                  s.score
+                )}
+              </td>
+              <td className="p-2">{new Date(s.timestamp).toLocaleString()}</td>
+              <td className="p-2 space-x-1 whitespace-nowrap">
+                {editingScore === s.id ? (
+                  <button
+                    onClick={handleUpdateScore}
+                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                  >
+                    Save
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleEditScore(s)}
+                    className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded"
+                  >
+                    Edit
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDeleteScore(s.id)}
+                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+
         </table>
       )}
     </div>
