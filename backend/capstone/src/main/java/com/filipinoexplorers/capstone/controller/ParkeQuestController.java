@@ -29,15 +29,13 @@ import java.util.stream.Collectors;
 @CrossOrigin
 public class ParkeQuestController {
     private final ParkeQuestService service;
+
+
     @Autowired
-private ParkeQuestQuestionRepository parkeQuestQuestionRepository;
+    private ParkeQuestQuestionRepository parkeQuestQuestionRepository;
 
-@Autowired
-private ParkeQuestChoiceRepository parkeQuestChoiceRepository;
-
-@Autowired
-private ParkeQuestScoreRepository parkeQuestScoreRepository;
-
+    @Autowired
+    private ParkeQuestScoreRepository parkeQuestScoreRepository;
 
     public ParkeQuestController(ParkeQuestService service) {
         this.service = service;
@@ -49,88 +47,118 @@ private ParkeQuestScoreRepository parkeQuestScoreRepository;
     }
 
     @PostMapping
-public ResponseEntity<ParkeQuestQuestion> save(@RequestBody ParkeQuestDTO dto) {
-    ParkeQuestQuestion question = new ParkeQuestQuestion();
-    question.setStory(dto.getStory());
-    question.setQuestion(dto.getQuestion());
-    question.setCorrectAnswer(dto.getCorrectAnswer());
-    question.setHint(dto.getHint()); // ✅ add this line
+    public ResponseEntity<ParkeQuestQuestion> save(@RequestBody ParkeQuestDTO dto) {
+        ParkeQuestQuestion question = new ParkeQuestQuestion();
+        question.setStory(dto.getStory());
+        question.setQuestion(dto.getQuestion());
+        question.setCorrectAnswer(dto.getCorrectAnswer());
+        question.setHint(dto.getHint());
 
 
-    List<ParkeQuestChoice> choiceList = dto.getChoices().stream().map(choiceText -> {
+
+        List<ParkeQuestChoice> choiceList = dto.getChoices().stream().map(choiceText -> {
         ParkeQuestChoice choice = new ParkeQuestChoice();
         choice.setChoice(choiceText);
-        choice.setQuestion(question); // important
+        choice.setQuestion(question); 
         return choice;
-    }).collect(Collectors.toList());
+        }).collect(Collectors.toList());
 
-    question.setChoices(choiceList);
-   return ResponseEntity.ok(parkeQuestQuestionRepository.save(question)); // ✅ correct
+        question.setChoices(choiceList);
+        return ResponseEntity.ok(parkeQuestQuestionRepository.save(question)); 
 
-}
-
-
-@PostMapping("/check")
-public ResponseEntity<ParkeQuestResultDTO> checkAnswer(@RequestBody ParkeQuestAnswerDTO answerDTO) {
-    ParkeQuestQuestion question = parkeQuestQuestionRepository.findById(answerDTO.getQuestionId())
-        .orElse(null);
-
-    if (question == null) {
-        return ResponseEntity.badRequest().body(new ParkeQuestResultDTO(false, 0, "Question not found"));
     }
 
-    String correct = question.getCorrectAnswer().trim().toLowerCase().replaceAll("[\\p{Punct}]", "");
-    String submitted = answerDTO.getSelectedAnswer().trim().toLowerCase().replaceAll("[\\p{Punct}]", "");
+    @PostMapping("/check")
+    public ResponseEntity<ParkeQuestResultDTO> checkAnswer(@RequestBody ParkeQuestAnswerDTO answerDTO) {
+        ParkeQuestQuestion question = parkeQuestQuestionRepository.findById(answerDTO.getQuestionId())
+            .orElse(null);
 
-    System.out.println("✔️ CORRECT:   " + correct);
-    System.out.println("🧪 SUBMITTED: " + submitted);
+        if (question == null) {
+            return ResponseEntity.badRequest().body(new ParkeQuestResultDTO(false, 0, "Question not found"));
+        }
 
-    boolean isCorrect = correct.equals(submitted);
-    int score = isCorrect ? (answerDTO.isUsedHint() ? 2 : 1) : (answerDTO.isUsedHint() ? 1 : 0);
-    String message = isCorrect ? "CORRECT ANSWER" : "WRONG ANSWER";
+        String correct = question.getCorrectAnswer().trim().toLowerCase().replaceAll("[\\p{Punct}]", "");
+        String submitted = answerDTO.getSelectedAnswer().trim().toLowerCase().replaceAll("[\\p{Punct}]", "");
 
-    return ResponseEntity.ok(new ParkeQuestResultDTO(isCorrect, score, message));
-}
+        System.out.println("✔️ CORRECT:   " + correct);
+        System.out.println("🧪 SUBMITTED: " + submitted);
 
-@DeleteMapping("/{id}")
-public ResponseEntity<String> deleteQuestion(@PathVariable Long id) {
-    parkeQuestQuestionRepository.deleteById(id);
-    return ResponseEntity.ok("Question deleted successfully.");
-}
+        boolean isCorrect = correct.equals(submitted);
+        int score = isCorrect ? (answerDTO.isUsedHint() ? 2 : 1) : (answerDTO.isUsedHint() ? 1 : 0);
+        String message = isCorrect ? "CORRECT ANSWER" : "WRONG ANSWER";
 
-@PutMapping("/{id}")
-public ResponseEntity<String> updateQuestion(@PathVariable Long id, @RequestBody ParkeQuestDTO dto) {
-    ParkeQuestQuestion question = parkeQuestQuestionRepository.findById(id).orElse(null);
-    if (question == null) {
-        return ResponseEntity.badRequest().body("Question not found.");
+        return ResponseEntity.ok(new ParkeQuestResultDTO(isCorrect, score, message));
     }
 
-    question.setStory(dto.getStory());
-    question.setQuestion(dto.getQuestion());
-    question.setCorrectAnswer(dto.getCorrectAnswer());
-    question.setHint(dto.getHint());
-
-    // ✅ SAFELY MODIFY the existing collection
-    question.getChoices().clear(); // Hibernate will treat cleared ones as orphans and delete them
-
-    for (String choiceText : dto.getChoices()) {
-        ParkeQuestChoice c = new ParkeQuestChoice();
-        c.setChoice(choiceText);
-        c.setQuestion(question); // set back-reference
-        question.getChoices().add(c);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteQuestion(@PathVariable Long id) {
+        parkeQuestQuestionRepository.deleteById(id);
+        return ResponseEntity.ok("Question deleted successfully.");
     }
 
-    parkeQuestQuestionRepository.save(question);
-    return ResponseEntity.ok("Question updated successfully.");
-}
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateQuestion(@PathVariable Long id, @RequestBody ParkeQuestDTO dto) {
+        ParkeQuestQuestion question = parkeQuestQuestionRepository.findById(id).orElse(null);
+        if (question == null) {
+            return ResponseEntity.badRequest().body("Question not found.");
+        }
+
+        question.setStory(dto.getStory());
+        question.setQuestion(dto.getQuestion());
+        question.setCorrectAnswer(dto.getCorrectAnswer());
+        question.setHint(dto.getHint());
 
 
 
-@PostMapping("/submit-score")
-public ResponseEntity<String> submitScore(@RequestBody ParkeQuestScore score) {
-    parkeQuestScoreRepository.save(score);
-    return ResponseEntity.ok("Score saved.");
-}
+
+        question.getChoices().clear(); 
+
+        for (String choiceText : dto.getChoices()) {
+            ParkeQuestChoice c = new ParkeQuestChoice();
+            c.setChoice(choiceText);
+            c.setQuestion(question); 
+            question.getChoices().add(c);
+        }
+
+        parkeQuestQuestionRepository.save(question);
+        return ResponseEntity.ok("Question updated successfully.");
+    }
+
+    @PostMapping("/submit-score")
+        public ResponseEntity<String> submitScore(@RequestBody ParkeQuestScore score) {
+            System.out.println("📥 Score received: " + score.getScore());
+            System.out.println("👤 Student: " + score.getStudentName());
+            System.out.println("🕒 Timestamp: " + score.getTimestamp());
+
+            parkeQuestScoreRepository.save(score);
+            return ResponseEntity.ok("Score saved.");
+        }
+
+
+
+
+    @GetMapping("/timer")
+    public ResponseEntity<Integer> getGlobalTimer() {
+        return ResponseEntity.ok(service.getGlobalTimer()); // ✅ use service
+    }
+
+    @PostMapping("/timer")
+    public ResponseEntity<String> updateGlobalTimer(@RequestParam int seconds) {
+        if (seconds < 10 || seconds > 3600) {
+            return ResponseEntity.badRequest().body("Timer must be between 10 and 3600 seconds.");
+        }
+        service.setGlobalTimer(seconds); // ✅ use service
+        return ResponseEntity.ok("⏱️ Timer updated to " + seconds + " seconds.");
+    }
+
+
+    @GetMapping("/scores")
+        public ResponseEntity<List<ParkeQuestScore>> getAllScores() {
+            return ResponseEntity.ok(parkeQuestScoreRepository.findAll());
+        }
+
+
+
 
 
 }

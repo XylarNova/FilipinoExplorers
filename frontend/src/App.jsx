@@ -32,6 +32,7 @@ import InputsMemoryGame from './assets/InputsMemoryGame';
 
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
+import ParkeQuestTeacher from './assets/ParkeQuestTeacher';
 
 import GroupMode from './assets/Groupmode';
 
@@ -58,6 +59,7 @@ const App = () => {
         <Route path="/gamebank" element={<GameBank />} />
         <Route path="/guess-the-word-teacher" element={<TeacherGuessTheWord />} />
         <Route path="/progress-tracking/:classRoomId" element={<ProgressTracking />} />
+        <Route path="/parkequestteacher" element={<ParkeQuestTeacher />} />
         
         {/* Student Side Path */}
 
