@@ -14,6 +14,7 @@ import './Homepage.css';
 const Homepage = () => {
   const navigate = useNavigate();
   const [activeDescription, setActiveDescription] = useState(null);
+  const [showPaaralanOptions, setShowPaaralanOptions] = useState(false);
 
   const gameData = [
     {
@@ -32,7 +33,8 @@ const Homepage = () => {
       name: 'Paaralan Quest',
       color: '#06D7A0',
       image: PaaralanQuestImage,
-      description: ' Basahin at intindihin, tanong sagutin natin! Read a story and answer fun questions about it. Great for building reading skills!'
+      description: ' Basahin at intindihin, tanong sagutin natin! Read a story and answer fun questions about it. Great for building reading skills!',
+      
     },
     {
       name: 'Memory Game',
@@ -172,7 +174,17 @@ const Homepage = () => {
           {gameData.map((game, index) => (
             <div
               key={index}
-              onClick={() => setActiveDescription(activeDescription === index ? null : index)}
+              onClick={() => {
+                if (game.name === 'Paaralan Quest') {
+                  setShowPaaralanOptions(true); // open mode select
+                } else if (game.path) {
+                  navigate(game.path); // other games go directly
+                } else {
+                  setActiveDescription(activeDescription === index ? null : index);
+                }
+              }}
+
+
               style={{
                 backgroundColor: game.color,
                 borderRadius: '20px',
@@ -215,6 +227,83 @@ const Homepage = () => {
 
       <footer style={{ backgroundColor: '#073A4D', color: '#ffffff', textAlign: 'center', padding: '20px', fontFamily: "'Fredoka', sans-serif" }}>
         © 2025 FilipinoExplorers | Aralin mo, Laruin mo!
+      {showPaaralanOptions && (
+  <div style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999
+  }}>
+    <div style={{
+      backgroundColor: '#fff',
+      padding: '30px 40px',
+      borderRadius: '15px',
+      textAlign: 'center',
+      fontFamily: "'Fredoka', sans-serif",
+      boxShadow: '0 8px 16px rgba(0,0,0,0.25)'
+    }}>
+      <h2 style={{ marginBottom: '20px', fontSize: '24px' }}>Choose Mode</h2>
+      <button
+        onClick={() => {
+          setShowPaaralanOptions(false);
+          navigate('/paaralanquest');
+        }}
+        style={{
+          margin: '10px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          backgroundColor: '#06D7A0',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer'
+        }}
+      >
+        Individual
+      </button>
+      <button
+        onClick={() => {
+          setShowPaaralanOptions(false);
+          navigate('/paaralanquest-group');
+        }}
+        style={{
+          margin: '10px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          backgroundColor: '#4092AD',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer'
+        }}
+      >
+        Group
+      </button>
+      <div>
+        <button
+          onClick={() => setShowPaaralanOptions(false)}
+          style={{
+            marginTop: '20px',
+            fontSize: '14px',
+            background: 'none',
+            border: 'none',
+            color: '#999',
+            cursor: 'pointer'
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </footer>
     </div>
   );
