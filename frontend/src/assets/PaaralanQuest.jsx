@@ -339,7 +339,7 @@ const fullStoryData = [
   },
   {
     story: "Naglagay ng basurahan si Teacher Anna sa likod ng silid upang hikayatin ang mga bata na huwag magkalat.",
-    question: "Bakit naglagay ng basurahan si Teacher Anna?",
+    question: "Bakit naglagay ng basurahan i Teacher Anna?",
     choices: ["Para itago", "Para iwasan", "Para magkalat", "Para hikayatin ang kaayusan"],
     correctAnswer: 3,
     hint: "Layunin niyang turuan ang mga bata ng kalinisan."
@@ -347,17 +347,17 @@ const fullStoryData = [
 ];
 
 const PaaralanQuest = () => {
-  const [studentName, setStudentName] = useState("");
+  const [student_Id, setstudent_Id] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [storyData, setStoryData] = useState([]);
   const [answeredQuestions, setAnsweredQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedChoice, setSelectedChoice] = useState(null);
+  const [choice_Id, setChoice_Id] = useState(null);
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [usedHint, setUsedHint] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [sessionFinished, setSessionFinished] = useState(false);
+  const [end_Time, setEnd_Time] = useState(false);
   const [nameSubmitted, setNameSubmitted] = useState(false);
   const [answerResults, setAnswerResults] = useState([]);
   const [timeLeft, setTimeLeft] = useState(10);
@@ -382,23 +382,23 @@ const PaaralanQuest = () => {
 
   useEffect(() => {
     if (answeredQuestions.length && answeredQuestions.every(q => q)) {
-      setSessionFinished(true);
+      setEnd_Time(true);
     }
   }, [answeredQuestions]);
 
   useEffect(() => {
-    if (sessionFinished) {
+    if (end_Time) {
       axios.post("http://localhost:8080/api/paaralan-quest/score/submit", {
-        studentName,
+        student_Id,
         totalScore: score
       })
       .then(() => console.log("✅ Score and name submitted successfully."))
       .catch(err => console.error("❌ Failed to submit score:", err));
     }
-  }, [sessionFinished]);
+  }, [end_Time]);
 
   useEffect(() => {
-  if (!timerActive || sessionFinished || answeredQuestions[currentIndex]) return;
+  if (!timerActive || end_Time || answeredQuestions[currentIndex]) return;
 
   timeoutTriggeredRef.current = false; // Reset lock for new question
 
@@ -423,7 +423,7 @@ const PaaralanQuest = () => {
             if (currentIndex < storyData.length - 1) {
               handleNext();
             } else {
-              setSessionFinished(true);
+              setEnd_Time(true);
             }
           }, 0); // Can be immediate or slight delay if you prefer
         }
@@ -435,13 +435,13 @@ const PaaralanQuest = () => {
   }, 1000);
 
   return () => clearInterval(interval);
-}, [timerActive, currentIndex, answeredQuestions, sessionFinished, answerResults, storyData.length]);
+}, [timerActive, currentIndex, answeredQuestions, end_Time, answerResults, storyData.length]);
 
 
   const handleNext = () => {
     if (currentIndex < storyData.length - 1) {
       setCurrentIndex(ci => ci + 1);
-      setSelectedChoice(null);
+      setChoice_Id(null);
       setFeedback("");
       setUsedHint(false);
       setShowHint(false);
@@ -452,7 +452,7 @@ const PaaralanQuest = () => {
   const handlePrev = () => {
     if (currentIndex > 0) {
       setCurrentIndex(ci => ci - 1);
-      setSelectedChoice(null);
+      setChoice_Id(null);
       setFeedback("");
       setUsedHint(false);
       setShowHint(false);
@@ -461,12 +461,12 @@ const PaaralanQuest = () => {
   };
 
   const handleCheckAnswer = () => {
-    if (selectedChoice === null) {
+    if (choice_Id === null) {
       setFeedback("Please select an answer.");
       return;
     }
     if (!answeredQuestions[currentIndex]) {
-      const isCorrect = selectedChoice === current.correctAnswer;
+      const isCorrect = choice_Id === current.correctAnswer;
       setScore(s => s + (isCorrect ? (usedHint ? 1 : 2) : 0));
       setFeedback(isCorrect ? "CORRECT ANSWER" : "WRONG ANSWER");
       const updatedAnswers = [...answeredQuestions];
@@ -487,7 +487,7 @@ const PaaralanQuest = () => {
     }
   };
 
-  if (!studentName) {
+  if (!student_Id) {
     return (
       <div style={{ backgroundImage: `url(${Background})`
 , backgroundSize: 'cover', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -505,7 +505,7 @@ const PaaralanQuest = () => {
           <button
             onClick={() => {
               if (nameInput.trim()) {
-                setStudentName(nameInput.trim());
+                setstudent_Id(nameInput.trim());
               } else {
                 alert("Name is required to start the game.");
               }
@@ -564,7 +564,7 @@ const PaaralanQuest = () => {
 
       
         <div style={{ display: 'flex', border: '4px solid #8B4513', backgroundColor: '#f5e5c0', borderRadius: '12px', padding: '20px', height: '600px', minWidth: '600px' }}>
-          {sessionFinished ? (
+          {end_Time ? (
             <div style={{ textAlign: 'center', width: '100%' }}>
               <h1>🎉 SESSION FINISHED 🎉</h1>
               <p>Your final score: <strong>{score} points</strong></p>
@@ -594,9 +594,9 @@ const PaaralanQuest = () => {
                 {current.choices.map((choice, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedChoice(idx)}
+                    onClick={() => setChoice_Id(idx)}
                     style={{
-                      backgroundColor: selectedChoice === idx ? '#d1e7dd' : '#fff',
+                      backgroundColor: choice_Id === idx ? '#d1e7dd' : '#fff',
                       marginBottom: '8px',
                       padding: '10px',
                       borderRadius: '8px',
@@ -699,7 +699,7 @@ const PaaralanQuest = () => {
       </div>
 
     
-      {!sessionFinished && (
+      {!end_Time && (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '40px' }}>
           <img src={LeftArrow} alt="Previous" onClick={handlePrev} style={{ width: '60px', height: '60px', cursor: currentIndex > 0 ? 'pointer' : 'not-allowed', opacity: currentIndex > 0 ? 1 : 0.5 }} />
           <img src={RightArrow} alt="Next" onClick={handleNext} style={{ width: '60px', height: '60px', cursor: currentIndex < storyData.length - 1 ? 'pointer' : 'not-allowed', opacity: currentIndex < storyData.length - 1 ? 1 : 0.5 }} />
