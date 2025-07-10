@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+ import React, { useState, useEffect } from 'react';
+
 import Background from '../assets/images/Paaralan Quest/Paaralan Quest BG.png';
 import Logo from '../assets/images/Logo.png';
 import StickImage from '../assets/images/Buttons and Other/Timer Log.png';
@@ -333,7 +334,9 @@ const PaaralanQuestGroup = () => {
   const current = storyData[currentIndex];
   const location = useLocation();
   const playerName = location.state?.playerName || "Player";
+  const [timeLeft, setTimeLeft] = useState(10); 
   const handleVote = (playerIndex, choiceIndex) => {
+  
 
 
     if (submitted) return; // Lock voting after submit
@@ -392,6 +395,21 @@ const PaaralanQuestGroup = () => {
   const voteCounts = getVoteCounts();
   const mostVoted = getMostVotedIndex();
 
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setTimeLeft(prev => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000); // every 1 second
+
+  return () => clearInterval(interval); // cleanup
+}, []);
+
+
   return (
     <div
       style={{
@@ -410,11 +428,15 @@ const PaaralanQuestGroup = () => {
         <div style={{ position: 'relative', marginRight: '-25px' }}>
           <img src={StickImage} alt="Timer" style={{ height: '150px', transform: 'rotate(90deg)' }} />
           <div style={{
-            position: 'absolute', top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '50px', height: '320px',
-            backgroundColor: 'lightgreen', borderRadius: '50px'
-          }} />
+        position: 'absolute',
+        bottom: 0,
+        width: '50px',
+        height: `${(timeLeft / 10) * 320}px`, // dynamic height
+        backgroundColor: 'lightgreen',
+        borderRadius: '50px',
+        transition: 'height 1s linear'
+      }} />
+
         </div>
 
         <div style={{

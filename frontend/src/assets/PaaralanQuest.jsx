@@ -362,6 +362,8 @@ const PaaralanQuest = () => {
   const [answerResults, setAnswerResults] = useState([]);
   const [timeLeft, setTimeLeft] = useState(10);
   const [timerActive, setTimerActive] = useState(true);
+  const timeoutTriggeredRef = React.useRef(false);
+
 
   const current = storyData.length > 0 ? storyData[currentIndex] : null;
 
@@ -396,19 +398,26 @@ const PaaralanQuest = () => {
   }, [sessionFinished]);
 
   useEffect(() => {
-    if (!timerActive || sessionFinished || answeredQuestions[currentIndex]) return;
+  if (!timerActive || sessionFinished || answeredQuestions[currentIndex]) return;
 
-    const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setFeedback("You ran out of time");
-          const updatedAnswers = [...answeredQuestions];
-          updatedAnswers[currentIndex] = true;
-          setAnsweredQuestions(updatedAnswers);
-          const updatedResults = [...answerResults];
-          updatedResults[currentIndex] = "wrong";
-          setAnswerResults(updatedResults);
+  timeoutTriggeredRef.current = false; // Reset lock for new question
+
+  const interval = setInterval(() => {
+    setTimeLeft(prev => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        setFeedback("You ran out of time");
+
+        const updatedAnswers = [...answeredQuestions];
+        updatedAnswers[currentIndex] = true;
+        setAnsweredQuestions(updatedAnswers);
+
+        const updatedResults = [...answerResults];
+        updatedResults[currentIndex] = "wrong";
+        setAnswerResults(updatedResults);
+
+        if (!timeoutTriggeredRef.current) {
+          timeoutTriggeredRef.current = true;
 
           setTimeout(() => {
             if (currentIndex < storyData.length - 1) {
@@ -416,16 +425,18 @@ const PaaralanQuest = () => {
             } else {
               setSessionFinished(true);
             }
-          }, 1500);
-
-          return 0;
+          }, 0); // Can be immediate or slight delay if you prefer
         }
-        return prev - 1;
-      });
-    }, 1000);
 
-    return () => clearInterval(interval);
-  }, [timerActive, currentIndex, answeredQuestions, sessionFinished, answerResults, storyData.length]);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [timerActive, currentIndex, answeredQuestions, sessionFinished, answerResults, storyData.length]);
+
 
   const handleNext = () => {
     if (currentIndex < storyData.length - 1) {
@@ -478,7 +489,8 @@ const PaaralanQuest = () => {
 
   if (!studentName) {
     return (
-      <div style={{ backgroundImage: `url(${Background})`, backgroundSize: 'cover', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ backgroundImage: `url(${Background})`
+, backgroundSize: 'cover', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '12px', boxShadow: '0 0 20px rgba(0,0,0,0.2)', textAlign: 'center' }}>
           <h2>Welcome to Paaralan Quest!</h2>
           <p>Please enter your name to begin:</p>
@@ -509,7 +521,8 @@ const PaaralanQuest = () => {
 
   return (
    
-    <div style={{ backgroundImage: `url(${Background})`, backgroundSize: 'cover', minHeight: '100vh', paddingTop: '100px', position: 'relative' }}>
+    <div style={{ backgroundImage: `url(${Background})`
+, backgroundSize: 'cover', minHeight: '100vh', paddingTop: '100px', position: 'relative' }}>
       <img src={Logo} alt="Logo" style={{ position: 'absolute', top: '20px', left: '30px', width: '160px' }} />
 
     
@@ -540,6 +553,7 @@ const PaaralanQuest = () => {
               width: '50px',
               
               height: `${(timeLeft / 10) * 320}px`,
+
               backgroundColor: 'lightgreen',
               borderRadius: '50px',
              
