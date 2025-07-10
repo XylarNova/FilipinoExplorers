@@ -333,7 +333,7 @@ const PaaralanQuestGroup = () => {
   const [submitted, setSubmitted] = useState(false);
   const current = storyData[currentIndex];
   const location = useLocation();
-  const playerName = location.state?.playerName || "Player";
+  const student_Id = location.state?.student_Id || "Player";
   const [timeLeft, setTimeLeft] = useState(10); 
   const handleVote = (playerIndex, choiceIndex) => {
   
@@ -447,7 +447,7 @@ const PaaralanQuestGroup = () => {
           <div style={{ flex: 1, paddingRight: 20 }}>
             <h2 style={{ color: '#5D4037' }}>Kuwento #{currentIndex + 1}</h2>
             <div style={{ backgroundColor: '#fff8e1', padding: 15, borderRadius: 8, height: '100%', overflowY: 'auto' }}>
-              {current.story}
+              {current.story_text}
             </div>
           </div>
 
@@ -464,7 +464,7 @@ const PaaralanQuestGroup = () => {
                 }}>
                   <strong>{choice}</strong>
                   <div style={{ fontSize: 12, color: '#333' }}>
-                   Welcome, {playerName}!
+                   Welcome, {student_Id}!
                     Votes: {voteCounts[i]}
                   </div>
                 </div>
