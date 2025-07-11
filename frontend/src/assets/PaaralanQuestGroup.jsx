@@ -335,6 +335,8 @@ const PaaralanQuestGroup = () => {
   const location = useLocation();
   const student_Id = location.state?.student_Id || "Player";
   const [timeLeft, setTimeLeft] = useState(10); 
+  const [scoredQuestions, setScoredQuestions] = useState(Array(storyData.length).fill(false));
+
   const handleVote = (playerIndex, choiceIndex) => {
   
 
@@ -360,19 +362,25 @@ const PaaralanQuestGroup = () => {
   };
 
   const handleSubmit = () => {
-  if (submitted) return; // prevent double submission
+  if (submitted || scoredQuestions[currentIndex]) return; // prevent double scoring
 
   const newScores = [...scores];
   votes.forEach((vote, i) => {
     if (vote === storyData[currentIndex].correctAnswer) {
-
-      newScores[i] += 1; // award +1 to player i
+      newScores[i] += 1;
     }
   });
 
   setScores(newScores);
+
+  // Mark this question as scored
+  const updatedScored = [...scoredQuestions];
+  updatedScored[currentIndex] = true;
+  setScoredQuestions(updatedScored);
+
   setSubmitted(true); // lock in the votes
 };
+
 
 
 
@@ -447,7 +455,7 @@ const PaaralanQuestGroup = () => {
           <div style={{ flex: 1, paddingRight: 20 }}>
             <h2 style={{ color: '#5D4037' }}>Kuwento #{currentIndex + 1}</h2>
             <div style={{ backgroundColor: '#fff8e1', padding: 15, borderRadius: 8, height: '100%', overflowY: 'auto' }}>
-              {current.story_text}
+              {current.story}
             </div>
           </div>
 
@@ -475,19 +483,40 @@ const PaaralanQuestGroup = () => {
 
                     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 600 }}>
                             <div style={{
-              backgroundColor: '#f5e5c0',
-              border: '4px solid #8B4513',
-              borderRadius: 10,
-              padding: 20,
-              textAlign: 'left'
-            }}>
-              <h3>📊 Player Scores</h3>
-              {players.map((player, i) => (
-                <div key={i}>
-                  {player}: <strong>{scores[i]}</strong>
-                </div>
-              ))}
-            </div>
+  backgroundColor: '#f5e5c0',
+  border: '4px solid #8B4513',
+  borderRadius: 10,
+  padding: 20,
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+  minWidth: '300px',
+  gap: 20
+}}>
+  <div>
+    <h3>📊 Player Scores</h3>
+    {players.map((player, i) => (
+      <div key={i}>
+        {player}: <strong>{scores[i]}</strong>
+      </div>
+    ))}
+  </div>
+
+  {scoredQuestions[currentIndex] && (
+    <div style={{
+      marginTop: 30,
+      color: '#8B0000',
+      fontWeight: 'bold',
+      fontSize: 14,
+      maxWidth: '140px',
+      textAlign: 'right'
+    }}>
+      ✅ You already answered this question.
+    </div>
+  )}
+</div>
+
 
 
 
