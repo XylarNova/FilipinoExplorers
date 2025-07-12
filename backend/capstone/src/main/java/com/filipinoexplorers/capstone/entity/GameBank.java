@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -59,8 +59,9 @@ public class GameBank {
     private List<MGQuestion> vocabularyQuestions;
 
 
-    // ✅ NEW: Track the teacher who created this game
+    //Track the teacher who created this game
     @ManyToOne
     @JoinColumn(name = "teacher_id")
+    @JsonBackReference // prevents infinite loop in JSON
     private Teacher teacher;
 }

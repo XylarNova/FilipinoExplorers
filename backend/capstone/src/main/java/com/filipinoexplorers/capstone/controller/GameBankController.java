@@ -43,7 +43,14 @@ public class GameBankController {
         String email = jwtService.extractUsername(token);
 
         return teacherRepository.findByEmail(email)
-                .<ResponseEntity<?>>map(t -> ResponseEntity.ok(gameSessionService.getGamesByTeacher(t)))
+                .<ResponseEntity<?>>map(teacher -> {
+                    List<GameBank> games = gameSessionService.getGamesByTeacher(teacher);
+                    System.out.println("🔍 DEBUG: Number of games found: " + games.size());
+                    System.out.println("🔍 DEBUG: Games data: " + games);
+                    return ResponseEntity.ok()
+                            .header("Content-Type", "application/json")
+                            .body(games);
+                })
                 .orElseGet(() -> ResponseEntity.status(404).body("Teacher not found"));
     }
 

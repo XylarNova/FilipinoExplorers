@@ -39,16 +39,16 @@ public class SecurityConfig {
             .requestMatchers("/api/words/get").permitAll()
             
             // Teacher routes
-            .requestMatchers("/api/gamesessions/**").hasAnyRole("TEACHER", "STUDENT")
-            .requestMatchers("/api/teacher-dashboard/**").hasRole("TEACHER")
-            .requestMatchers("/api/classes/**").hasAnyRole("TEACHER" ,"STUDENT")
-            .requestMatchers("/api/classroom/**").hasRole("TEACHER")
-            .requestMatchers("/api/progress-tracking/**").hasAnyRole("TEACHER", "STUDENT")
+            .requestMatchers("/api/gamesessions/**").hasAnyAuthority("ROLE_TEACHER", "ROLE_STUDENT")
+            .requestMatchers("/api/teacher-dashboard/**").hasAuthority("ROLE_TEACHER")
+            .requestMatchers("/api/classes/**").hasAnyAuthority("ROLE_TEACHER", "ROLE_STUDENT")
+            .requestMatchers("/api/classroom/**").hasAuthority("ROLE_TEACHER")
+            .requestMatchers("/api/progress-tracking/**").hasAnyAuthority("ROLE_TEACHER", "ROLE_STUDENT")
 
 
             // Student routes
-            .requestMatchers("/api/classes/join").hasRole("STUDENT")
-            .requestMatchers("/api/classes/student/joined").hasRole("STUDENT")
+            .requestMatchers("/api/classes/join").hasAuthority("ROLE_STUDENT")
+            .requestMatchers("/api/classes/student/joined").hasAuthority("ROLE_STUDENT")
 
             // Permit all for memory game API endpoints to avoid 403
             .requestMatchers("/api/session/**").permitAll()

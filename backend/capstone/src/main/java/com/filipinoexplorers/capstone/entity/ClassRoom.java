@@ -2,7 +2,9 @@ package com.filipinoexplorers.capstone.entity;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,11 +32,14 @@ public class ClassRoom {
 
     @ManyToOne
     @JoinColumn(name = "teacher_id", nullable = false)
+    @JsonIgnore // ✅ Prevent circular reference via Teacher → GameBank
     private Teacher teacher;
 
     @ManyToMany(mappedBy = "classrooms")
+    @JsonIgnore // ✅ Optional, avoids bloating or recursion via Student
     private Set<Student> students = new HashSet<>();
+
     @ManyToMany(mappedBy = "classrooms")
-    @JsonBackReference
+    @JsonBackReference // ✅ Works with GameBank’s @JsonManagedReference
     private Set<GameBank> gameSessions = new HashSet<>();
 }

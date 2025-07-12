@@ -16,13 +16,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.Lob;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class Teacher implements User {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,9 +37,12 @@ public class Teacher implements User {
     @Column(name = "last_password_change")
     private LocalDateTime lastPasswordChange;
 
+    
+    
     private String email;
     private String first_name;
     private String last_name;
+    @JsonIgnore
     private String password;
     private String school;
 

@@ -69,13 +69,52 @@ useEffect(() => {
 const fetchSavedGames = async () => {
   try {
     const response = await axiosInstance.get('/gamesessions/my-games');
-    const data = response.data;
+    let data = response.data;
+    
+    // Debug: Log the response structure
+    console.log(" Full response structure:", data);
+    console.log(" Response type:", typeof data);
+    console.log("Is array?", Array.isArray(data));
 
+    // If data is a string, try to parse it as JSON
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+        console.log("Parsed JSON data:", data);
+        console.log("Parsed data type:", typeof data);
+        console.log("Parsed is array?", Array.isArray(data));
+      } catch (parseError) {
+        console.error("❌ Failed to parse JSON string:", parseError);
+        setSavedGames([]);
+        return;
+      }
+    }
+
+    // Handle both array and object responses
+    let gamesArray;
     if (Array.isArray(data)) {
-      setSavedGames(data);
+      gamesArray = data;
+    } else if (data && typeof data === 'object') {
+      // If it's an object, try to find the array property
+      // Common patterns: data.games, data.data, data.content, etc.
+      gamesArray = data.games || data.data || data.content || data.results || [];
+      
+      // If none of the common properties exist, check if it's a single game object
+      if (!Array.isArray(gamesArray) && data.id) {
+        gamesArray = [data]; // Wrap single game in array
+      }
     } else {
-      console.error("Expected an array, got:", data);
-      setSavedGames([]); // fallback
+      gamesArray = [];
+    }
+
+    console.log("Final games array:", gamesArray);
+    console.log("Number of games:", gamesArray.length);
+
+    if (Array.isArray(gamesArray)) {
+      setSavedGames(gamesArray);
+    } else {
+      console.error("Unable to extract games array from response:", data);
+      setSavedGames([]);
     }
   } catch (error) {
     console.error('❌ Error fetching teacher games:', error);
