@@ -11,6 +11,7 @@ import com.filipinoexplorers.capstone.entity.ClassRoom;
 import com.filipinoexplorers.capstone.repository.ClassRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -105,7 +106,27 @@ public class GameBankController {
 
     @PostMapping("/post")
     public ResponseEntity<GameBank> createGameSession(@RequestBody GameBankRequestDTO request) {
-        return ResponseEntity.ok(gameSessionService.createGameSessionFromDTO(request));
+        System.out.println("🔍 POST /api/gamesessions/post - Request received");
+        System.out.println("🔍 Request data: " + request);
+        
+        // Debug authentication
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("🔍 Authentication: " + auth);
+        if (auth != null) {
+            System.out.println("🔍 Principal: " + auth.getPrincipal());
+            System.out.println("🔍 Authorities: " + auth.getAuthorities());
+            System.out.println("🔍 Is authenticated: " + auth.isAuthenticated());
+        }
+        
+        try {
+            GameBank result = gameSessionService.createGameSessionFromDTO(request);
+            System.out.println("✅ Game session created successfully: " + result.getId());
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println("❌ Error creating game session: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
   @PutMapping("/put/{id}")

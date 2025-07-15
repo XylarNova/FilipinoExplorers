@@ -68,8 +68,24 @@ public class JwtService {
                 .build();
 
         Claims claims = parser.parseClaimsJws(token).getBody();
-
-        return claims.get("authorities", List.class);
+        
+        // Try to get authorities from multiple possible claim names
+        List<String> authorities = claims.get("authorities", List.class);
+        if (authorities == null) {
+            authorities = claims.get("roles", List.class);
+        }
+        if (authorities == null) {
+            String role = claims.get("role", String.class);
+            if (role != null) {
+                authorities = List.of(role);
+            }
+        }
+        
+        // Debug logging
+        System.out.println("🔍 JWT Claims: " + claims);
+        System.out.println("🔍 Extracted authorities: " + authorities);
+        
+        return authorities != null ? authorities : List.of();
     }
 
     public boolean validateToken(String token, org.springframework.security.core.userdetails.UserDetails userDetails) {

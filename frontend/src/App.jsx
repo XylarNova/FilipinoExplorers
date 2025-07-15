@@ -74,8 +74,8 @@ const App = () => {
         
 
         {/* Games Section Path */}
-       {/*<Route path="/guesstheword" element={<GuessTheWord />} />*/}
-        <Route path="/memorygamegroup" element={<MemoryGameGroup />} />wd
+        <Route path="/guesstheword/:gameId" element={<GuessTheWord />} />
+        <Route path="/memorygamegroup" element={<MemoryGameGroup />} />
 
         <Route path="/memorygame/:sessionId?" element={<MemoryGame />} />
         <Route path="/inputmemorygame" element={<InputsMemoryGame />} />

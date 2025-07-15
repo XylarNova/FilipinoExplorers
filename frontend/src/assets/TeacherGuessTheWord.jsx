@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance';
 import filipinoExplorerLogo from '../assets/images/logo.png';
 
 const TeacherGuessTheWord = () => {
@@ -23,9 +23,6 @@ const TeacherGuessTheWord = () => {
   const [activePuzzles, setActivePuzzles] = useState([]);
   const [editingScore, setEditingScore] = useState(null);
   const [temporaryScore, setTemporaryScore] = useState(10);
-
-  // API base URL
-  const API_BASE_URL = 'http://localhost:8080/api/gtw';
 
   // Fetch puzzles on component mount
   useEffect(() => {
@@ -51,7 +48,7 @@ const TeacherGuessTheWord = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE_URL}/word-puzzles`);
+      const response = await axiosInstance.get('/gtw/word-puzzles');
       if (response.data) {
         setPuzzles(response.data);
       }
@@ -65,7 +62,7 @@ const TeacherGuessTheWord = () => {
 
   const fetchActivePuzzles = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/active-puzzles`);
+      const response = await axiosInstance.get('/gtw/active-puzzles');
       if (response.data) {
         setActivePuzzles(response.data);
       }
@@ -122,10 +119,10 @@ const TeacherGuessTheWord = () => {
       };
       
       if (isEditing) {
-        response = await axios.put(`${API_BASE_URL}/word-puzzles/${currentPuzzle.id}`, puzzleData);
+        response = await axiosInstance.put(`/gtw/word-puzzles/${currentPuzzle.id}`, puzzleData);
         setConfirmationMessage('Puzzle updated successfully!');
       } else {
-        response = await axios.post(`${API_BASE_URL}/word-puzzles`, puzzleData);
+        response = await axiosInstance.post('/gtw/word-puzzles', puzzleData);
         setConfirmationMessage('New puzzle added successfully!');
       }
       
@@ -163,7 +160,7 @@ const TeacherGuessTheWord = () => {
   const deletePuzzle = async (id) => {
     if (window.confirm('Are you sure you want to delete this puzzle?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/word-puzzles/${id}`);
+        await axiosInstance.delete(`/gtw/word-puzzles/${id}`);
         fetchPuzzles(); // Refresh the list
         fetchActivePuzzles(); // Refresh active puzzles
         setConfirmationMessage('Puzzle deleted successfully!');
@@ -203,7 +200,7 @@ const TeacherGuessTheWord = () => {
     }
 
     try {
-      await axios.post(`${API_BASE_URL}/active-puzzles`, { puzzleIds: selectedPuzzles });
+      await axiosInstance.post('/gtw/active-puzzles', { puzzleIds: selectedPuzzles });
       fetchActivePuzzles(); // Refresh active puzzles list
       setConfirmationMessage(`${selectedPuzzles.length} puzzles successfully set for gameplay!`);
       setShowConfirmation(true);
@@ -253,7 +250,7 @@ const TeacherGuessTheWord = () => {
   // Save updated score for a puzzle
   const saveUpdatedScore = async (puzzleId) => {
     try {
-      await axios.put(`${API_BASE_URL}/word-puzzles/${puzzleId}/score`, { score: temporaryScore });
+      await axiosInstance.put(`/gtw/word-puzzles/${puzzleId}/score`, { score: temporaryScore });
       fetchPuzzles(); // Refresh the list
       setEditingScore(null);
       setConfirmationMessage('Score updated successfully!');
@@ -271,7 +268,7 @@ const TeacherGuessTheWord = () => {
 
   const toggleHintStatus = async (puzzleId, currentStatus) => {
   try {
-    await axios.put(`${API_BASE_URL}/word-puzzles/${puzzleId}/hint-status`, { 
+    await axiosInstance.put(`/gtw/word-puzzles/${puzzleId}/hint-status`, { 
       hintEnabled: !currentStatus 
     });
     fetchPuzzles(); // Refresh the list

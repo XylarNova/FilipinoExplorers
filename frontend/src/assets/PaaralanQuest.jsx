@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axiosInstance from '../utils/axiosInstance';
 import Background from '../assets/images/Paaralan Quest/Paaralan Quest BG.png';
 import Logo from '../assets/images/Logo.png';
 import StickImage from '../assets/images/Buttons and Other/Timer Log.png';
@@ -26,127 +28,192 @@ const iconStyle = {
   fontSize: '20px',
 };
 
-const storyData = [
-  {
-    story: "Si Juan ay isang masipag na estudyante na laging tumutulong sa kanyang mga kaklase.",
-    question: "Ano ang ipinapakita ni Juan sa kanyang mga kaklase?",
-    choices: ["Katamaran", "Kasipagan", "Kawalang-galang", "Pag-aalinlangan"],
-    correctAnswer: 1,
-    hint: "Si Juan ay hindi tamad at palaging tumutulong."
-  },
-  {
-    story: "Isang araw, nagtanim ng buto ng mangga si Ana at araw-araw niya itong dinilig.",
-    question: "Ano ang aral sa kwento ni Ana?",
-    choices: ["Ang prutas ay masarap", "Ang tubig ay mahalaga", "Ang tiyaga ay may magandang bunga", "Ang araw ay mainit"],
-    correctAnswer: 2,
-    hint: "Araw-araw niyang dinilig ang kanyang tanim."
-  },
-  {
-    story: "Tuwing hapon, tinutulungan ni Marco ang kanyang lola sa pagtitinda ng gulay sa palengke.",
-    question: "Ano ang ipinapakita ni Marco sa kanyang lola?",
-    choices: ["Pagiging makasarili", "Pagmamalaki", "Paggalang at pagtulong", "Pag-aaksaya ng oras"],
-    correctAnswer: 2,
-    hint: "Tumutulong si Marco sa kanyang lola araw-araw."
-  },
-  {
-    story: "Masayang naglaro si Liza at ang kanyang mga kaibigan sa parke pagkatapos ng klase.",
-    question: "Ano ang ginagawa ni Liza pagkatapos ng klase?",
-    choices: ["Nag-aaral", "Nagpapahinga", "Naglalaba", "Naglaro sa parke"],
-    correctAnswer: 3,
-    hint: "Ginawa ito ni Liza kasama ang kanyang mga kaibigan sa parke."
-  },
-  {
-    story: "Si Mang Tonyo ay palaging naglilinis ng kanyang bakuran tuwing umaga.",
-    question: "Ano ang ugali ni Mang Tonyo batay sa kwento?",
-    choices: ["Tamad", "Malinis at masinop", "Makalat", "Pasaway"],
-    correctAnswer: 1,
-    hint: "Araw-araw siyang naglilinis sa bakuran."
-  },
-  {
-    story: "Nagbigay ng pagkain si Carla sa batang lansangan nang makita niya ito sa daan.",
-    question: "Anong katangian ni Carla ang ipinakita sa kwento?",
-    choices: ["Pagkainggitin", "Madamot", "Mapagbigay", "Palaaway"],
-    correctAnswer: 2,
-    hint: "Nagbigay si Carla ng pagkain."
-  },
-  {
-    story: "Laging pinupuri ng kanyang guro si Ben dahil sa maayos niyang pagsusulat.",
-    question: "Bakit pinupuri si Ben ng kanyang guro?",
-    choices: ["Magaling siyang sumayaw", "Maayos siyang magsulat", "Mahusay siyang umawit", "Magaling siyang magbasa"],
-    correctAnswer: 1,
-    hint: "Ang guro niya ay humanga sa paraan ng kanyang pagsusulat."
-  },
-  {
-    story: "Naglakad si Noel ng isang kilometro upang makarating sa paaralan kahit umuulan.",
-    question: "Anong katangian ang ipinakita ni Noel?",
-    choices: ["Katamaran", "Katapatan", "Kasipagan at tiyaga", "Kabastusan"],
-    correctAnswer: 2,
-    hint: "Naglakad siya kahit na umuulan."
-  },
-  {
-    story: "Tuwing Sabado, nagsisimba ang pamilya Reyes bilang pasasalamat.",
-    question: "Ano ang ginagawa ng pamilya Reyes tuwing Sabado?",
-    choices: ["Namamasyal", "Nagsisimba", "Naglalaro", "Namimili"],
-    correctAnswer: 1,
-    hint: "Ginagawa nila ito bilang pasasalamat."
-  },
-  {
-    story: "Pinagbigyan ni Aling Rosa ang hiling ng kanyang anak na bumili ng libro.",
-    question: "Ano ang hiningi ng anak ni Aling Rosa?",
-    choices: ["Laruan", "Damit", "Sapatos", "Libro"],
-    correctAnswer: 3,
-    hint: "Gamit ito sa pag-aaral at binili sa halip na laruan o damit."
-  },
-  {
-    story: "Si Dan ay hindi nanood ng TV at sa halip ay nag-aral para sa pagsusulit.",
-    question: "Ano ang ginawa ni Dan sa halip na manood ng TV?",
-    choices: ["Nagluto", "Natulog", "Nag-aral", "Naglaro"],
-    correctAnswer: 2,
-    hint: "Inuna niya ang pagsusulit kaysa sa TV."
-  },
-  {
-    story: "Tinulungan ni May si Lisa sa paggawa ng takdang-aralin sa Filipino.",
-    question: "Anong asignatura ang tinulungan ni May kay Lisa?",
-    choices: ["Matematika", "Agham", "Filipino", "Araling Panlipunan"],
-    correctAnswer: 2,
-    hint: "Takdang-aralin ito sa wikang pambansa."
-  },
-  {
-    story: "Naglinis ng silid-aralan ang mga mag-aaral bago umuwi.",
-    question: "Ano ang ginawa ng mga mag-aaral bago umuwi?",
-    choices: ["Naglaro", "Naglinis ng silid-aralan", "Nag-quiz", "Nag-sine"],
-    correctAnswer: 1,
-    hint: "Isinagawa nila ito para maging maayos ang klasrum."
-  },
-  {
-    story: "Tumulong si Karen sa mga batang walang dalang lapis sa klase.",
-    question: "Ano ang tulong na ginawa ni Karen?",
-    choices: ["Nagbahagi ng lapis", "Nagpahiram ng libro", "Naglinis ng klasrum", "Nagbigay ng pera"],
-    correctAnswer: 0,
-    hint: "Walang dalang gamit sa pagsusulat ang mga bata."
-  },
-  {
-    story: "Pinatawad ni Andrea ang kanyang kaibigan matapos silang mag-away.",
-    question: "Ano ang ginawa ni Andrea sa kanyang kaibigan?",
-    choices: ["Pinagalitan", "Pinalayas", "Pinatawad", "Pinagsabihan"],
-    correctAnswer: 2,
-    hint: "Naging magkaibigan ulit sila matapos ang alitan."
-  }
-];
-
 const PaaralanQuest = () => {
+  const { sessionId } = useParams();
+  const [gameSession, setGameSession] = useState(null);
+  const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [usedHint, setUsedHint] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [answeredQuestions, setAnsweredQuestions] = useState(Array(storyData.length).fill(false));
+  const [answeredQuestions, setAnsweredQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showStory, setShowStory] = useState(true);
+  const [storyTimer, setStoryTimer] = useState(null);
 
-  const current = storyData[currentIndex];
+  // Fetch game session data
+  useEffect(() => {
+    const fetchGameSession = async () => {
+      try {
+        const response = await axiosInstance.get(`/gamesessions/${sessionId}`);
+        const session = response.data;
+        
+        setGameSession(session);
+        setQuestions(session.vocabularyQuestions || []);
+        setAnsweredQuestions(new Array(session.vocabularyQuestions?.length || 0).fill(false));
+        
+        // Set story visibility based on story mode
+        if (session.storyMode === 'multiple') {
+          setShowStory(false); // Don't show story screen for multiple stories mode
+        } else {
+          // Set up story timer based on game settings for single story mode
+          if (session.storyContent && session.setTime) {
+            const storyDisplayTime = Math.min(session.setTime / 3, 60); // Story shows for 1/3 of total time, max 60 seconds
+            setStoryTimer(storyDisplayTime);
+          }
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching game session:', err);
+        setError('Failed to load game. Please try again.');
+        setLoading(false);
+      }
+    };
+
+    if (sessionId) {
+      fetchGameSession();
+    }
+  }, [sessionId]);
+
+  // Handle story timer
+  useEffect(() => {
+    if (showStory && storyTimer > 0) {
+      const timer = setTimeout(() => {
+        setShowStory(false);
+      }, storyTimer * 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showStory, storyTimer]);
+
+  if (loading) {
+    return (
+      <div className="bg-cover min-h-screen flex items-center justify-center" style={{ backgroundImage: `url(${Background})` }}>
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
+          <div className="text-xl font-bold text-gray-700">Loading Paaralan Quest...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-cover min-h-screen flex items-center justify-center" style={{ backgroundImage: `url(${Background})` }}>
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
+          <div className="text-xl font-bold text-red-600 mb-4">Error</div>
+          <div className="text-gray-700">{error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!gameSession || !questions.length) {
+    return (
+      <div className="bg-cover min-h-screen flex items-center justify-center" style={{ backgroundImage: `url(${Background})` }}>
+        <div className="text-center p-8 bg-white rounded-lg shadow-lg">
+          <div className="text-xl font-bold text-gray-700 mb-4">No Game Data</div>
+          <div className="text-gray-600">This game session has no questions available.</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show story screen if story exists and showStory is true
+  if (showStory && gameSession.storyContent && (!gameSession.storyMode || gameSession.storyMode === 'single')) {
+    return (
+      <div
+        className="bg-cover min-h-screen pt-24 px-8 flex flex-col items-center gap-6"
+        style={{ backgroundImage: `url(${Background})` }}
+      >
+        <img src={Logo} alt="Logo" className="absolute top-5 left-8 w-40" />
+        
+        <div className="max-w-4xl mx-auto mt-20">
+          <div className="bg-[#f5e5c0] border-8 border-[#71361F] rounded-lg p-8">
+            <h1 className="text-3xl font-bold text-center mb-6 text-[#71361F]">
+              {gameSession.gameTitle}
+            </h1>
+            
+            <div className="bg-[#F4D2A3] p-6 rounded-lg text-lg leading-relaxed text-justify">
+              {gameSession.storyContent}
+            </div>
+            
+            <div className="text-center mt-6">
+              <button
+                onClick={() => setShowStory(false)}
+                className="px-8 py-3 bg-yellow-400 border-2 border-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-500 transition"
+              >
+                START QUESTIONS
+              </button>
+            </div>
+            
+            {storyTimer && (
+              <div className="text-center mt-4 text-gray-600">
+                Questions will start automatically in {storyTimer} seconds
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const current = questions[currentIndex];
+
+  // Check if game is complete
+  const isGameComplete = answeredQuestions.every(answered => answered);
+  
+  // If game is complete, show completion screen
+  if (isGameComplete) {
+    const totalQuestions = questions.length;
+    const percentage = Math.round((score / totalQuestions) * 100);
+    
+    return (
+      <div
+        className="bg-cover min-h-screen pt-24 px-8 flex flex-col items-center justify-center"
+        style={{ backgroundImage: `url(${Background})` }}
+      >
+        <img src={Logo} alt="Logo" className="absolute top-5 left-8 w-40" />
+        
+        <div className="bg-[#f5e5c0] border-8 border-[#71361F] rounded-lg p-8 max-w-2xl text-center">
+          <h1 className="text-4xl font-bold text-[#71361F] mb-6">
+            🎉 Congratulations! 🎉
+          </h1>
+          
+          <div className="text-2xl font-bold text-gray-800 mb-4">
+            Game Complete!
+          </div>
+          
+          <div className="text-xl mb-6">
+            <div className="mb-2">Final Score: <span className="font-bold text-green-600">{score}</span></div>
+            <div className="mb-2">Total Questions: <span className="font-bold">{totalQuestions}</span></div>
+            <div className="mb-4">Percentage: <span className="font-bold text-blue-600">{percentage}%</span></div>
+          </div>
+          
+          <div className="text-lg text-gray-700 mb-6">
+            {percentage >= 80 
+              ? "Excellent work! You've mastered this quest!" 
+              : percentage >= 60 
+              ? "Good job! Keep practicing to improve!" 
+              : "Keep learning and try again!"}
+          </div>
+          
+          <button
+            onClick={() => window.location.href = '/student-dashboard'}
+            className="px-8 py-3 bg-yellow-400 border-2 border-yellow-600 text-white font-bold rounded-lg hover:bg-yellow-500 transition"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleNext = () => {
-    if (currentIndex < storyData.length - 1) {
+    if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setSelectedChoice(null);
       setFeedback("");
@@ -215,120 +282,125 @@ const PaaralanQuest = () => {
       </div>
   
       {/* Main Content Wrapper */}
-      <div className="flex flex-row gap-5 w-full max-w-[1300px] pl-40">
-        {/* Left Side: Story */}
-        <div className="flex-1 flex border-8 border-[#71361F] bg-[#f5e5c0] h-[570px]">
-          {/* Story */}
-          <div className="flex-1 pr-5 bg-[#F4D2A3]">
-            <div className="p-4 rounded-lg h-full overflow-y-auto text-justify">
-              {current.story}
+      <div className="flex justify-center w-full max-w-[900px] mx-auto">
+        {/* Question Panel */}
+        <div className="bg-[#f5e5c0] border-8 border-[#71361F] rounded-lg p-8 w-full min-h-[500px] flex flex-col">
+          <h1 className="text-2xl font-bold text-center mb-6 text-[#71361F]">
+            {gameSession.gameTitle}
+          </h1>
+          
+          {/* Story for current question (Multiple Stories Mode) */}
+          {gameSession.storyMode === 'multiple' && current.story && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-lg mb-3 text-[#71361F]">Story {currentIndex + 1}:</h3>
+              <div className="bg-[#F4D2A3] p-4 rounded-lg text-base leading-relaxed text-justify">
+                {current.story}
+              </div>
             </div>
-          </div>
-  
-          {/* Divider */}
-          <div className="w-2 bg-[#71361F]" />
-  
-          {/* Question & Choices */}
-          <div className="flex-1 pl-5 p-4 bg-[#F4D2A3] flex flex-col justify-between">
-            <div>
-              <h2 className="font-bold text-lg mb-3">{current.question}</h2>
-  
-              {showHint && (
-                <div className="animate-fadeIn bg-[#fff8e1] border border-gray-300 rounded-lg p-3 mb-3 text-gray-800 shadow-md">
-                  <span className="inline-block mr-2 text-xl">📘</span>
-                  {current.hint}
-                </div>
-              )}
-  
-              {current.choices.map((choice, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedChoice(index)}
-                  className={`mb-2 p-2 rounded-lg border-2 border-gray-300 cursor-pointer w-full text-left transition ${
-                    selectedChoice === index ? "bg-green-100" : "bg-white"
-                  }`}
-                >
-                  {choice}
-                </button>
-              ))}
+          )}
+          
+          <h2 className="font-bold text-xl mb-4 text-center">{current.question}</h2>
+
+          {showHint && (
+            <div className="animate-fadeIn bg-[#fff8e1] border border-gray-300 rounded-lg p-3 mb-4 text-gray-800 shadow-md">
+              <span className="inline-block mr-2 text-xl">📘</span>
+              {current.hint}
             </div>
-          </div>
-        </div>
-  
-        {/* Side Panel */}
-        <div className="w-[220px] flex flex-col justify-between mr-[-60px]">
-          {/* Feedback & Score */}
-          <div 
-            className={`p-5 rounded-lg border-4 text-center font-bold ${
-              feedback === "CORRECT ANSWER"
-                ? "border-[#8B4513] bg-[#f5e5c0] text-green-500"
-                : feedback === "WRONG ANSWER"
-                ? "border-[#8B4513] bg-[#f5e5c0] text-red-500"
-                : "border-[#8B4513] bg-[#f5e5c0] text-gray-800"
-            }`}
-          >
-            Score: {score}
-            <br />
-            {feedback}
-          </div>
-  
-          {/* Question Dots */}
-          <div className="bg-[#8B4513] p-5 rounded-lg flex flex-wrap gap-2 justify-center">
-            {storyData.map((_, i) => (
-              <div
-                key={i}
-                className={`w-8 h-8 rounded-full font-bold flex justify-center items-center ${
-                  i === currentIndex ? "bg-yellow-400" : "bg-[#f5e5c0]"
+          )}
+
+          <div className="flex-1 mb-6">
+            {current.choices.map((choice, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedChoice(index)}
+                className={`mb-3 p-4 rounded-lg border-2 cursor-pointer w-full text-left transition ${
+                  selectedChoice === index 
+                    ? "bg-green-100 border-green-500 text-green-800" 
+                    : "bg-white border-gray-300 hover:bg-gray-50"
                 }`}
               >
-                {i + 1}
-              </div>
+                {choice}
+              </button>
             ))}
           </div>
-  
-          {/* Hint Button */}
-          <button
-            onClick={handleHint}
-            disabled={usedHint}
-            className={`px-5 py-2 rounded-full font-bold text-white ${
-              usedHint
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+
+          {/* Feedback & Score */}
+          <div 
+            className={`p-4 rounded-lg border-4 text-center font-bold mb-4 ${
+              feedback === "CORRECT ANSWER"
+                ? "border-green-500 bg-green-50 text-green-700"
+                : feedback === "WRONG ANSWER"
+                ? "border-red-500 bg-red-50 text-red-700"
+                : "border-gray-300 bg-gray-50 text-gray-700"
             }`}
+            style={{ minHeight: "80px" }}
           >
-            HINT
-          </button>
+            <div className="text-lg">{feedback}</div>
+            <div className="text-sm mt-1">Score: {score}</div>
+          </div>
+
+          {/* Navigation Controls */}
+          <div className="flex justify-between items-center">
+            <img
+              src={LeftArrow}
+              alt="Previous"
+              onClick={handlePrev}
+              className={`w-12 h-12 ${
+                currentIndex > 0
+                  ? "cursor-pointer opacity-100 hover:opacity-80"
+                  : "cursor-not-allowed opacity-50"
+              }`}
+            />
+            
+            <div className="flex gap-4 items-center">
+              <button
+                onClick={handleHint}
+                className={`px-4 py-2 rounded-lg font-bold transition ${
+                  usedHint
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+                disabled={usedHint}
+              >
+                {usedHint ? "Hint Used" : "Get Hint"}
+              </button>
+              
+              <button
+                onClick={handleCheckAnswer}
+                className="px-6 py-2 rounded-lg bg-yellow-400 border-2 border-yellow-600 text-white font-bold hover:bg-yellow-500 transition"
+              >
+                CHECK ANSWER
+              </button>
+            </div>
+            
+            <img
+              src={RightArrow}
+              alt="Next"
+              onClick={handleNext}
+              className={`w-12 h-12 ${
+                currentIndex < questions.length - 1
+                  ? "cursor-pointer opacity-100 hover:opacity-80"
+                  : "cursor-not-allowed opacity-50"
+              }`}
+            />
+          </div>
         </div>
       </div>
-  
-      {/* Navigation Buttons */}
-      <div className="flex justify-center items-center gap-10 mt-4">
-        <img
-          src={LeftArrow}
-          alt="Previous"
-          onClick={handlePrev}
-          className={`w-14 h-14 ${
-            currentIndex > 0
-              ? "cursor-pointer opacity-100"
-              : "cursor-not-allowed opacity-50"
-          }`}
-        />
-        <button
-          onClick={handleCheckAnswer}
-          className="px-6 py-3 rounded-lg bg-yellow-400 border-2 border-yellow-600 text-white font-bold hover:bg-yellow-500 transition"
-        >
-          CHECK ANSWER
-        </button>
-        <img
-          src={RightArrow}
-          alt="Next"
-          onClick={handleNext}
-          className={`w-14 h-14 ${
-            currentIndex < storyData.length - 1
-              ? "cursor-pointer opacity-100"
-              : "cursor-not-allowed opacity-50"
-          }`}
-        />
+
+      {/* Question Progress Indicators */}
+      <div className="flex justify-center mt-4">
+        <div className="bg-[#8B4513] p-3 rounded-lg flex flex-wrap gap-2 justify-center">
+          {questions.map((_, i) => (
+            <div
+              key={i}
+              className={`w-8 h-8 rounded-full font-bold flex justify-center items-center text-sm ${
+                i === currentIndex ? "bg-yellow-400" : "bg-[#f5e5c0]"
+              }`}
+            >
+              {i + 1}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );  

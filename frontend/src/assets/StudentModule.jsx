@@ -17,21 +17,62 @@ const StudentModule = ({ darkMode = false }) => {
     const fetchGames = async () => {
       try {
         const classRes = await axiosInstance.get('/classes/student/joined');
-        const classIds = classRes.data.map((cls) => cls.id);
+        const classes = classRes.data;
 
-        const allGames = [];
-        for (const id of classIds) {
-          const res = await axiosInstance.get(`/gamesessions/classroom/${id}`);
-          allGames.push(...res.data);
+        const allGamesWithClassInfo = [];
+        const gameIdTracker = new Set(); // Track unique game IDs
+
+        for (const classroom of classes) {
+          try {
+            const res = await axiosInstance.get(`/gamesessions/classroom/${classroom.id}`);
+            const gamesInClass = res.data;
+
+            gamesInClass.forEach((game) => {
+              // Create unique identifier for game-classroom combination
+              const gameKey = `${game.id}-${classroom.id}`;
+              
+              if (!gameIdTracker.has(gameKey)) {
+                gameIdTracker.add(gameKey);
+                
+                // Add classroom info to each game
+                const gameWithClassInfo = {
+                  ...game,
+                  classroomInfo: {
+                    id: classroom.id,
+                    name: classroom.name,
+                    teacherName: classroom.teacher 
+                      ? `${classroom.teacher.first_name} ${classroom.teacher.last_name}`
+                      : 'Unknown Teacher'
+                  },
+                  // Default gameType if null
+                  gameType: game.gameType || 'MemoryGame'
+                };
+                
+                allGamesWithClassInfo.push(gameWithClassInfo);
+              }
+            });
+          } catch (classError) {
+            console.error(`Error loading games for classroom ${classroom.id}:`, classError);
+          }
         }
 
+        // Group games by quarter
         const grouped = {};
         quarters.forEach(q => grouped[q] = []);
 
-        allGames.forEach((game) => {
+        allGamesWithClassInfo.forEach((game) => {
           if (quarters.includes(game.quarter)) {
             grouped[game.quarter].push(game);
           }
+        });
+
+        // Sort games within each quarter by status (Open first) and then by title
+        Object.keys(grouped).forEach(quarter => {
+          grouped[quarter].sort((a, b) => {
+            if (a.status === 'Open' && b.status !== 'Open') return -1;
+            if (a.status !== 'Open' && b.status === 'Open') return 1;
+            return a.gameTitle.localeCompare(b.gameTitle);
+          });
         });
 
         setGamesByQuarter(grouped);
@@ -59,19 +100,35 @@ const renderGameButton = (game) => {
     return (
       <button
         onClick={() => {
+          console.log('Game clicked:', game); // Debug log
+          
           if (game.category === 'Vocabulary') {
-            if (game.gameType === 'GuessTheWord') {
-              navigate(`/guesstheword/${game.id}`);
-            } else if (game.gameType === 'MemoryGame') {
-              navigate(`/memorygame/${game.id}`);
-            } else {
-              alert('Unsupported game type: ' + game.gameType);
+            // Handle different game types with fallback
+            switch (game.gameType) {
+              case 'GuessTheWord':
+                navigate(`/guesstheword/${game.id}`);
+                break;
+              case 'MemoryGame':
+              case null:
+              case undefined:
+                // Default to MemoryGame for null/undefined gameType
+                navigate(`/memorygame/${game.id}`);
+                break;
+              default:
+                console.warn('Unknown game type:', game.gameType);
+                // Default fallback to MemoryGame
+                navigate(`/memorygame/${game.id}`);
             }
+          } else if (game.category === 'Grammar') {
+            // Handle Grammar games (you can add more game types here)
+            navigate(`/memorygame/${game.id}`); // Default to memory game
           } else {
-            alert('Unsupported game category: ' + game.category);
+            console.error('Unsupported game category:', game.category);
+            alert(`Game category "${game.category}" is not yet supported. Please contact your teacher.`);
           }
         }}
         className="bg-[#06D6A0] text-white px-4 py-1 rounded-full text-sm font-semibold hover:opacity-90 transition"
+        title={`${hasPlayed ? 'Review' : 'Start'} - ${game.classroomInfo?.name || 'Unknown Class'}`}
       >
         {hasPlayed ? 'Review' : 'Start'}
       </button>
@@ -80,9 +137,10 @@ const renderGameButton = (game) => {
     return (
       <button
         disabled
-        className="bg-white text-black px-4 py-1 rounded-full text-sm font-semibold cursor-not-allowed"
+        className="bg-gray-400 text-gray-600 px-4 py-1 rounded-full text-sm font-semibold cursor-not-allowed opacity-60"
+        title={`Game is ${game.status.toLowerCase()} - ${game.classroomInfo?.name || 'Unknown Class'}`}
       >
-        Lock
+        {game.status === 'Draft' ? 'Draft' : 'Locked'}
       </button>
     );
   }
@@ -150,12 +208,27 @@ const renderGameButton = (game) => {
                   {games.length > 0 ? (
                     games.map((game, i) => (
                       <div
-                        key={i}
+                        key={`${game.id}-${game.classroomInfo?.id || i}`}
                         className="flex justify-between items-center px-5 py-3 rounded-lg shadow"
                         style={{ backgroundColor: bgColor }}
                       >
-                        <span className="font-semibold text-[#073B4C]">{game.gameTitle}</span>
-                        {renderGameButton(game)}
+                        <div className="flex-1">
+                          <div className="font-semibold text-[#073B4C]">{game.gameTitle}</div>
+                          <div className="text-xs text-[#073B4C] opacity-75 mt-1">
+                            {game.classroomInfo?.name} • {game.classroomInfo?.teacherName}
+                          </div>
+                          <div className="text-xs text-[#073B4C] opacity-60 mt-1">
+                            {game.category} • {game.gameType || 'MemoryGame'}
+                            {game.status !== 'Open' && (
+                              <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs">
+                                {game.status}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          {renderGameButton(game)}
+                        </div>
                       </div>
                     ))
                   ) : (

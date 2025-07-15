@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 import Logo from "../assets/images/Logo.png";
 import Background from "../assets/images/Parke Game/Parke Quest BG.png";
 
@@ -20,7 +20,7 @@ const ParkeQuest = () => {
 
   const fetchAllQuestions = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/parkequest");
+      const res = await axiosInstance.get("/parkequest");
       setAllQuestions(res.data);
       setQuestionNumber(res.data.length + 1);
     } catch (error) {
@@ -57,11 +57,7 @@ const ParkeQuest = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
       try {
-        await axios.delete(`http://localhost:8080/api/parkequest/${id}`, {
-          headers: {
-            Authorization: "Bearer dummy-token",
-          },
-        });
+        await axiosInstance.delete(`/parkequest/${id}`);
         setMessage("🗑️ Question deleted.");
         fetchAllQuestions();
       } catch (error) {
@@ -89,19 +85,11 @@ const ParkeQuest = () => {
 
     try {
       if (editingId) {
-        await axios.put(`http://localhost:8080/api/parkequest/${editingId}`, dto, {
-          headers: {
-            Authorization: "Bearer dummy-token",
-          },
-        });
+        await axiosInstance.put(`/parkequest/${editingId}`, dto);
         setMessage(`✅ Question #${editingId} updated!`);
         setEditingId(null);
       } else {
-        await axios.post("http://localhost:8080/api/parkequest", dto, {
-          headers: {
-            Authorization: "Bearer dummy-token",
-          },
-        });
+        await axiosInstance.post("/parkequest", dto);
         setMessage("✅ Question #" + questionNumber + " submitted!");
         setQuestionNumber((prev) => prev + 1);
       }

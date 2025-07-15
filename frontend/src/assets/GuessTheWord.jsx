@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance';
 import bgImage from '../assets/images/Guess the Word/Guess the word UI BG.png';
 import filipinoExplorerLogo from '../assets/images/logo.png';
 import woodenLog from '../assets/images/Buttons and Other/Timer Log.png';
@@ -28,9 +28,6 @@ const GuessTheWord = () => {
   const [hintText, setHintText] = useState(''); // New state for hint text
   const [disabledLetterValues, setDisabledLetterValues] = useState([]);
   
-  
-  // API base URL
-  const API_BASE_URL = 'http://localhost:8080/api/gtw';
   
   // Fetch puzzles on component mount
   useEffect(() => {
@@ -113,7 +110,7 @@ const GuessTheWord = () => {
     setError(null);
     try {
       // Changed to fetch active puzzles instead of all puzzles
-      const response = await axios.get(`${API_BASE_URL}/active-puzzles`);
+      const response = await axiosInstance.get('/gtw/active-puzzles');
       if (response.data && response.data.length > 0) {
         setPuzzles(response.data);
         setCurrentPuzzle(response.data[0]);
@@ -172,7 +169,7 @@ const GuessTheWord = () => {
   
   try {
     setIsLoading(true);
-    const response = await axios.post(`${API_BASE_URL}/check-answer`, {
+    const response = await axiosInstance.post('/gtw/check-answer', {
       puzzleId: currentPuzzle.id,
       answer
     });
@@ -259,7 +256,7 @@ const GuessTheWord = () => {
       if (!isTranslated) {
         setIsLoading(true);
         // Use the proper translation endpoint
-        const response = await axios.get(`${API_BASE_URL}/translation/${currentPuzzle.id}`);
+        const response = await axiosInstance.get(`/gtw/translation/${currentPuzzle.id}`);
         
         if (response.data && response.data.translation) {
           // Store the translation in the state
@@ -284,7 +281,7 @@ const GuessTheWord = () => {
   const getHint = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/hint/${currentPuzzle.id}`);
+      const response = await axiosInstance.get(`/gtw/hint/${currentPuzzle.id}`);
       
       if (response.data && response.data.available) {
         setHintText(response.data.hint);
