@@ -36,6 +36,8 @@ const ParkeQuest = () => {
     const saved = localStorage.getItem("pq_answered");
     return saved ? JSON.parse(saved) : [];
   });
+  const alreadyAnsweredCorrectly = answeredIndices.includes(currentIndex);
+
 
   const submitGame = async () => {
   try {
@@ -173,38 +175,36 @@ const ParkeQuest = () => {
     setSelectedOrder(updated);
   };
 
+        const checkAnswer = async () => {
+          if (secondsLeft === 0) return;
 
-      const checkAnswer = async () => {
-      if (secondsLeft === 0) return;
+          const current = questions[currentIndex];
+          const studentAnswer = selectedOrder.join(" ");
 
-      const current = questions[currentIndex];
-      const studentAnswer = selectedOrder.join(" ");
+          try {
+            const res = await axios.post("http://localhost:8080/api/parkequest/check", {
+              questionId: current.id,
+              selectedAnswer: studentAnswer,
+              usedHint,
+            });
 
-      try {
-        const res = await axios.post("http://localhost:8080/api/parkequest/check", {
-          questionId: current.id,
-          selectedAnswer: studentAnswer,
-          usedHint,
-        });
+            setResultMessage(res.data.message);
 
-        setResultMessage(res.data.message);
+            const alreadyAnswered = answeredIndices.includes(currentIndex);
 
-        const alreadyAnswered = answeredIndices.includes(currentIndex);
+            if (!alreadyAnswered && res.data.message === "CORRECT ANSWER") {
+              const newScore = score + 2; // ✅ Always +2
+              const newAnswered = [...answeredIndices, currentIndex];
+              setScore(newScore);
+              setAnsweredIndices(newAnswered);
+              localStorage.setItem("pq_score", newScore.toString());
+              localStorage.setItem("pq_answered", JSON.stringify(newAnswered));
+            }
 
-        if (!alreadyAnswered && res.data.score > 0) {
-          const newScore = score + res.data.score;
-          const newAnswered = [...answeredIndices, currentIndex];
-          setScore(newScore);
-          setAnsweredIndices(newAnswered);
-          localStorage.setItem("pq_score", newScore.toString());
-          localStorage.setItem("pq_answered", JSON.stringify(newAnswered));
-        }
-
-      } catch (err) {
-        console.error("Check answer failed:", err);
-      }
-    };
-
+          } catch (err) {
+            console.error("Check answer failed:", err);
+          }
+        };
 
   const goToNext = async () => {
     if (secondsLeft === 0) return; // ⛔ Prevent navigation if time is up
@@ -366,15 +366,27 @@ const ParkeQuest = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => {
+        <button
+          onClick={() => {
+            if (score >= 1 && !usedHint && !alreadyAnsweredCorrectly) {
+              const newScore = score - 1;
+              setScore(newScore);
               setUsedHint(true);
               setShowHint(true);
-            }}
-            className="w-[250px] py-3 rounded-full bg-[#1982fc] hover:bg-blue-700 text-white font-bold text-lg shadow-md"
-          >
-            HINT
-          </button>
+              localStorage.setItem("pq_score", newScore.toString());
+            }
+          }}
+          disabled={score < 1 || usedHint || alreadyAnsweredCorrectly}
+          className={`w-[250px] py-3 rounded-full font-bold text-lg shadow-md ${
+            score < 1 || usedHint || alreadyAnsweredCorrectly
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-[#1982fc] hover:bg-blue-700 text-white'
+          }`}
+        >
+          HINT
+        </button>
+
+
           <button
             onClick={submitGame}
             className="w-[250px] py-3 rounded-full bg-[#ffca28] hover:bg-yellow-500 text-white font-bold text-lg shadow-md"
@@ -384,8 +396,9 @@ const ParkeQuest = () => {
 
 
           <div className="text-white text-lg font-bold text-center mt-2">
-            Score: <span className="text-green-300">{score}</span> / {questions.length}
+            Score: <span className="text-green-300">{score}</span> / {questions.length * 2}
           </div>
+
 
           {resultMessage && (
             <div className="text-white text-lg font-bold text-center mt-4">
@@ -409,7 +422,7 @@ const ParkeQuest = () => {
 {secondsLeft === 0 && (
   <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
     <div className="bg-white text-[#4e2c1c] p-8 rounded-xl shadow-lg text-center max-w-md font-bold text-xl">
-      Your final score: {finalScore ?? score} / {questions.length}
+      Your final score: {finalScore ?? score} / {questions.length * 2}
     </div>
   </div>
 )}
