@@ -8,6 +8,7 @@ import GuessTheWordImage from './images/Homepage/Guess The Word .png';
 import ParkeQuestImage from './images/Homepage/Parke Quest.png';
 import PaaralanQuestImage from './images/Homepage/Paaralan Quest Icon.png';
 import MemoryGameImage from './images/Homepage/Memory Game Icon.png';
+import MemoryGamePanel from './MemoryGamePanel';
 
 
 
@@ -217,6 +218,7 @@ const handleSaveGame = async () => {
 
   const gameSession = {
     gameTitle,
+    gameType: "MemoryGame", // Added default or appropriate gameType value
     category: selectedCategory,
     leaderboard: gameSettings.leaderboard,
     hints: gameSettings.hints,
