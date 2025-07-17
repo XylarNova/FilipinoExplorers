@@ -2,9 +2,7 @@ package com.filipinoexplorers.capstone.entity;
 
 import jakarta.persistence.*;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import lombok.*;
 
 @Getter
@@ -23,11 +21,7 @@ public class ParkeQuestQuestion {
     private String correctAnswer;
     private String hint;
 
-
-   @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-@JsonManagedReference
-private List<ParkeQuestChoice> choices;
-
-
-    // Getters and Setters
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<ParkeQuestChoice> choices;
 }

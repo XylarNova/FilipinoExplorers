@@ -13,6 +13,7 @@ public class ParkeQuestService {
 
     private final ParkeQuestQuestionRepository parkeQuestQuestionRepository;
     private final ParkeQuestChoiceRepository parkeQuestChoiceRepository;
+    private int globalTimeLimitSeconds = 300;
 
     public ParkeQuestService(ParkeQuestQuestionRepository parkeQuestQuestionRepository,
                              ParkeQuestChoiceRepository parkeQuestChoiceRepository) {
@@ -50,5 +51,14 @@ public class ParkeQuestService {
 
     public void deleteById(Long id) {
         parkeQuestQuestionRepository.deleteById(id);
+    }
+
+
+    public int getGlobalTimer() {
+    return globalTimeLimitSeconds;
+    }
+
+    public void setGlobalTimer(int seconds) {
+        this.globalTimeLimitSeconds = seconds;
     }
 }
