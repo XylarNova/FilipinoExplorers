@@ -434,10 +434,11 @@ const PaaralanQuestGroup = () => {
 
       <div style={{ display: 'flex', gap: 20, width: '90%', alignItems: 'center' }}>
         <div style={{ position: 'relative', marginRight: '-25px' }}>
-          <img src={StickImage} alt="Timer" style={{ height: '150px', transform: 'rotate(90deg)' }} />
+          <img src={StickImage} alt="Timer" style={{ width: 'auto', height: '150px', transform: 'rotate(90deg)',marginLeft: '50px' }} />
           <div style={{
         position: 'absolute',
         bottom: 0,
+         right: '20px',
         width: '50px',
         height: `${(timeLeft / 10) * 320}px`, // dynamic height
         backgroundColor: 'lightgreen',
