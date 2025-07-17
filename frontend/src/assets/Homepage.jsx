@@ -15,6 +15,8 @@ const Homepage = () => {
   const navigate = useNavigate();
   const [activeDescription, setActiveDescription] = useState(null);
   const [showPaaralanOptions, setShowPaaralanOptions] = useState(false);
+  const [showUserSelect, setShowUserSelect] = useState(false);
+
 
   const gameData = [
     {
@@ -174,15 +176,16 @@ const Homepage = () => {
           {gameData.map((game, index) => (
             <div
               key={index}
-              onClick={() => {
-                if (game.name === 'Paaralan Quest') {
-                  setShowPaaralanOptions(true); // open mode select
-                } else if (game.path) {
-                  navigate(game.path); // other games go directly
-                } else {
-                  setActiveDescription(activeDescription === index ? null : index);
-                }
-              }}
+             onClick={() => {
+              if (game.name === 'Paaralan Quest') {
+                setShowUserSelect(true); // new step before mode select
+              } else if (game.path) {
+                navigate(game.path);
+              } else {
+                setActiveDescription(activeDescription === index ? null : index);
+              }
+            }}
+
 
 
               style={{
@@ -227,6 +230,84 @@ const Homepage = () => {
 
       <footer style={{ backgroundColor: '#073A4D', color: '#ffffff', textAlign: 'center', padding: '20px', fontFamily: "'Fredoka', sans-serif" }}>
         © 2025 FilipinoExplorers | Aralin mo, Laruin mo!
+{showUserSelect && (
+  <div style={{
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999
+  }}>
+    <div style={{
+      backgroundColor: '#fff',
+      padding: '30px 40px',
+      borderRadius: '15px',
+      textAlign: 'center',
+      fontFamily: "'Fredoka', sans-serif",
+      boxShadow: '0 8px 16px rgba(0,0,0,0.25)'
+    }}>
+      <h2 style={{ marginBottom: '20px', fontSize: '24px' }}>Select User</h2>
+      <button
+        onClick={() => {
+          setShowUserSelect(false);
+          setShowPaaralanOptions(true); // show the next modal
+        }}
+        style={{
+          margin: '10px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          backgroundColor: '#FAB900',
+          color: '#000',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer'
+        }}
+      >
+        Student
+      </button>
+      <button
+        onClick={() => {
+          setShowUserSelect(false);
+          navigate('/paaralanquest-teacher'); // new teacher page
+        }}
+        style={{
+          margin: '10px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          backgroundColor: '#4092AD',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer'
+        }}
+      >
+        Teacher
+      </button>
+      <div>
+        <button
+          onClick={() => setShowUserSelect(false)}
+          style={{
+            marginTop: '20px',
+            fontSize: '14px',
+            background: 'none',
+            border: 'none',
+            color: '#999',
+            cursor: 'pointer'
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
       {showPaaralanOptions && (
   <div style={{
     position: 'fixed',

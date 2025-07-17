@@ -34,7 +34,7 @@ import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
 
 import GroupMode from './assets/Groupmode';
-
+import PaaralanQuestTeacher from './assets/PaaralanQuestTeacher';
 
 // Admin Side
 import AddWordOfTheDay from './adminpages/AddWordOfTheDay';
@@ -79,6 +79,7 @@ const App = () => {
         <Route path="/paaralanquest-individual" element={<PaaralanQuest />} />
         <Route path="/paaralanquest-group" element={<PaaralanQuestGroup />} />
         <Route path="/paaralanquest" element={<PaaralanQuest />} />
+        <Route path="/paaralanquest-teacher" element={<PaaralanQuestTeacher />} />
         <Route path="/parkequest" element={<ParkeQuest />} />
 
         {/* Admin Side */}
