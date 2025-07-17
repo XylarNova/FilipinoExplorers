@@ -21,6 +21,7 @@ const PaaralanQuestTeacher = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <button
           onClick={() => navigate('/paaralanquest-teacher/create')}
+
           style={buttonStyle}
         >
           ➕ Create Question

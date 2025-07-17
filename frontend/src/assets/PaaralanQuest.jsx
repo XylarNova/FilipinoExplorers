@@ -28,323 +28,7 @@ const iconStyle = {
 };
 
 // Replace this with all your 45+ entries
-const fullStoryData = [
-  {
-    story: "Si Juan ay isang masipag na estudyante na laging tumutulong sa kanyang mga kaklase.",
-    question: "Ano ang ipinapakita ni Juan sa kanyang mga kaklase?",
-    choices: ["Katamaran", "Kasipagan", "Kawalang-galang", "Pag-aalinlangan"],
-    correctAnswer: 1,
-    hint: "Si Juan ay hindi tamad at palaging tumutulong."
-  },
-  {
-    story: "Isang araw, nagtanim ng buto ng mangga si Ana at araw-araw niya itong dinilig.",
-    question: "Ano ang aral sa kwento ni Ana?",
-    choices: ["Ang prutas ay masarap", "Ang tubig ay mahalaga", "Ang tiyaga ay may magandang bunga", "Ang araw ay mainit"],
-    correctAnswer: 2,
-    hint: "Araw-araw niyang dinilig ang kanyang tanim."
-  },
-  {
-    story: "Tuwing hapon, tinutulungan ni Marco ang kanyang lola sa pagtitinda ng gulay sa palengke.",
-    question: "Ano ang ipinapakita ni Marco sa kanyang lola?",
-    choices: ["Pagiging makasarili", "Pagmamalaki", "Paggalang at pagtulong", "Pag-aaksaya ng oras"],
-    correctAnswer: 2,
-    hint: "Tumutulong si Marco sa kanyang lola araw-araw."
-  },
-  {
-    story: "Masayang naglaro si Liza at ang kanyang mga kaibigan sa parke pagkatapos ng klase.",
-    question: "Ano ang ginagawa ni Liza pagkatapos ng klase?",
-    choices: ["Nag-aaral", "Nagpapahinga", "Naglalaba", "Naglaro sa parke"],
-    correctAnswer: 3,
-    hint: "Ginawa ito ni Liza kasama ang kanyang mga kaibigan sa parke."
-  },
-  {
-    story: "Si Mang Tonyo ay palaging naglilinis ng kanyang bakuran tuwing umaga.",
-    question: "Ano ang ugali ni Mang Tonyo batay sa kwento?",
-    choices: ["Tamad", "Malinis at masinop", "Makalat", "Pasaway"],
-    correctAnswer: 1,
-    hint: "Araw-araw siyang naglilinis sa bakuran."
-  },
-  {
-    story: "Nagbigay ng pagkain si Carla sa batang lansangan nang makita niya ito sa daan.",
-    question: "Anong katangian ni Carla ang ipinakita sa kwento?",
-    choices: ["Pagkainggitin", "Madamot", "Mapagbigay", "Palaaway"],
-    correctAnswer: 2,
-    hint: "Nagbigay si Carla ng pagkain."
-  },
-  {
-    story: "Laging pinupuri ng kanyang guro si Ben dahil sa maayos niyang pagsusulat.",
-    question: "Bakit pinupuri si Ben ng kanyang guro?",
-    choices: ["Magaling siyang sumayaw", "Maayos siyang magsulat", "Mahusay siyang umawit", "Magaling siyang magbasa"],
-    correctAnswer: 1,
-    hint: "Ang guro niya ay humanga sa paraan ng kanyang pagsusulat."
-  },
-  {
-    story: "Naglakad si Noel ng isang kilometro upang makarating sa paaralan kahit umuulan.",
-    question: "Anong katangian ang ipinakita ni Noel?",
-    choices: ["Katamaran", "Katapatan", "Kasipagan at tiyaga", "Kabastusan"],
-    correctAnswer: 2,
-    hint: "Naglakad siya kahit na umuulan."
-  },
-  {
-    story: "Tuwing Sabado, nagsisimba ang pamilya Reyes bilang pasasalamat.",
-    question: "Ano ang ginagawa ng pamilya Reyes tuwing Sabado?",
-    choices: ["Namamasyal", "Nagsisimba", "Naglalaro", "Namimili"],
-    correctAnswer: 1,
-    hint: "Ginagawa nila ito bilang pasasalamat."
-  },
-  {
-    story: "Pinagbigyan ni Aling Rosa ang hiling ng kanyang anak na bumili ng libro.",
-    question: "Ano ang hiningi ng anak ni Aling Rosa?",
-    choices: ["Laruan", "Damit", "Sapatos", "Libro"],
-    correctAnswer: 3,
-    hint: "Gamit ito sa pag-aaral at binili sa halip na laruan o damit."
-  },
-  {
-    story: "Si Dan ay hindi nanood ng TV at sa halip ay nag-aral para sa pagsusulit.",
-    question: "Ano ang ginawa ni Dan sa halip na manood ng TV?",
-    choices: ["Nagluto", "Natulog", "Nag-aral", "Naglaro"],
-    correctAnswer: 2,
-    hint: "Inuna niya ang pagsusulit kaysa sa TV."
-  },
-  {
-    story: "Tinulungan ni May si Lisa sa paggawa ng takdang-aralin sa Filipino.",
-    question: "Anong asignatura ang tinulungan ni May kay Lisa?",
-    choices: ["Matematika", "Agham", "Filipino", "Araling Panlipunan"],
-    correctAnswer: 2,
-    hint: "Takdang-aralin ito sa wikang pambansa."
-  },
-  {
-    story: "Naglinis ng silid-aralan ang mga mag-aaral bago umuwi.",
-    question: "Ano ang ginawa ng mga mag-aaral bago umuwi?",
-    choices: ["Naglaro", "Naglinis ng silid-aralan", "Nag-quiz", "Nag-sine"],
-    correctAnswer: 1,
-    hint: "Isinagawa nila ito para maging maayos ang klasrum."
-  },
-  {
-    story: "Tumulong si Karen sa mga batang walang dalang lapis sa klase.",
-    question: "Ano ang tulong na ginawa ni Karen?",
-    choices: ["Nagbahagi ng lapis", "Nagpahiram ng libro", "Naglinis ng klasrum", "Nagbigay ng pera"],
-    correctAnswer: 0,
-    hint: "Walang dalang gamit sa pagsusulat ang mga bata."
-  },
-  {
-    story: "Pinatawad ni Andrea ang kanyang kaibigan matapos silang mag-away.",
-    question: "Ano ang ginawa ni Andrea sa kanyang kaibigan?",
-    choices: ["Pinagalitan", "Pinalayas", "Pinatawad", "Pinagsabihan"],
-    correctAnswer: 2,
-    hint: "Naging magkaibigan ulit sila matapos ang alitan."
-  },
-  {
-    story: "Habang nasa pila, mahinahong naghintay si Paolo ng kanyang turn sa kantina.",
-    question: "Anong ugali ni Paolo ang ipinakita niya sa kwento?",
-    choices: ["Pagmamadali", "Pagiging magulo", "Pagtitimpi at disiplina", "Pagkainggitin"],
-    correctAnswer: 2,
-    hint: "Hindi siya sumingit at mahinahong naghintay."
-  },
-  {
-    story: "Nagdasal si Mia bago magsimula ang kanyang pagsusulit sa paaralan.",
-    question: "Ano ang ginawa ni Mia bago ang pagsusulit?",
-    choices: ["Naglaro", "Nagdasal", "Uminom ng tubig", "Nagbasa ng libro"],
-    correctAnswer: 1,
-    hint: "Humingi siya ng gabay sa Diyos."
-  },
-  {
-    story: "Isinauli ni Rico ang wallet na kanyang napulot sa daan.",
-    question: "Anong katangian ni Rico ang ipinakita niya?",
-    choices: ["Katapatan", "Pagiging pabaya", "Pagka-makasarili", "Pagiging matatakutin"],
-    correctAnswer: 0,
-    hint: "Hindi niya inangkin ang napulot niya."
-  },
-  {
-    story: "Ginising ni Lian ang kanyang kapatid upang hindi ito mahuli sa klase.",
-    question: "Ano ang ipinakita ni Lian sa kanyang kapatid?",
-    choices: ["Pagka-inis", "Pagmamahal at malasakit", "Pagka-tamad", "Pagkabagot"],
-    correctAnswer: 1,
-    hint: "Ginising niya ito upang makatulong."
-  },
-  {
-    story: "Mas pinili ni Ella na magtapon ng basura sa tamang lalagyan kahit walang nakatingin.",
-    question: "Anong ugali ang ipinakita ni Ella?",
-    choices: ["Pagka-ipokrito", "Pagka-bastos", "Pagiging responsable", "Pagiging pabaya"],
-    correctAnswer: 2,
-    hint: "Ginawa niya ang tama kahit walang nakakakita."
-  },
-  {
-    story: "Nakita ni Julia na nahulog ang libro ng kanyang kaklase at agad niya itong pinulot.",
-    question: "Anong ginawa ni Julia nang may mahulog na libro?",
-    choices: ["Tinapakan ito", "Tiningnan lang", "Pinulot at ibinalik", "Iniwan sa sahig"],
-    correctAnswer: 2,
-    hint: "Tumulong si Julia sa kaklase nang hindi hinihingi."
-  },
-  {
-    story: "Tuwing gabi, inaayos ni Mark ang kanyang gamit para sa susunod na araw ng klase.",
-    question: "Ano ang ginagawa ni Mark tuwing gabi?",
-    choices: ["Naglalaba", "Inaayos ang gamit", "Nanonood ng TV", "Naglalaro ng cellphone"],
-    correctAnswer: 1,
-    hint: "Inihahanda niya ang sarili para sa klase."
-  },
-  {
-    story: "Nag-abot ng tubig si Leo sa kanyang amang pagod mula sa trabaho.",
-    question: "Ano ang ginawa ni Leo sa kanyang ama?",
-    choices: ["Niyaya maglaro", "Binigyan ng tubig", "Hinayaan lang", "Inasar"],
-    correctAnswer: 1,
-    hint: "Inalagaan niya ang ama sa simpleng paraan."
-  },
-  {
-    story: "Pinahiram ni Joy ng papel ang kanyang kaklaseng walang dalang gamit.",
-    question: "Ano ang ibinigay ni Joy sa kanyang kaklase?",
-    choices: ["Lapis", "Libro", "Papel", "Bag"],
-    correctAnswer: 2,
-    hint: "Ang kaklase ay walang dalang gamit pang-sulat."
-  },
-  {
-    story: "Tumulong si Enzo sa matandang tumatawid sa kalsada.",
-    question: "Sino ang tinulungan ni Enzo?",
-    choices: ["Bata", "Guro", "Kaibigan", "Matanda"],
-    correctAnswer: 3,
-    hint: "Isang matanda ang tinulungan niya sa pagtawid."
-  },
-  {
-    story: "Nagboluntaryo si Nina na magwalis ng paligid ng paaralan pagkatapos ng klase.",
-    question: "Ano ang ginawa ni Nina pagkatapos ng klase?",
-    choices: ["Umuwi agad", "Naglaro", "Nagwalis ng paligid", "Nanonood ng TV"],
-    correctAnswer: 2,
-    hint: "Ginawa niya ito bilang boluntaryong tulong sa paaralan."
-  },
-  {
-    story: "Nagbigay si Tomas ng donasyong laruan para sa mga batang nasalanta ng bagyo.",
-    question: "Kanino nagbigay ng laruan si Tomas?",
-    choices: ["Kaklase", "Sarili", "Bata sa lansangan", "Mga batang nasalanta ng bagyo"],
-    correctAnswer: 3,
-    hint: "Ito ay para sa mga batang apektado ng sakuna."
-  },
-  {
-    story: "Maagang gumising si Carla upang tumulong sa paghahanda ng agahan.",
-    question: "Ano ang ginawa ni Carla ng maaga?",
-    choices: ["Natutulog pa", "Nanonood ng TV", "Tumulong sa agahan", "Naglaro"],
-    correctAnswer: 2,
-    hint: "Siya ay tumulong sa bahay sa umaga."
-  },
-  {
-    story: "Inakay ni Miguel ang kanyang lolo habang tumatawid sa kalsada.",
-    question: "Sino ang tinulungan ni Miguel?",
-    choices: ["Kaklase", "Nanay", "Kaibigan", "Lolo"],
-    correctAnswer: 3,
-    hint: "Tinulungan niya ang kanyang matandang kamag-anak."
-  },
-  {
-    story: "Nagdala si Rina ng dagdag na lapis upang ipahiram sa mga kaklaseng walang gamit.",
-    question: "Bakit nagdala ng dagdag na lapis si Rina?",
-    choices: ["Upang magbenta", "Upang magpahiram", "Upang ipamigay", "Upang iguhit"],
-    correctAnswer: 1,
-    hint: "May kaklase siyang walang gamit."
-  },
-  {
-    story: "Isinulat ni Lito ang kanyang takdang-aralin sa malinis at maayos na papel.",
-    question: "Paano isinulat ni Lito ang kanyang takdang-aralin?",
-    choices: ["Sa malinis at maayos na papel", "Sa punit na papel", "Sa likod ng libro", "Hindi niya isinulat"],
-    correctAnswer: 0,
-    hint: "Maayos siyang gumawa ng takdang-aralin."
-  },
-  {
-    story: "Pinahiram ni Toni ang kanyang payong sa kaklaseng walang dalang panangga sa ulan.",
-    question: "Anong bagay ang pinahiram ni Toni?",
-    choices: ["Bag", "Payong", "Cellphone", "Jacket"],
-    correctAnswer: 1,
-    hint: "Panangga ito sa ulan."
-  },
-  {
-    story: "Sumali si James sa tree planting activity ng kanilang barangay.",
-    question: "Anong aktibidad ang sinalihan ni James?",
-    choices: ["Pagdiriwang", "Sayawan", "Tree planting", "Basura clean-up"],
-    correctAnswer: 2,
-    hint: "Ito ay tumutulong sa kalikasan."
-  },
-  {
-    story: "Nagbigay ng simpleng regalo si Ivy sa kanyang guro sa Araw ng mga Guro.",
-    question: "Kailan nagbigay ng regalo si Ivy?",
-    choices: ["Pasko", "Bagong Taon", "Araw ng mga Guro", "Buwan ng Wika"],
-    correctAnswer: 2,
-    hint: "Ito ay espesyal para sa kanyang guro."
-  },
-  {
-    story: "Tumulong si Bryan sa paglalagay ng dekorasyon sa silid-aralan.",
-    question: "Anong ginawa ni Bryan sa silid-aralan?",
-    choices: ["Sinira ito", "Nilinisan ito", "Dinagdagan ng dekorasyon", "Tinulugan"],
-    correctAnswer: 2,
-    hint: "Ginawa ito upang mas gumanda ang klasrum."
-  },
-  {
-    story: "Naglakad si Liza papuntang paaralan upang hindi mahuli sa klase.",
-    question: "Bakit naglakad si Liza sa paaralan?",
-    choices: ["Para mamasyal", "Para hindi mahuli", "Para maglaro", "Para bumili ng pagkain"],
-    correctAnswer: 1,
-    hint: "Ayaw niyang mahuli sa klase."
-  },
-  {
-    story: "Ipinagtanggol ni Rob ang kanyang kaklase na inaapi ng iba.",
-    question: "Ano ang ginawa ni Rob?",
-    choices: ["Nanood lang", "Tumawa", "Umalis", "Ipinagtanggol ang inaapi"],
-    correctAnswer: 3,
-    hint: "Nagpakita siya ng tapang at pagkakaibigan."
-  },
-  {
-    story: "Tinulungan ni Sofia ang kanyang nanay sa paglalaba tuwing Linggo.",
-    question: "Anong ginagawa ni Sofia tuwing Linggo?",
-    choices: ["Naglalaro", "Naglalaba", "Nag-aaral", "Natutulog"],
-    correctAnswer: 1,
-    hint: "Tumulong siya sa gawaing bahay."
-  },
-  {
-    story: "Nagpaalala si Emma sa kaklase tungkol sa darating na pagsusulit.",
-    question: "Ano ang ipinapaalala ni Emma?",
-    choices: ["Buwan ng Wika", "Piyesta", "Pagsusulit", "Holiday"],
-    correctAnswer: 2,
-    hint: "Tinutulungan niya ang kaklase na makapaghanda."
-  },
-  {
-    story: "Sumulat si Andrei ng liham ng pasasalamat sa kanyang guro.",
-    question: "Kanino sumulat si Andrei?",
-    choices: ["Kaklase", "Nanay", "Guro", "Kaibigan"],
-    correctAnswer: 2,
-    hint: "Isinulat ito bilang pasasalamat sa taong nagtuturo sa kanya."
-  },
-  {
-    story: "Nagbigay ng upuan si Kent sa matandang babae sa bus.",
-    question: "Ano ang ginawa ni Kent sa bus?",
-    choices: ["Uminom ng tubig", "Nagbasa ng libro", "Nagbigay ng upuan", "Nakatulog"],
-    correctAnswer: 2,
-    hint: "Isinuko niya ang kanyang upuan bilang paggalang."
-  },
-  {
-    story: "Tuwing recess, ibinabahagi ni Lara ang kanyang baon sa kanyang kaibigan.",
-    question: "Kanino ibinabahagi ni Lara ang kanyang baon?",
-    choices: ["Sa guro", "Sa kapatid", "Sa kaibigan", "Sa janitor"],
-    correctAnswer: 2,
-    hint: "Isang kilos ng pagiging mapagbigay sa kaibigan."
-  },
-  {
-    story: "Sumunod si Alvin sa patakaran ng paaralan na bawal magkalat.",
-    question: "Ano ang ginawa ni Alvin sa patakaran ng paaralan?",
-    choices: ["Hindi sumunod", "Sinunod", "Ipinagwalang-bahala", "Pinagtawanan"],
-    correctAnswer: 1,
-    hint: "Ipinakita niya ang pagiging disiplinado."
-  },
-  {
-    story: "Tinulungan ni Bea ang kanyang kapatid sa paggawa ng proyekto sa agham.",
-    question: "Saan tinulungan ni Bea ang kanyang kapatid?",
-    choices: ["Sa matematika", "Sa agham", "Sa Filipino", "Sa araling panlipunan"],
-    correctAnswer: 1,
-    hint: "Ito ay isang proyekto tungkol sa siyensya."
-  },
-  {
-    story: "Naglagay ng basurahan si Teacher Anna sa likod ng silid upang hikayatin ang mga bata na huwag magkalat.",
-    question: "Bakit naglagay ng basurahan i Teacher Anna?",
-    choices: ["Para itago", "Para iwasan", "Para magkalat", "Para hikayatin ang kaayusan"],
-    correctAnswer: 3,
-    hint: "Layunin niyang turuan ang mga bata ng kalinisan."
-  }
-];
+
 
 const PaaralanQuest = () => {
   const [student_Id, setstudent_Id] = useState("");
@@ -368,10 +52,27 @@ const PaaralanQuest = () => {
   const current = storyData.length > 0 ? storyData[currentIndex] : null;
 
   useEffect(() => {
-    const shuffled = [...fullStoryData].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 15);
-    setStoryData(selected);
-  }, []);
+  axios.get("http://localhost:8080/api/story-questions")
+    .then(res => {
+      const raw = res.data;
+
+      const formatted = raw.map(item => ({
+        story: item.story,
+        question: item.question,
+        choices: item.choices,
+        correctAnswer: item.correctAnswer,
+        hint: item.hint,
+      }));
+
+      const shuffled = formatted.sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 15);
+      setStoryData(selected);
+    })
+    .catch(err => {
+      console.error("❌ Failed to load Paaralan Quest data:", err);
+    });
+}, []);
+
 
   useEffect(() => {
     if (storyData.length > 0) {

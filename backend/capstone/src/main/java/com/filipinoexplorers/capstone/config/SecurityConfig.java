@@ -53,6 +53,8 @@ public class SecurityConfig {
             // Permit all for memory game API endpoints to avoid 403
             .requestMatchers("/api/session/**").permitAll()
             .requestMatchers("/api/questions/**").permitAll()
+            .requestMatchers("/api/story-questions/**").permitAll()
+
             
             .anyRequest().authenticated()
     ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); 
