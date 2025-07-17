@@ -55,6 +55,7 @@ const ParkeQuest = () => {
       localStorage.removeItem("pq_score");
       localStorage.removeItem("pq_answered");
       localStorage.removeItem("pq_index");
+      localStorage.removeItem("pq_startTime");
       navigate("/#games");
     }, 3000);
   } catch (err) {
@@ -69,12 +70,24 @@ const ParkeQuest = () => {
   const [finalScore, setFinalScore] = useState(null);
 
   useEffect(() => {
-  axios.get("http://localhost:8080/api/parkequest/timer").then((res) => {
-    const seconds = res.data;
-    setTotalSeconds(seconds);
-    setSecondsLeft(seconds);
-  });
-}, []);
+      axios.get("http://localhost:8080/api/parkequest/timer").then((res) => {
+        const total = res.data;
+        setTotalSeconds(total);
+
+        // ⏳ Save game start time only ONCE
+        const savedStartTime = localStorage.getItem("pq_startTime");
+        if (!savedStartTime) {
+          const now = Date.now();
+          localStorage.setItem("pq_startTime", now.toString());
+          setSecondsLeft(total);
+        } else {
+          const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
+          const remaining = total - elapsed;
+          setSecondsLeft(remaining > 0 ? remaining : 0);
+        }
+      });
+    }, []);
+
 
 
   useEffect(() => {
@@ -262,8 +275,8 @@ const ParkeQuest = () => {
         <img src={Logo} alt="Logo" className="w-40" />
       </div>
 
-      <div className="w-full text-center mt-6">
-        <div className="inline-block bg-amber-100 border-4 border-amber-800 px-8 py-4 rounded-xl shadow-md">
+      <div className="w-full flex justify-start mt-6 pl-[375px]">
+        <div className="w-[600px] bg-amber-100 border-4 border-amber-800 px-8 py-4 rounded-xl shadow-md text-center">
           <h1 className="text-3xl font-bold text-amber-900">Hulaan ang Salita</h1>
           <p className="text-lg text-amber-800">Buoin ang salita na tinutukoy ng kahulugan</p>
         </div>

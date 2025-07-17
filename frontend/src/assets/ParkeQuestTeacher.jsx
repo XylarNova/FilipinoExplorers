@@ -1,118 +1,117 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Logo from "../assets/images/Logo.png";
-import Background from "../assets/images/Parke Game/Parke Quest BG.png";
+"use client"
+
+import { useEffect, useState } from "react"
+import axios from "axios"
+
+// Since we can't import the actual images, I'll use placeholder URLs
+// You can replace these with your actual image imports
+import Logo from "../assets/images/Logo.png"
+import Background from "../assets/images/Parke Game/Parke Quest BG.png"
 
 const ParkeQuestTeacher = () => {
-  const [story, setStory] = useState("");
-  const [question, setQuestion] = useState("");
-  const [fullSentence, setFullSentence] = useState("");
-  const [fragments, setFragments] = useState(["", "", ""]);
-  const [hint, setHint] = useState("");
-  const [message, setMessage] = useState("");
-  const [questionNumber, setQuestionNumber] = useState(1);
-  const [allQuestions, setAllQuestions] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [globalTimer, setGlobalTimer] = useState(5); // 🌍 Global game timer in minutes
-  const [scores, setScores] = useState([]);
-  const [editingScore, setEditingScore] = useState(null);
-  const [editedName, setEditedName] = useState("");
-  const [editedScore, setEditedScore] = useState(0);
-
+  const [story, setStory] = useState("")
+  const [question, setQuestion] = useState("")
+  const [fullSentence, setFullSentence] = useState("")
+  const [fragments, setFragments] = useState(["", "", ""])
+  const [hint, setHint] = useState("")
+  const [message, setMessage] = useState("")
+  const [questionNumber, setQuestionNumber] = useState(1)
+  const [allQuestions, setAllQuestions] = useState([])
+  const [editingId, setEditingId] = useState(null)
+  const [globalTimer, setGlobalTimer] = useState(5)
+  const [scores, setScores] = useState([])
+  const [editingScore, setEditingScore] = useState(null)
+  const [editedName, setEditedName] = useState("")
+  const [editedScore, setEditedScore] = useState(0)
 
   const fetchScores = async () => {
-  try {
-    const res = await axios.get("http://localhost:8080/api/parkequest/scores");
-    setScores(res.data);
-  } catch (error) {
-    console.error("❌ Failed to fetch scores:", error);
+    try {
+      const res = await axios.get("http://localhost:8080/api/parkequest/scores")
+      setScores(res.data)
+    } catch (error) {
+      console.error("❌ Failed to fetch scores:", error)
+    }
   }
-    };
 
-    const handleDeleteScore = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this score?")) return;
-  try {
-    await axios.delete(`http://localhost:8080/api/parkequest/scores/${id}`);
-    fetchScores();
-  } catch (err) {
-    console.error("Delete score failed", err);
+  const handleDeleteScore = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this score?")) return
+    try {
+      await axios.delete(`http://localhost:8080/api/parkequest/scores/${id}`)
+      fetchScores()
+    } catch (err) {
+      console.error("Delete score failed", err)
+    }
   }
-};
 
-const handleEditScore = (score) => {
-  setEditingScore(score.id);
-  setEditedName(score.studentName);
-  setEditedScore(score.score);
-};
-
-const handleUpdateScore = async () => {
-  try {
-    await axios.put(`http://localhost:8080/api/parkequest/scores/${editingScore}`, {
-      studentName: editedName,
-      score: editedScore,
-    });
-    setEditingScore(null);
-    fetchScores();
-  } catch (err) {
-    console.error("Update score failed", err);
+  const handleEditScore = (score) => {
+    setEditingScore(score.id)
+    setEditedName(score.studentName)
+    setEditedScore(score.score)
   }
-};
 
-
-  
-
+  const handleUpdateScore = async () => {
+    try {
+      await axios.put(`http://localhost:8080/api/parkequest/scores/${editingScore}`, {
+        studentName: editedName,
+        score: editedScore,
+      })
+      setEditingScore(null)
+      fetchScores()
+    } catch (err) {
+      console.error("Update score failed", err)
+    }
+  }
 
   useEffect(() => {
-    fetchAllQuestions();
-    fetchGlobalTimer();
-    fetchScores();
-  }, []);
+    fetchAllQuestions()
+    fetchGlobalTimer()
+    fetchScores()
+  }, [])
 
   const fetchAllQuestions = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/parkequest");
-      setAllQuestions(res.data);
-      setQuestionNumber(res.data.length + 1);
+      const res = await axios.get("http://localhost:8080/api/parkequest")
+      setAllQuestions(res.data)
+      setQuestionNumber(res.data.length + 1)
     } catch (error) {
-      console.error("Error fetching questions:", error);
+      console.error("Error fetching questions:", error)
     }
-  };
+  }
 
   const fetchGlobalTimer = async () => {
-  try {
-    const res = await axios.get("http://localhost:8080/api/parkequest/timer");
-    setGlobalTimer(Math.ceil(res.data / 60)); // convert from seconds to minutes
-  } catch (error) {
-    console.error("Failed to fetch global timer:", error);
+    try {
+      const res = await axios.get("http://localhost:8080/api/parkequest/timer")
+      setGlobalTimer(Math.ceil(res.data / 60))
+    } catch (error) {
+      console.error("Failed to fetch global timer:", error)
+    }
   }
-};
-
 
   const handleSplitSentence = () => {
-    const words = fullSentence.trim().split(" ");
-    const splitCount = Math.ceil(words.length / 3);
-    const part1 = words.slice(0, splitCount).join(" ");
-    const part2 = words.slice(splitCount, splitCount * 2).join(" ");
-    const part3 = words.slice(splitCount * 2).join(" ");
-    const shuffled = [part1, part2, part3].sort(() => Math.random() - 0.5);
-    setFragments(shuffled);
-  };
+    const words = fullSentence.trim().split(" ")
+    const splitCount = Math.ceil(words.length / 3)
+    const part1 = words.slice(0, splitCount).join(" ")
+    const part2 = words.slice(splitCount, splitCount * 2).join(" ")
+    const part3 = words.slice(splitCount * 2).join(" ")
+    const shuffled = [part1, part2, part3].sort(() => Math.random() - 0.5)
+    setFragments(shuffled)
+  }
 
   const handleFragmentChange = (index, value) => {
-    const updated = [...fragments];
-    updated[index] = value;
-    setFragments(updated);
-  };
+    const updated = [...fragments]
+    updated[index] = value
+    setFragments(updated)
+  }
 
   const handleEdit = (q) => {
-    setEditingId(q.id);
-    setStory(q.story);
-    setQuestion(q.question);
-    setFullSentence(q.correctAnswer);
-    setHint(q.hint);
-    setFragments(q.choices.map(c => c.choice));
-    setMessage("✏️ Editing Question #" + q.id);
-  };
+    setEditingId(q.id)
+    setStory(q.story)
+    setQuestion(q.question)
+    setFullSentence(q.correctAnswer)
+    setHint(q.hint)
+    setFragments(q.choices.map((c) => c.choice))
+    setMessage("✏️ Editing Question #" + q.id)
+  }
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
@@ -121,22 +120,21 @@ const handleUpdateScore = async () => {
           headers: {
             Authorization: "Bearer dummy-token",
           },
-        });
-        setMessage("🗑️ Question deleted.");
-        fetchAllQuestions();
+        })
+        setMessage("🗑️ Question deleted.")
+        fetchAllQuestions()
       } catch (error) {
-        console.error("Delete error:", error);
-        setMessage("❌ Failed to delete question.");
+        console.error("Delete error:", error)
+        setMessage("❌ Failed to delete question.")
       }
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
+    e.preventDefault()
     if (!story || !question || !fullSentence || fragments.includes("") || !hint) {
-      setMessage("❌ Please fill out all fields, including a valid timer.");
-      return;
+      setMessage("❌ Please fill out all fields, including a valid timer.")
+      return
     }
 
     const dto = {
@@ -145,7 +143,7 @@ const handleUpdateScore = async () => {
       correctAnswer: fullSentence,
       choices: fragments,
       hint,
-      };
+    }
 
     try {
       if (editingId) {
@@ -153,251 +151,443 @@ const handleUpdateScore = async () => {
           headers: {
             Authorization: "Bearer dummy-token",
           },
-        });
-        setMessage(`✅ Question #${editingId} updated!`);
-        setEditingId(null);
+        })
+        setMessage(`✅ Question #${editingId} updated!`)
+        setEditingId(null)
       } else {
         await axios.post("http://localhost:8080/api/parkequest", dto, {
           headers: {
             Authorization: "Bearer dummy-token",
           },
-        });
-        setMessage("✅ Question #" + questionNumber + " submitted!");
-        setQuestionNumber((prev) => prev + 1);
+        })
+        setMessage("✅ Question #" + questionNumber + " submitted!")
+        setQuestionNumber((prev) => prev + 1)
       }
-
-      setStory("");
-      setQuestion("");
-      setFullSentence("");
-      setFragments(["", "", ""]);
-      setHint("");
-      fetchAllQuestions();
+      setStory("")
+      setQuestion("")
+      setFullSentence("")
+      setFragments(["", "", ""])
+      setHint("")
+      fetchAllQuestions()
     } catch (error) {
-      console.error("Submit error:", error);
-      setMessage("❌ Failed to submit. Try again.");
+      console.error("Submit error:", error)
+      setMessage("❌ Failed to submit. Try again.")
     }
-  };
+  }
 
   const handleUpdateGlobalTimer = async () => {
-  if (globalTimer < 1 || globalTimer > 60) {
-    setMessage("⏰ Please set a timer between 1 and 60 minutes.");
-    return;
+    if (globalTimer < 1 || globalTimer > 60) {
+      setMessage("⏰ Please set a timer between 1 and 60 minutes.")
+      return
+    }
+    try {
+      await axios.post(`http://localhost:8080/api/parkequest/timer?seconds=${globalTimer * 60}`)
+      setMessage(`✅ Global timer set to ${globalTimer} minute(s)!`)
+    } catch (error) {
+      console.error("Failed to update global timer:", error)
+      setMessage("❌ Failed to update global timer.")
+    }
   }
 
-  try {
-    await axios.post(`http://localhost:8080/api/parkequest/timer?seconds=${globalTimer * 60}`);
-
-
-    setMessage(`✅ Global timer set to ${globalTimer} minute(s)!`);
-  } catch (error) {
-    console.error("Failed to update global timer:", error);
-    setMessage("❌ Failed to update global timer.");
+  // Format date and time properly
+  const formatDateTime = (timestamp) => {
+    const date = new Date(timestamp)
+    const dateStr = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+    const timeStr = date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+    return { dateStr, timeStr }
   }
-};
-
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center flex items-center justify-center py-10 px-4"
-      style={{
-        backgroundImage: `url(${Background})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="w-full max-w-2xl bg-white bg-opacity-90 p-8 rounded-2xl shadow-lg font-['Fredoka'] border border-gray-200">
-        <div className="flex justify-center mb-6">
-          <img src={Logo} alt="Logo" className="w-40" />
+    <>
+      <style jsx global>{`
+        @import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap");
+        
+        * {
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: "Fredoka", cursive;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .wood-panel {
+          background: #4e2c1c;
+          border-radius: 30px;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+          border: 3px solid #8B4A32;
+        }
+        
+        .wood-input {
+          background: #fde68a;
+          border: 2px solid #8B4A32;
+          border-radius: 12px;
+          padding: 12px 16px;
+          font-family: "Fredoka", cursive;
+          font-size: 16px;
+          color: #4e2c1c;
+          font-weight: 500;
+        }
+        
+        .wood-input:focus {
+          outline: none;
+          border-color: #ffca28;
+          box-shadow: 0 0 0 3px rgba(255, 202, 40, 0.3);
+        }
+        
+        .wood-button {
+          background: #ffca28;
+          border: 2px solid #8B4A32;
+          border-radius: 12px;
+          padding: 12px 24px;
+          font-family: "Fredoka", cursive;
+          font-weight: bold;
+          color: #4e2c1c;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .wood-button:hover {
+          background: #ffd54f;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .wood-button:active {
+          transform: translateY(0);
+        }
+        
+        .wood-button-blue {
+          background: #1982fc;
+          color: white;
+        }
+        
+        .wood-button-blue:hover {
+          background: #1976d2;
+        }
+        
+        .wood-button-red {
+          background: #f44336;
+          color: white;
+        }
+        
+        .wood-button-red:hover {
+          background: #d32f2f;
+        }
+        
+        .wood-button-green {
+          background: #4caf50;
+          color: white;
+        }
+        
+        .wood-button-green:hover {
+          background: #388e3c;
+        }
+        
+        .stats-circle {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background: #ffca28;
+          border: 3px solid #8B4A32;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          color: #4e2c1c;
+          font-size: 18px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+      `}</style>
+
+      <div
+        className="flex flex-col min-h-screen bg-cover bg-center font-['Fredoka'] relative"
+        style={{ backgroundImage: `url(${Background})` }}
+      >
+        {/* Logo at top center */}
+        <div className="w-full text-center pt-6 pb-4">
+          <img src={Logo || "/placeholder.svg"} alt="Logo" className="w-40 mx-auto" />
         </div>
 
-
-        <div className="mb-8">
-        <label className="block font-bold mb-2 text-[#073B4C]">🌍 Set Global Game Timer (minutes)</label>
-        <div className="flex gap-2">
-          <input
-            type="number"
-            className="w-full p-2 border rounded"
-            min={1}
-            max={60}
-            value={globalTimer}
-            onChange={(e) => setGlobalTimer(parseInt(e.target.value))}
-          />
-          <button
-            onClick={handleUpdateGlobalTimer}
-            type="button"
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            Update Timer
-          </button>
+        {/* Title Banner */}
+        <div className="w-full text-center mb-6">
+          <div className="inline-block bg-amber-100 border-4 border-amber-800 px-8 py-4 rounded-xl shadow-md">
+            <h1 className="text-3xl font-bold text-amber-900">🌟 Parke Quest Teacher Portal 🌟</h1>
+            <p className="text-lg text-amber-800">Gumawa ng mga Tanong para sa mga Batang Eksplorador!</p>
+          </div>
         </div>
-      </div>
 
+        <div className="flex flex-1 justify-center items-start gap-8 px-6 pb-12">
+          {/* Left Panel - Stats */}
+          <div className="flex flex-col gap-6">
+            {/* Stats Panel */}
+            <div className="wood-panel p-6 text-white text-center min-w-[220px]">
+              <h3 className="text-xl font-bold mb-4 text-[#fde68a]">📊 Statistics</h3>
+              <div className="flex flex-col gap-4">
+                <div className="stats-circle mx-auto">
+                  <span>{allQuestions.length}</span>
+                </div>
+                <p className="text-[#fde68a] font-semibold">Total Questions</p>
 
-        <form onSubmit={handleSubmit}>
-          <h2 className="text-2xl font-bold mb-4 text-center text-[#073B4C]">
-            {editingId ? `Edit Parke Quest Question #${editingId}` : `Add Parke Quest Question #${questionNumber}`}
-          </h2>
-
-          <label className="block font-semibold">Story</label>
-          <textarea
-            className="w-full p-3 border rounded mb-4"
-            rows={3}
-            value={story}
-            onChange={(e) => setStory(e.target.value)}
-          />
-
-          <label className="block font-semibold">Question</label>
-          <input
-            className="w-full p-2 border rounded mb-4"
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-          />
-
-          <label className="block font-semibold">Correct Full Sentence</label>
-          <input
-            className="w-full p-2 border rounded mb-2"
-            type="text"
-            value={fullSentence}
-            onChange={(e) => setFullSentence(e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={handleSplitSentence}
-            className="mb-4 bg-[#FFD166] text-[#073B4C] px-4 py-2 rounded hover:bg-[#ffc94a]"
-          >
-            Split into Fragments
-          </button>
-
-          {fragments.map((frag, index) => (
-            <div key={index} className="mb-2">
-              <label className="font-semibold">Fragment {index + 1}</label>
-              <input
-                type="text"
-                className="w-full p-2 border rounded"
-                value={frag}
-                onChange={(e) => handleFragmentChange(index, e.target.value)}
-              />
-            </div>
-          ))}
-
-          <label className="block font-semibold mt-4">Hint</label>
-          <input
-            className="w-full p-2 border rounded mb-4"
-            type="text"
-            value={hint}
-            onChange={(e) => setHint(e.target.value)}
-          />
-
-
-
-          <button
-            type="submit"
-            className="w-full bg-[#06D6A0] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#05c594] transition-all"
-          >
-            {editingId ? "Update Question" : "Submit Question"}
-          </button>
-
-          {message && <p className="mt-4 text-center text-sm">{message}</p>}
-        </form>
-
-        <div className="mt-10">
-          <h3 className="text-lg font-bold mb-2 text-[#073B4C]">Existing Questions</h3>
-          {allQuestions.length === 0 && (
-            <p className="text-sm italic text-gray-500">No questions yet.</p>
-          )}
-          {allQuestions.map((q) => (
-            <div key={q.id} className="bg-white border rounded p-4 mb-3 shadow-sm">
-              <p><strong>Q#{q.id}:</strong> {q.question}</p>
-              <p className="text-sm italic">Story: {q.story}</p>
-              <p className="text-sm">Answer: <span className="text-green-700">{q.correctAnswer}</span></p>
-              <p className="text-sm">Hint: {q.hint}</p>
-              <p className="text-sm">Choices: {q.choices.map(c => c.choice).join(", ")}</p>
-              <div className="flex gap-2 mt-2">
-                <button onClick={() => handleEdit(q)} className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1 rounded">Edit</button>
-                <button onClick={() => handleDelete(q.id)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded">Delete</button>
+                <div className="stats-circle mx-auto">
+                  <span>{scores.length}</span>
+                </div>
+                <p className="text-[#fde68a] font-semibold">Student Scores</p>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
 
-            <div className="mt-10">
-      <h3 className="text-lg font-bold mb-2 text-[#073B4C]">📊 Student Scores</h3>
-      {scores.length === 0 ? (
-        <p className="text-sm italic text-gray-500">No scores submitted yet.</p>
-      ) : (
-        <table className="w-full text-sm border mt-2 bg-white rounded shadow">
-          <thead className="bg-[#073B4C] text-white">
-            <tr>
-              <th className="p-2 text-left">Student Name</th>
-              <th className="p-2 text-left">Score</th>
-              <th className="p-2 text-left">Submitted At</th>
-              <th className="p-2 text-left">Actions</th> {/* ✅ Add this */}
-            </tr>
-          </thead>
-
-          <tbody>
-          {scores.map((s, i) => (
-            <tr key={i} className="border-t">
-              <td className="p-2">
-                {editingScore === s.id ? (
-                  <input
-                    type="text"
-                    className="border px-2 py-1 rounded w-full"
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                  />
-                ) : (
-                  s.studentName || "Anonymous"
-                )}
-              </td>
-              <td className="p-2">
-                {editingScore === s.id ? (
-                  <input
-                    type="number"
-                    className="border px-2 py-1 rounded w-full"
-                    value={editedScore}
-                    onChange={(e) => setEditedScore(Number(e.target.value))}
-                  />
-                ) : (
-                  s.score
-                )}
-              </td>
-              <td className="p-2">{new Date(s.timestamp).toLocaleString()}</td>
-              <td className="p-2 space-x-1 whitespace-nowrap">
-                {editingScore === s.id ? (
-                  <button
-                    onClick={handleUpdateScore}
-                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
-                  >
-                    Save
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleEditScore(s)}
-                    className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded"
-                  >
-                    Edit
-                  </button>
-                )}
-                <button
-                  onClick={() => handleDeleteScore(s.id)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                >
-                  Delete
+          {/* Main Content Panel */}
+          <div className="flex flex-col items-center gap-6">
+            {/* Timer Settings */}
+            <div className="wood-panel p-6 text-white w-[700px]">
+              <h3 className="text-xl font-bold mb-4 text-[#fde68a] text-center">⏰ Global Game Timer</h3>
+              <div className="flex items-center justify-center gap-4">
+                <label className="text-[#fde68a] font-semibold">Minutes:</label>
+                <input
+                  type="number"
+                  className="wood-input w-20 text-center"
+                  min={1}
+                  max={60}
+                  value={globalTimer}
+                  onChange={(e) => setGlobalTimer(Number.parseInt(e.target.value))}
+                />
+                <button onClick={handleUpdateGlobalTimer} className="wood-button">
+                  ⏰ Set Timer
                 </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+              </div>
+            </div>
 
-        </table>
-      )}
-    </div>
+            {/* Question Form */}
+            <div className="wood-panel p-6 text-white w-[700px]">
+              <h2 className="text-2xl font-bold mb-6 text-center text-[#fde68a]">
+                {editingId ? `✏️ Edit Question #${editingId}` : `➕ Create Question #${questionNumber}`}
+              </h2>
 
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Story */}
+                <div>
+                  <label className="block text-[#fde68a] font-semibold mb-2">📚 Adventure Story</label>
+                  <textarea
+                    className="wood-input w-full"
+                    rows={3}
+                    value={story}
+                    onChange={(e) => setStory(e.target.value)}
+                    placeholder="Tell an exciting story about our Filipino explorer..."
+                  />
+                </div>
+
+                {/* Question */}
+                <div>
+                  <label className="block text-[#fde68a] font-semibold mb-2">❓ Question</label>
+                  <input
+                    className="wood-input w-full"
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    placeholder="What question will challenge our young explorers?"
+                  />
+                </div>
+
+                {/* Full Sentence */}
+                <div>
+                  <label className="block text-[#fde68a] font-semibold mb-2">✅ Correct Answer</label>
+                  <input
+                    className="wood-input w-full mb-3"
+                    value={fullSentence}
+                    onChange={(e) => setFullSentence(e.target.value)}
+                    placeholder="Write the complete correct answer..."
+                  />
+                  <button type="button" onClick={handleSplitSentence} className="wood-button">
+                    ✨ Split into Fragments
+                  </button>
+                </div>
+
+                {/* Fragments */}
+                <div>
+                  <label className="block text-[#fde68a] font-semibold mb-3">🧩 Answer Fragments</label>
+                  <div className="grid grid-cols-1 gap-3">
+                    {fragments.map((frag, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <span className="text-[#fde68a] font-semibold min-w-[100px]">Fragment {index + 1}:</span>
+                        <input
+                          className="wood-input flex-1"
+                          value={frag}
+                          onChange={(e) => handleFragmentChange(index, e.target.value)}
+                          placeholder={`Fragment ${index + 1}...`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Hint */}
+                <div>
+                  <label className="block text-[#fde68a] font-semibold mb-2">💡 Hint</label>
+                  <input
+                    className="wood-input w-full"
+                    value={hint}
+                    onChange={(e) => setHint(e.target.value)}
+                    placeholder="Give the students a helpful clue..."
+                  />
+                </div>
+
+                <button type="submit" className="wood-button w-full text-lg py-4">
+                  {editingId ? "💾 Update Question" : "➕ Create Question"}
+                </button>
+
+                {message && (
+                  <div className="text-center p-4 bg-[#fde68a] rounded-lg">
+                    <p className="font-bold text-[#4e2c1c]">{message}</p>
+                  </div>
+                )}
+              </form>
+            </div>
+          </div>
+
+          {/* Right Panel - Questions & Scores */}
+          <div className="flex flex-col gap-6 w-[450px]">
+            {/* Questions List */}
+            <div className="wood-panel p-6 text-white max-h-[400px] overflow-y-auto">
+              <h3 className="text-xl font-bold mb-4 text-[#fde68a] text-center">📚 Question Library</h3>
+              {allQuestions.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">🎯</div>
+                  <p className="text-[#fde68a]">No questions yet!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {allQuestions.map((q) => (
+                    <div key={q.id} className="bg-[#8B4A32] p-4 rounded-lg border-2 border-[#fde68a]">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="bg-[#ffca28] text-[#4e2c1c] px-2 py-1 rounded font-bold text-sm">
+                          Q#{q.id}
+                        </span>
+                        <div className="flex gap-2">
+                          <button onClick={() => handleEdit(q)} className="wood-button-blue px-3 py-1 text-sm">
+                            ✏️
+                          </button>
+                          <button onClick={() => handleDelete(q.id)} className="wood-button-red px-3 py-1 text-sm">
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-[#fde68a] font-semibold mb-1">{q.question}</p>
+                      <p className="text-xs text-gray-300 italic mb-2">{q.story}</p>
+                      <p className="text-xs text-green-300">✅ {q.correctAnswer}</p>
+                      <p className="text-xs text-blue-300">💡 {q.hint}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Scores Panel */}
+            <div className="wood-panel p-6 text-white max-h-[350px] overflow-y-auto">
+              <h3 className="text-xl font-bold mb-4 text-[#fde68a] text-center">🏆 Student Scores</h3>
+              {scores.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4">🏅</div>
+                  <p className="text-[#fde68a]">No scores yet!</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {scores.map((s, i) => {
+                    const { dateStr, timeStr } = formatDateTime(s.timestamp)
+                    return (
+                      <div key={i} className="bg-[#8B4A32] p-4 rounded-lg border border-[#fde68a]">
+                        {editingScore === s.id ? (
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-[#fde68a] text-xs font-semibold mb-1">Student Name:</label>
+                              <input
+                                className="wood-input w-full text-sm"
+                                value={editedName}
+                                onChange={(e) => setEditedName(e.target.value)}
+                                placeholder="Enter student name..."
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[#fde68a] text-xs font-semibold mb-1">Score:</label>
+                              <input
+                                type="number"
+                                className="wood-input w-20 text-sm"
+                                value={editedScore}
+                                onChange={(e) => setEditedScore(Number(e.target.value))}
+                                min="0"
+                              />
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                              <button
+                                onClick={handleUpdateScore}
+                                className="wood-button-green px-3 py-1 text-xs flex-1"
+                              >
+                                💾 Save
+                              </button>
+                              <button
+                                onClick={() => setEditingScore(null)}
+                                className="wood-button px-3 py-1 text-xs flex-1"
+                              >
+                                ❌ Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex-1">
+                                <p className="text-[#fde68a] font-bold text-sm mb-1">
+                                  👤 {s.studentName || "Anonymous Explorer"}
+                                </p>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="bg-[#4caf50] text-white px-2 py-1 rounded text-xs font-bold">
+                                    ⭐ {s.score} pts
+                                  </span>
+                                </div>
+                                <div className="text-xs text-gray-300">
+                                  <p className="mb-1">📅 {dateStr}</p>
+                                  <p>🕐 {timeStr}</p>
+                                </div>
+                              </div>
+                              <div className="flex flex-col gap-1 ml-2">
+                                <button
+                                  onClick={() => handleEditScore(s)}
+                                  className="wood-button-blue px-2 py-1 text-xs"
+                                  title="Edit Score"
+                                >
+                                  ✏️
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteScore(s.id)}
+                                  className="wood-button-red px-2 py-1 text-xs"
+                                  title="Delete Score"
+                                >
+                                  🗑️
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  );
-};
+    </>
+  )
+}
 
-export default ParkeQuestTeacher;
+export default ParkeQuestTeacher
