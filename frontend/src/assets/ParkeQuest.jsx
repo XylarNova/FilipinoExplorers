@@ -70,23 +70,33 @@ const ParkeQuest = () => {
   const [finalScore, setFinalScore] = useState(null);
 
   useEffect(() => {
-      axios.get("http://localhost:8080/api/parkequest/timer").then((res) => {
-        const total = res.data;
-        setTotalSeconds(total);
+        axios.get("http://localhost:8080/api/parkequest/timer").then((res) => {
+          const total = res.data;
+          setTotalSeconds(total);
 
-        // ⏳ Save game start time only ONCE
-        const savedStartTime = localStorage.getItem("pq_startTime");
-        if (!savedStartTime) {
+          const savedStartTime = localStorage.getItem("pq_startTime");
+          const parsed = parseInt(savedStartTime);
           const now = Date.now();
-          localStorage.setItem("pq_startTime", now.toString());
-          setSecondsLeft(total);
-        } else {
-          const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
-          const remaining = total - elapsed;
-          setSecondsLeft(remaining > 0 ? remaining : 0);
-        }
-      });
-    }, []);
+
+          // 🟢 New session if no start time, or invalid, or time already expired
+          if (!savedStartTime || isNaN(parsed) || now - parsed >= total * 1000) {
+            localStorage.setItem("pq_startTime", now.toString());
+            setSecondsLeft(total);
+            setScore(0);
+            setAnsweredIndices([]);
+            setResultMessage("");
+            localStorage.removeItem("pq_score");
+            localStorage.removeItem("pq_answered");
+            localStorage.removeItem("pq_index");
+          } else {
+            // 🔁 Resumed session
+            const elapsed = Math.floor((now - parsed) / 1000);
+            const remaining = total - elapsed;
+            setSecondsLeft(remaining > 0 ? remaining : 0);
+          }
+        });
+      }, []);
+
 
 
 
@@ -423,7 +433,7 @@ const ParkeQuest = () => {
             <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
               <div className="bg-white text-[#4e2c1c] p-8 rounded-xl shadow-lg text-center max-w-md font-bold text-xl">
                 ✅ Session submitted!<br />
-                Your final score: {finalScore} / {questions.length}
+                Your final score: {finalScore} / {questions.length * 2}
                 <div className="text-sm mt-2 text-gray-600">Returning to homepage...</div>
               </div>
             </div>
