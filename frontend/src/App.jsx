@@ -32,10 +32,13 @@ import InputsMemoryGame from './assets/InputsMemoryGame';
 import PaaralanQuestGroup from './assets/PaaralanQuestGroup';
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
-
+//harvey paaralan
 import GroupMode from './assets/Groupmode';
 import PaaralanQuestTeacher from './assets/PaaralanQuestTeacher';
 import CreateQuestion from './assets/CreateQuestion';
+import DisplayQuestions from './assets/DisplayQuestions';
+
+
 
 // Admin Side
 import AddWordOfTheDay from './adminpages/AddWordOfTheDay';
@@ -77,11 +80,14 @@ const App = () => {
 
         <Route path="/memorygame/:sessionId?" element={<MemoryGame />} />
         <Route path="/inputmemorygame" element={<InputsMemoryGame />} />
+      
         <Route path="/paaralanquest-individual" element={<PaaralanQuest />} />
         <Route path="/paaralanquest-group" element={<PaaralanQuestGroup />} />
         <Route path="/paaralanquest" element={<PaaralanQuest />} />
         <Route path="/paaralanquest-teacher" element={<PaaralanQuestTeacher />} />
         <Route path="/paaralanquest-teacher/create" element={<CreateQuestion />} />
+        <Route path="/paaralanquest-teacher/display" element={<DisplayQuestions />} />
+
         <Route path="/parkequest" element={<ParkeQuest />} />
 
         {/* Admin Side */}
