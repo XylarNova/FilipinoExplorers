@@ -8,6 +8,7 @@ import com.filipinoexplorers.capstone.repository.ClassRoomRepository;
 import com.filipinoexplorers.capstone.repository.StudentRepository;
 import com.filipinoexplorers.capstone.repository.TeacherRepository;
 import com.filipinoexplorers.capstone.service.JwtService;
+import com.filipinoexplorers.capstone.dto.ClassRoomDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -189,6 +190,7 @@ public class ClassRoomController {
     }
 
     // Student joined classes
+    // changed this method to return ClassRoomDTO with teacher's first and last names
     @GetMapping("/student/joined")
     public ResponseEntity<?> getJoinedClasses(@RequestHeader("Authorization") String token) {
         try {
@@ -200,7 +202,23 @@ public class ClassRoomController {
             }
 
             Student student = studentOpt.get();
-            return ResponseEntity.ok(student.getClassrooms());
+            Set<ClassRoom> joinedClasses = student.getClassrooms();
+
+            List<ClassRoomDTO> classDTOs = joinedClasses.stream().map(classRoom -> {
+                Teacher teacher = classRoom.getTeacher();
+                return new ClassRoomDTO(
+                    classRoom.getId(),
+                    classRoom.getName(),
+                    classRoom.getDescription(),
+                    classRoom.getEnrollmentMethod(),
+                    classRoom.getBannerUrl(),
+                    classRoom.getClassCode(),
+                    teacher != null ? teacher.getFirst_name() : null,
+                    teacher != null ? teacher.getLast_name() : null
+                );
+            }).toList();
+
+            return ResponseEntity.ok(classDTOs);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
         }

@@ -23,38 +23,35 @@ const StudentModule = ({ darkMode = false }) => {
         const gameIdTracker = new Set(); // Track unique game IDs
 
         for (const classroom of classes) {
-          try {
-            const res = await axiosInstance.get(`/gamesessions/classroom/${classroom.id}`);
-            const gamesInClass = res.data;
+  try {
+    const res = await axiosInstance.get(`/gamesessions/classroom/${classroom.id}`);
+    const gamesInClass = res.data;
 
-            gamesInClass.forEach((game) => {
-              // Create unique identifier for game-classroom combination
-              const gameKey = `${game.id}-${classroom.id}`;
-              
-              if (!gameIdTracker.has(gameKey)) {
-                gameIdTracker.add(gameKey);
-                
-                // Add classroom info to each game
-                const gameWithClassInfo = {
-                  ...game,
-                  classroomInfo: {
-                    id: classroom.id,
-                    name: classroom.name,
-                    teacherName: classroom.teacher 
-                      ? `${classroom.teacher.first_name} ${classroom.teacher.last_name}`
-                      : 'Unknown Teacher'
-                  },
-                  // Default gameType if null
-                  gameType: game.gameType || 'MemoryGame'
-                };
-                
-                allGamesWithClassInfo.push(gameWithClassInfo);
-              }
-            });
-          } catch (classError) {
-            console.error(`Error loading games for classroom ${classroom.id}:`, classError);
-          }
-        }
+    gamesInClass.forEach((game) => {
+      const gameKey = `${game.id}-${classroom.id}`;
+      
+      if (!gameIdTracker.has(gameKey)) {
+        gameIdTracker.add(gameKey);
+
+        const teacherName = `Teacher ${classroom.teacherFirstName} ${classroom.teacherLastName}`; // changed this line
+
+        const gameWithClassInfo = {
+          ...game,
+          classroomInfo: {
+            id: classroom.id,
+            name: classroom.name,
+            teacherName: teacherName
+          },
+          gameType: game.gameType || 'MemoryGame'
+        };
+
+        allGamesWithClassInfo.push(gameWithClassInfo);
+      }
+    });
+  } catch (classError) {
+    console.error(`Error loading games for classroom ${classroom.id}:`, classError);
+  }
+}
 
         // Group games by quarter
         const grouped = {};
@@ -215,7 +212,7 @@ const renderGameButton = (game) => {
                         <div className="flex-1">
                           <div className="font-semibold text-[#073B4C]">{game.gameTitle}</div>
                           <div className="text-xs text-[#073B4C] opacity-75 mt-1">
-                            {game.classroomInfo?.name} • {game.classroomInfo?.teacherName}
+                            {game.classroomInfo?.name} • {game.classroomInfo?.teacherName} 
                           </div>
                           <div className="text-xs text-[#073B4C] opacity-60 mt-1">
                             {game.category} • {game.gameType || 'MemoryGame'}
