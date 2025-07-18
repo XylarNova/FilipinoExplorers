@@ -12,6 +12,8 @@ const TeacherDashboard = () => {
   const [summary, setSummary] = useState({ totalClasses: 0, totalStudents: 0, activeModules: 0 });
   const [classOverview, setClassOverview] = useState([]);
   const [lastName, setLastName] = useState('');
+  const [timelineGames, setTimelineGames] = useState([]); //timeline state
+  const [sortOrder, setSortOrder] = useState('desc'); //order state for timeline
 
   useEffect(() => {
     const storedDarkMode = localStorage.getItem("darkMode");
@@ -25,22 +27,32 @@ const TeacherDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [summaryRes, classOverviewRes, userRes] = await Promise.all([
+        const token = localStorage.getItem("token");
+
+        const [summaryRes, classOverviewRes, userRes, gamesRes] = await Promise.all([
           axiosInstance.get('/teacher-dashboard/summary'),
           axiosInstance.get('/teacher-dashboard/class-overview'),
           axiosInstance.get('/auth/user'),
+          axiosInstance.get('/gamesessions/my-games', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+          }),
         ]);
 
         setSummary(summaryRes.data);
         setClassOverview(classOverviewRes.data);
         setLastName(userRes.data.lastName || '');
+        setTimelineGames(gamesRes.data); // timeline set
+
       } catch (error) {
-        console.error("Error loading dashboard data:", error);
+        console.error("❌ Failed to load dashboard data", error);
       }
     };
 
     fetchData();
   }, []);
+
 
   const toggleDarkMode = () => setDarkMode(prev => !prev);
 
@@ -135,10 +147,41 @@ const TeacherDashboard = () => {
           </button>
         </div>
 
-        <h2 className={`text-[30px] font-bold font-['Fredoka'] ${textClass} mb-4`}>
-          Timeline
-        </h2>
-        {/* Timeline content here */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className={`text-[30px] font-bold font-['Fredoka'] ${textClass}`}>
+            Timeline
+          </h2>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="text-sm rounded border border-gray-300 px-2 py-1 focus:outline-none"
+          >
+            <option value="desc">Newest</option>
+            <option value="asc">Oldest</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-2">
+          {timelineGames.length === 0 ? (
+            <p className={`${textClass} text-center`}>No games created yet.</p>
+          ) : (
+            timelineGames
+              .sort((a, b) => {
+                const dateA = new Date(a.lastModified);
+                const dateB = new Date(b.lastModified);
+                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+              }) //sort order logic
+              .slice(0, 5) //limit to 5 most recent games (can adjust as needed)
+              .map((game, idx) => (
+                <div key={idx} className="bg-white p-4 rounded-lg shadow border-l-4 border-[#06D6A0]">
+                  <h3 className="text-lg font-semibold text-[#073B4C] truncate">{game.gameTitle}</h3>
+                  <p className="text-sm text-gray-500 truncate">🗂️ {game.category}</p> 
+                  <p className="text-sm text-gray-400 truncate">👾 {game.gameType} | 📜 {game.status}</p> 
+                  <p className="text-xs text-gray-400">🕓 {new Date(game.lastModified).toLocaleString()}</p> 
+                </div> //can change emoji here to something custom
+              ))
+          )}
+        </div>
       </aside>
     </div>
   );
