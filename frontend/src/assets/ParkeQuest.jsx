@@ -293,21 +293,35 @@ const ParkeQuest = () => {
       </div>
 
       <div className="flex flex-1 justify-center items-center gap-10 px-6 py-12">
-        {/* Timer Stick */}
-        <div className="relative w-[140px] h-[320px] flex items-center justify-center">
+        {/* Timer Stick with static + dynamic liquid */}
+        <div className="relative w-[180px] h-[420px] flex items-center justify-center">
+          {/* Stick Background */}
           <img
             src={TimerLog}
             alt="Timer Stick"
-            className="absolute w-[180px] h-[420px] object-contain z-10"
+            className="absolute w-full h-full object-contain z-10"
           />
-          <div
-            className="absolute bottom-[20px] w-[20px] bg-emerald-400 z-20 transition-all duration-1000 ease-linear rounded-full"
-            style={{
-              height: `${progress}%`,
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          ></div>
+
+          {/* Static Liquid Layer (base fill) */}
+          <div className="absolute w-[36px] h-[360px] bottom-[25px] z-20 flex items-end justify-center overflow-hidden rounded-full">
+            <div
+              className="w-full h-full"
+              style={{ backgroundColor: "#fff3bf" }}
+            />
+          </div>
+
+          {/* Dynamic Liquid Layer (shrinking fill) */}
+          <div className="absolute w-[36px] h-[360px] bottom-[25px] z-30 flex items-end justify-center overflow-hidden rounded-full">
+            <div
+              className="w-full"
+              style={{
+                height: `${progress}%`,
+                backgroundColor: "#1fd0a1",
+                borderRadius: "9999px",
+                transition: "all 1s ease",
+              }}
+            />
+          </div>
         </div>
 
         {/* Game Panel */}
