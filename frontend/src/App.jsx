@@ -37,6 +37,8 @@ import GroupMode from './assets/Groupmode';
 import PaaralanQuestTeacher from './assets/PaaralanQuestTeacher';
 import CreateQuestion from './assets/CreateQuestion';
 import DisplayQuestions from './assets/DisplayQuestions';
+import UpdateQuestion from './assets/UpdateQuestion';
+
 
 
 
@@ -87,6 +89,8 @@ const App = () => {
         <Route path="/paaralanquest-teacher" element={<PaaralanQuestTeacher />} />
         <Route path="/paaralanquest-teacher/create" element={<CreateQuestion />} />
         <Route path="/paaralanquest-teacher/display" element={<DisplayQuestions />} />
+        <Route path="/paaralanquest-teacher/update/:id" element={<UpdateQuestion />} />
+
 
         <Route path="/parkequest" element={<ParkeQuest />} />
 

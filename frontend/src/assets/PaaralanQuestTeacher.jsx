@@ -30,12 +30,7 @@ const PaaralanQuestTeacher = () => {
           onClick={() => navigate('/paaralanquest-teacher/display')}
           style={buttonStyle}
         >
-          📋 Display Questions
-        </button>
-        <button
-          onClick={() => navigate('/paaralanquest-teacher/update')}
-          style={buttonStyle}
-        >
+          
           ✏️ Update Question
         </button>
         <button
