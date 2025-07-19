@@ -28,4 +28,7 @@ public interface GameBankRepository extends JpaRepository<GameBank, Long> {
     List<GameBank> findByCategoryAndReview(String category, boolean review);
     List<GameBank> findByQuarterAndReview(String quarter, boolean review);
     List<GameBank> findByStatusAndCategory(String status, String category);
+    List<GameBank> findByGameType(String gameType);
+    List<GameBank> findByCategoryAndGameType(String category, String gameType);
+
 }

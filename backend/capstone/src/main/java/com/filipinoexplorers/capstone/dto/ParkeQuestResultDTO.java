@@ -1,4 +1,3 @@
-// ParkeQuestResultDTO.java
 package com.filipinoexplorers.capstone.dto;
 
 import lombok.AllArgsConstructor;

@@ -33,7 +33,7 @@ public class SecurityConfig {
             .cors(withDefaults()) // Enable CORS (cross-origin resource sharing)
          .authorizeHttpRequests(authz -> authz
             .requestMatchers("/api/auth/register", "/api/auth/login", "/api/group-games/**", "/api/auth/profile-picture").permitAll()
-            .requestMatchers("/api/group-progress/**").permitAll()
+            .requestMatchers("/api/group-progress/**", "/api/class-records/**").permitAll()
             .requestMatchers("/api/auth/change-password").authenticated()
 
             .requestMatchers("/api/words/get").permitAll()
@@ -54,6 +54,10 @@ public class SecurityConfig {
             .requestMatchers("/api/session/**").permitAll()
             .requestMatchers("/api/questions/**").permitAll()
             .requestMatchers("/api/story-questions/**").permitAll()
+
+            // Parke Quest Permit
+            .requestMatchers("/api/parkequest/**").permitAll()
+            .requestMatchers("/api/parkequestteacher/**").permitAll()
 
             
             .anyRequest().authenticated()

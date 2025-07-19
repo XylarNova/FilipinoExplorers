@@ -6,6 +6,7 @@ import java.util.List;
 @Data
 public class GameBankRequestDTO {
     private String gameTitle;
+    private String gameType;
     private String category;
     private boolean leaderboard;
     private boolean hints;
