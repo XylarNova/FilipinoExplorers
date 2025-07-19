@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Background from '../assets/images/Paaralan Quest/Paaralan Quest BG.png';
 import Logo from '../assets/images/Logo.png';
 import StickImage from '../assets/images/Buttons and Other/Timer Log.png';
@@ -26,162 +27,155 @@ const iconStyle = {
   fontSize: '20px',
 };
 
-const storyData = [
-  {
-    story: "Si Juan ay isang masipag na estudyante na laging tumutulong sa kanyang mga kaklase.",
-    question: "Ano ang ipinapakita ni Juan sa kanyang mga kaklase?",
-    choices: ["Katamaran", "Kasipagan", "Kawalang-galang", "Pag-aalinlangan"],
-    correctAnswer: 1,
-    hint: "Si Juan ay hindi tamad at palaging tumutulong."
-  },
-  {
-    story: "Isang araw, nagtanim ng buto ng mangga si Ana at araw-araw niya itong dinilig.",
-    question: "Ano ang aral sa kwento ni Ana?",
-    choices: ["Ang prutas ay masarap", "Ang tubig ay mahalaga", "Ang tiyaga ay may magandang bunga", "Ang araw ay mainit"],
-    correctAnswer: 2,
-    hint: "Araw-araw niyang dinilig ang kanyang tanim."
-  },
-  {
-    story: "Tuwing hapon, tinutulungan ni Marco ang kanyang lola sa pagtitinda ng gulay sa palengke.",
-    question: "Ano ang ipinapakita ni Marco sa kanyang lola?",
-    choices: ["Pagiging makasarili", "Pagmamalaki", "Paggalang at pagtulong", "Pag-aaksaya ng oras"],
-    correctAnswer: 2,
-    hint: "Tumutulong si Marco sa kanyang lola araw-araw."
-  },
-  {
-    story: "Masayang naglaro si Liza at ang kanyang mga kaibigan sa parke pagkatapos ng klase.",
-    question: "Ano ang ginagawa ni Liza pagkatapos ng klase?",
-    choices: ["Nag-aaral", "Nagpapahinga", "Naglalaba", "Naglaro sa parke"],
-    correctAnswer: 3,
-    hint: "Ginawa ito ni Liza kasama ang kanyang mga kaibigan sa parke."
-  },
-  {
-    story: "Si Mang Tonyo ay palaging naglilinis ng kanyang bakuran tuwing umaga.",
-    question: "Ano ang ugali ni Mang Tonyo batay sa kwento?",
-    choices: ["Tamad", "Malinis at masinop", "Makalat", "Pasaway"],
-    correctAnswer: 1,
-    hint: "Araw-araw siyang naglilinis sa bakuran."
-  },
-  {
-    story: "Nagbigay ng pagkain si Carla sa batang lansangan nang makita niya ito sa daan.",
-    question: "Anong katangian ni Carla ang ipinakita sa kwento?",
-    choices: ["Pagkainggitin", "Madamot", "Mapagbigay", "Palaaway"],
-    correctAnswer: 2,
-    hint: "Nagbigay si Carla ng pagkain."
-  },
-  {
-    story: "Laging pinupuri ng kanyang guro si Ben dahil sa maayos niyang pagsusulat.",
-    question: "Bakit pinupuri si Ben ng kanyang guro?",
-    choices: ["Magaling siyang sumayaw", "Maayos siyang magsulat", "Mahusay siyang umawit", "Magaling siyang magbasa"],
-    correctAnswer: 1,
-    hint: "Ang guro niya ay humanga sa paraan ng kanyang pagsusulat."
-  },
-  {
-    story: "Naglakad si Noel ng isang kilometro upang makarating sa paaralan kahit umuulan.",
-    question: "Anong katangian ang ipinakita ni Noel?",
-    choices: ["Katamaran", "Katapatan", "Kasipagan at tiyaga", "Kabastusan"],
-    correctAnswer: 2,
-    hint: "Naglakad siya kahit na umuulan."
-  },
-  {
-    story: "Tuwing Sabado, nagsisimba ang pamilya Reyes bilang pasasalamat.",
-    question: "Ano ang ginagawa ng pamilya Reyes tuwing Sabado?",
-    choices: ["Namamasyal", "Nagsisimba", "Naglalaro", "Namimili"],
-    correctAnswer: 1,
-    hint: "Ginagawa nila ito bilang pasasalamat."
-  },
-  {
-    story: "Pinagbigyan ni Aling Rosa ang hiling ng kanyang anak na bumili ng libro.",
-    question: "Ano ang hiningi ng anak ni Aling Rosa?",
-    choices: ["Laruan", "Damit", "Sapatos", "Libro"],
-    correctAnswer: 3,
-    hint: "Gamit ito sa pag-aaral at binili sa halip na laruan o damit."
-  },
-  {
-    story: "Si Dan ay hindi nanood ng TV at sa halip ay nag-aral para sa pagsusulit.",
-    question: "Ano ang ginawa ni Dan sa halip na manood ng TV?",
-    choices: ["Nagluto", "Natulog", "Nag-aral", "Naglaro"],
-    correctAnswer: 2,
-    hint: "Inuna niya ang pagsusulit kaysa sa TV."
-  },
-  {
-    story: "Tinulungan ni May si Lisa sa paggawa ng takdang-aralin sa Filipino.",
-    question: "Anong asignatura ang tinulungan ni May kay Lisa?",
-    choices: ["Matematika", "Agham", "Filipino", "Araling Panlipunan"],
-    correctAnswer: 2,
-    hint: "Takdang-aralin ito sa wikang pambansa."
-  },
-  {
-    story: "Naglinis ng silid-aralan ang mga mag-aaral bago umuwi.",
-    question: "Ano ang ginawa ng mga mag-aaral bago umuwi?",
-    choices: ["Naglaro", "Naglinis ng silid-aralan", "Nag-quiz", "Nag-sine"],
-    correctAnswer: 1,
-    hint: "Isinagawa nila ito para maging maayos ang klasrum."
-  },
-  {
-    story: "Tumulong si Karen sa mga batang walang dalang lapis sa klase.",
-    question: "Ano ang tulong na ginawa ni Karen?",
-    choices: ["Nagbahagi ng lapis", "Nagpahiram ng libro", "Naglinis ng klasrum", "Nagbigay ng pera"],
-    correctAnswer: 0,
-    hint: "Walang dalang gamit sa pagsusulat ang mga bata."
-  },
-  {
-    story: "Pinatawad ni Andrea ang kanyang kaibigan matapos silang mag-away.",
-    question: "Ano ang ginawa ni Andrea sa kanyang kaibigan?",
-    choices: ["Pinagalitan", "Pinalayas", "Pinatawad", "Pinagsabihan"],
-    correctAnswer: 2,
-    hint: "Naging magkaibigan ulit sila matapos ang alitan."
-  }
-];
+// Replace this with all your 45+ entries
+
 
 const PaaralanQuest = () => {
+  const [student_Id, setstudent_Id] = useState("");
+  const [nameInput, setNameInput] = useState("");
+  const [storyData, setStoryData] = useState([]);
+  const [answeredQuestions, setAnsweredQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedChoice, setSelectedChoice] = useState(null);
+  const [choice_Id, setChoice_Id] = useState(null);
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [usedHint, setUsedHint] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [answeredQuestions, setAnsweredQuestions] = useState(Array(storyData.length).fill(false));
+  const [end_Time, setEnd_Time] = useState(false);
+  const [nameSubmitted, setNameSubmitted] = useState(false);
+  const [answerResults, setAnswerResults] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(10);
+  const [timerActive, setTimerActive] = useState(true);
+  const timeoutTriggeredRef = React.useRef(false);
 
-  const current = storyData[currentIndex];
+
+  const current = storyData.length > 0 ? storyData[currentIndex] : null;
+
+  useEffect(() => {
+  axios.get("http://localhost:8080/api/story-questions")
+    .then(res => {
+      const raw = res.data;
+
+      const formatted = raw.map(item => ({
+        story: item.story,
+        question: item.question,
+        choices: item.choices,
+        correctAnswer: item.correctAnswer,
+        hint: item.hint,
+      }));
+
+      const shuffled = formatted.sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 15);
+      setStoryData(selected);
+    })
+    .catch(err => {
+      console.error("❌ Failed to load Paaralan Quest data:", err);
+    });
+}, []);
+
+
+  useEffect(() => {
+    if (storyData.length > 0) {
+      setAnsweredQuestions(Array(storyData.length).fill(false));
+      setAnswerResults(Array(storyData.length).fill(null));
+    }
+  }, [storyData]);
+
+  useEffect(() => {
+    if (answeredQuestions.length && answeredQuestions.every(q => q)) {
+      setEnd_Time(true);
+    }
+  }, [answeredQuestions]);
+
+  useEffect(() => {
+    if (end_Time) {
+      axios.post("http://localhost:8080/api/paaralan-quest/score/submit", {
+        student_Id,
+        totalScore: score
+      })
+      .then(() => console.log("✅ Score and name submitted successfully."))
+      .catch(err => console.error("❌ Failed to submit score:", err));
+    }
+  }, [end_Time]);
+
+  useEffect(() => {
+  if (!timerActive || end_Time || answeredQuestions[currentIndex]) return;
+
+  timeoutTriggeredRef.current = false; // Reset lock for new question
+
+  const interval = setInterval(() => {
+    setTimeLeft(prev => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        setFeedback("You ran out of time");
+
+        const updatedAnswers = [...answeredQuestions];
+        updatedAnswers[currentIndex] = true;
+        setAnsweredQuestions(updatedAnswers);
+
+        const updatedResults = [...answerResults];
+        updatedResults[currentIndex] = "wrong";
+        setAnswerResults(updatedResults);
+
+        if (!timeoutTriggeredRef.current) {
+          timeoutTriggeredRef.current = true;
+
+          setTimeout(() => {
+            if (currentIndex < storyData.length - 1) {
+              handleNext();
+            } else {
+              setEnd_Time(true);
+            }
+          }, 0); // Can be immediate or slight delay if you prefer
+        }
+
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [timerActive, currentIndex, answeredQuestions, end_Time, answerResults, storyData.length]);
+
 
   const handleNext = () => {
     if (currentIndex < storyData.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setSelectedChoice(null);
+      setCurrentIndex(ci => ci + 1);
+      setChoice_Id(null);
       setFeedback("");
       setUsedHint(false);
       setShowHint(false);
+      setTimeLeft(10);
     }
   };
 
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setSelectedChoice(null);
+      setCurrentIndex(ci => ci - 1);
+      setChoice_Id(null);
       setFeedback("");
       setUsedHint(false);
       setShowHint(false);
+      setTimeLeft(10);
     }
   };
 
   const handleCheckAnswer = () => {
-    if (selectedChoice === null) {
+    if (choice_Id === null) {
       setFeedback("Please select an answer.");
       return;
     }
-
     if (!answeredQuestions[currentIndex]) {
-      if (selectedChoice === current.correctAnswer) {
-        setScore((prev) => prev + (usedHint ? 1 : 2));
-        setFeedback("CORRECT ANSWER");
-      } else {
-        setFeedback("WRONG ANSWER");
-      }
-
+      const isCorrect = choice_Id === current.correctAnswer;
+      setScore(s => s + (isCorrect ? (usedHint ? 1 : 2) : 0));
+      setFeedback(isCorrect ? "CORRECT ANSWER" : "WRONG ANSWER");
       const updatedAnswers = [...answeredQuestions];
       updatedAnswers[currentIndex] = true;
       setAnsweredQuestions(updatedAnswers);
+      const updatedResults = [...answerResults];
+      updatedResults[currentIndex] = isCorrect ? "correct" : "wrong";
+      setAnswerResults(updatedResults);
     } else {
       setFeedback("You already answered this question.");
     }
@@ -194,144 +188,225 @@ const PaaralanQuest = () => {
     }
   };
 
-  return (
-    <div
-      className="bg-cover min-h-screen pt-24 px-8 flex flex-col items-center gap-6"
-      style={{ backgroundImage: `url(${Background})` }}
-    >
-      {/* Logo */}
-      <img src={Logo} alt="Logo" className="absolute top-5 left-8 w-40" />
-  
-      {/* Timer Panel */}
-      <div className="absolute top-[180px] left-10 mt-45">
-        <div className="relative w-40 h-40">
-          <img
-            src={StickImage}
-            alt="Timer"
-            className="w-full h-full object-contain rotate-90"
+  if (!student_Id) {
+    return (
+      <div style={{ backgroundImage: `url(${Background})`
+, backgroundSize: 'cover', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '12px', boxShadow: '0 0 20px rgba(0,0,0,0.2)', textAlign: 'center' }}>
+          <h2>Welcome to Paaralan Quest!</h2>
+          <p>Please enter your name to begin:</p>
+          <input
+            type="text"
+            value={nameInput}
+            onChange={e => setNameInput(e.target.value)}
+            placeholder="Your name"
+            style={{ padding: '10px', width: '80%', marginTop: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
           />
-          <div className="absolute top-[24%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-12 h-80 bg-green-200 rounded-full" />
-        </div>
-      </div>
-  
-      {/* Main Content Wrapper */}
-      <div className="flex flex-row gap-5 w-full max-w-[1300px] pl-40">
-        {/* Left Side: Story */}
-        <div className="flex-1 flex border-8 border-[#71361F] bg-[#f5e5c0] h-[570px]">
-          {/* Story */}
-          <div className="flex-1 pr-5 bg-[#F4D2A3]">
-            <div className="p-4 rounded-lg h-full overflow-y-auto text-justify">
-              {current.story}
-            </div>
-          </div>
-  
-          {/* Divider */}
-          <div className="w-2 bg-[#71361F]" />
-  
-          {/* Question & Choices */}
-          <div className="flex-1 pl-5 p-4 bg-[#F4D2A3] flex flex-col justify-between">
-            <div>
-              <h2 className="font-bold text-lg mb-3">{current.question}</h2>
-  
-              {showHint && (
-                <div className="animate-fadeIn bg-[#fff8e1] border border-gray-300 rounded-lg p-3 mb-3 text-gray-800 shadow-md">
-                  <span className="inline-block mr-2 text-xl">📘</span>
-                  {current.hint}
-                </div>
-              )}
-  
-              {current.choices.map((choice, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedChoice(index)}
-                  className={`mb-2 p-2 rounded-lg border-2 border-gray-300 cursor-pointer w-full text-left transition ${
-                    selectedChoice === index ? "bg-green-100" : "bg-white"
-                  }`}
-                >
-                  {choice}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-  
-        {/* Side Panel */}
-        <div className="w-[220px] flex flex-col justify-between mr-[-60px]">
-          {/* Feedback & Score */}
-          <div 
-            className={`p-5 rounded-lg border-4 text-center font-bold ${
-              feedback === "CORRECT ANSWER"
-                ? "border-[#8B4513] bg-[#f5e5c0] text-green-500"
-                : feedback === "WRONG ANSWER"
-                ? "border-[#8B4513] bg-[#f5e5c0] text-red-500"
-                : "border-[#8B4513] bg-[#f5e5c0] text-gray-800"
-            }`}
-          >
-            Score: {score}
-            <br />
-            {feedback}
-          </div>
-  
-          {/* Question Dots */}
-          <div className="bg-[#8B4513] p-5 rounded-lg flex flex-wrap gap-2 justify-center">
-            {storyData.map((_, i) => (
-              <div
-                key={i}
-                className={`w-8 h-8 rounded-full font-bold flex justify-center items-center ${
-                  i === currentIndex ? "bg-yellow-400" : "bg-[#f5e5c0]"
-                }`}
-              >
-                {i + 1}
-              </div>
-            ))}
-          </div>
-  
-          {/* Hint Button */}
+          <br />
           <button
-            onClick={handleHint}
-            disabled={usedHint}
-            className={`px-5 py-2 rounded-full font-bold text-white ${
-              usedHint
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600 cursor-pointer"
-            }`}
+            onClick={() => {
+              if (nameInput.trim()) {
+                setstudent_Id(nameInput.trim());
+              } else {
+                alert("Name is required to start the game.");
+              }
+            }}
+            style={{ marginTop: '20px', padding: '10px 20px', borderRadius: '8px', backgroundColor: '#007BFF', color: '#fff', border: 'none', cursor: 'pointer' }}
           >
-            HINT
+            Start Game
           </button>
         </div>
       </div>
-  
-      {/* Navigation Buttons */}
-      <div className="flex justify-center items-center gap-10 mt-4">
-        <img
-          src={LeftArrow}
-          alt="Previous"
-          onClick={handlePrev}
-          className={`w-14 h-14 ${
-            currentIndex > 0
-              ? "cursor-pointer opacity-100"
-              : "cursor-not-allowed opacity-50"
-          }`}
-        />
-        <button
-          onClick={handleCheckAnswer}
-          className="px-6 py-3 rounded-lg bg-yellow-400 border-2 border-yellow-600 text-white font-bold hover:bg-yellow-500 transition"
-        >
-          CHECK ANSWER
-        </button>
-        <img
-          src={RightArrow}
-          alt="Next"
-          onClick={handleNext}
-          className={`w-14 h-14 ${
-            currentIndex < storyData.length - 1
-              ? "cursor-pointer opacity-100"
-              : "cursor-not-allowed opacity-50"
-          }`}
-        />
-      </div>
-    </div>
-  );  
-};
+    );
+  }
 
+  return (
+   
+    <div style={{ backgroundImage: `url(${Background})`
+, backgroundSize: 'cover', minHeight: '100vh', paddingTop: '100px', position: 'relative' }}>
+      <img src={Logo} alt="Logo" style={{ position: 'absolute', top: '20px', left: '30px', width: '160px' }} />
+
+    
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+        <div style={{ position: 'relative', marginRight: '-25px', marginTop: '100px' }}>
+          <img
+            src={StickImage}
+           
+            alt="Timer"
+            style={{ marginTop: '100px', height: '150px', transform: 'rotate(90deg)', zIndex: 0 }}
+          />
+       
+            <div style={{
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '50px',
+            height: '320px',
+            overflow: 'hidden',
+            borderRadius: '50px',
+            zIndex: 1
+          }}>
+            <div style={{
+              position: 'absolute',
+             
+              bottom: 0,
+              width: '50px',
+              
+              height: `${(timeLeft / 10) * 320}px`,
+
+              backgroundColor: 'lightgreen',
+              borderRadius: '50px',
+             
+              transition: 'height 1s linear'
+            }} />
+          </div>
+        </div>
+
+      
+        <div style={{ display: 'flex', border: '4px solid #8B4513', backgroundColor: '#f5e5c0', borderRadius: '12px', padding: '20px', height: '600px', minWidth: '600px' }}>
+          {end_Time ? (
+            <div style={{ textAlign: 'center', width: '100%' }}>
+              <h1>🎉 SESSION FINISHED 🎉</h1>
+              <p>Your final score: <strong>{score} points</strong></p>
+            </div>
+          
+          ) : (
+            current && <>
+              <div style={{ flex: 1, paddingRight: '20px' }}>
+                <h2>Kuwento #{currentIndex + 1}</h2>
+                <div style={{ backgroundColor: '#fff8e1', padding: '15px', borderRadius: '8px', height: '100%', overflowY: 'auto' }}>
+                  {current.story}
+                </div>
+              </div>
+
+         
+              <div style={{ width: '8px', backgroundColor: '#8B4513' }} />
+
+        
+              <div style={{ flex: 1, paddingLeft: '20px' }}>
+                <h2>{current.question}</h2>
+                {showHint && (
+                  <div style={popoverStyle}>
+                    <span style={iconStyle}>📘</span>
+                    {current.hint}
+                  </div>
+                )}
+                {current.choices.map((choice, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setChoice_Id(idx)}
+                    style={{
+                      backgroundColor: choice_Id === idx ? '#d1e7dd' : '#fff',
+                      marginBottom: '8px',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '2px solid #ccc',
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {choice}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+      
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '600px', width: '220px' }}>
+          <div style={{
+            padding: '20px',
+            borderRadius: '10px',
+            border: '4px solid #8B4513',
+            backgroundColor: '#f5e5c0',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            color: feedback === "CORRECT ANSWER" ? 'green' : feedback === "WRONG ANSWER" ? 'red' : '#333'
+          }}>
+            Score: {score} <br />
+            {feedback}
+          </div>
+
+       
+          <div style={{ backgroundColor: '#8B4513', padding: '20px', borderRadius: '10px', display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
+            {storyData.map((_, i) => {
+              let bgColor = '#f5e5c0';
+              if (i === currentIndex) bgColor = '#FFD700';
+              else if (answerResults[i] === 'correct') bgColor = 'lightgreen';
+              else if (answerResults[i] === 'wrong') bgColor = '#ff9999';
+              return (
+                <div
+                  key={i}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: bgColor,
+                    color: '#000',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}
+                >
+                  {i + 1}
+                </div>
+              );
+            })}
+          </div>
+
+       
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+            <button
+              onClick={handleHint}
+              disabled={usedHint}
+              style={{
+               
+                padding: '10px 20px',
+                borderRadius: '30px',
+              
+                backgroundColor: usedHint ? '#aaa' : '#007BFF',
+                color: '#fff',
+                
+                fontWeight: 'bold',
+                
+                cursor: usedHint ? 'not-allowed' : 'pointer'
+              }}
+            >
+              HINT
+            </button>
+
+            <button
+              onClick={handleCheckAnswer}
+              style={{
+                
+                padding: '10px 20px',
+                borderRadius: '10px',
+                backgroundColor: '#FFD700',
+                border: '2px solid #D4AC0D',
+                color: '#fff',
+                
+                fontWeight: 'bold'
+              }}
+            >
+              
+              CHECK ANSWER
+            </button>
+          </div>
+        </div>
+      </div>
+
+    
+      {!end_Time && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '40px' }}>
+          <img src={LeftArrow} alt="Previous" onClick={handlePrev} style={{ width: '60px', height: '60px', cursor: currentIndex > 0 ? 'pointer' : 'not-allowed', opacity: currentIndex > 0 ? 1 : 0.5 }} />
+          <img src={RightArrow} alt="Next" onClick={handleNext} style={{ width: '60px', height: '60px', cursor: currentIndex < storyData.length - 1 ? 'pointer' : 'not-allowed', opacity: currentIndex < storyData.length - 1 ? 1 : 0.5 }} />
+        </div>
+      )}
+    </div>
+  );
+};
 export default PaaralanQuest;
