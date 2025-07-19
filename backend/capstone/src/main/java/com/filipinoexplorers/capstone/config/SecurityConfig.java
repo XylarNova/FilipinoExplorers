@@ -56,6 +56,7 @@ public class SecurityConfig {
 
               // ✅ Add this line to fix 403 for ParkeQuest
             .requestMatchers("/api/parkequest/**").permitAll()
+            .requestMatchers("/api/parkequestteacher/**").permitAll()
             
             .anyRequest().authenticated()
     ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); 

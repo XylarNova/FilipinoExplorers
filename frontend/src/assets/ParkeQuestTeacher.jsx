@@ -116,11 +116,7 @@ const ParkeQuestTeacher = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
       try {
-        await axios.delete(`http://localhost:8080/api/parkequest/${id}`, {
-          headers: {
-            Authorization: "Bearer dummy-token",
-          },
-        })
+        await axios.delete(`http://localhost:8080/api/parkequest/${id}`) // Remove headers
         setMessage("🗑️ Question deleted.")
         fetchAllQuestions()
       } catch (error) {
@@ -147,19 +143,11 @@ const ParkeQuestTeacher = () => {
 
     try {
       if (editingId) {
-        await axios.put(`http://localhost:8080/api/parkequest/${editingId}`, dto, {
-          headers: {
-            Authorization: "Bearer dummy-token",
-          },
-        })
+        await axios.put(`http://localhost:8080/api/parkequest/${editingId}`, dto)
         setMessage(`✅ Question #${editingId} updated!`)
         setEditingId(null)
       } else {
-        await axios.post("http://localhost:8080/api/parkequest", dto, {
-          headers: {
-            Authorization: "Bearer dummy-token",
-          },
-        })
+        await axios.post("http://localhost:8080/api/parkequest", dto)
         setMessage("✅ Question #" + questionNumber + " submitted!")
         setQuestionNumber((prev) => prev + 1)
       }
@@ -374,6 +362,27 @@ const ParkeQuestTeacher = () => {
                 {editingId ? `✏️ Edit Question #${editingId}` : `➕ Create Question #${questionNumber}`}
               </h2>
 
+              {editingId && (
+                <div className="text-right mb-4">
+                  <button
+                    type="button"
+                    className="wood-button-blue"
+                    onClick={() => {
+                      setEditingId(null)
+                      setStory("")
+                      setQuestion("")
+                      setFullSentence("")
+                      setFragments(["", "", ""])
+                      setHint("")
+                      setMessage("🆕 Ready to create a new question.")
+                    }}
+                  >
+                    ➕ Create New Question
+                  </button>
+                </div>
+              )}
+
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Story */}
                 <div>
@@ -466,11 +475,11 @@ const ParkeQuestTeacher = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {allQuestions.map((q) => (
+                  {allQuestions.map((q, i) => (
                     <div key={q.id} className="bg-[#8B4A32] p-4 rounded-lg border-2 border-[#fde68a]">
                       <div className="flex justify-between items-start mb-2">
                         <span className="bg-[#ffca28] text-[#4e2c1c] px-2 py-1 rounded font-bold text-sm">
-                          Q#{q.id}
+                         Q#{i + 1}
                         </span>
                         <div className="flex gap-2">
                           <button onClick={() => handleEdit(q)} className="wood-button-blue px-3 py-1 text-sm">
