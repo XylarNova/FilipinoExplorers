@@ -1,211 +1,469 @@
-import React, { useEffect, useState } from "react";
-import axiosInstance from "../utils/axiosInstance";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
 import Logo from "../assets/images/Logo.png";
 import Background from "../assets/images/Parke Game/Parke Quest BG.png";
+import WoodPanel from "../assets/images/Parke Game/wood-panel2.png";
+import ButtonNext from "../assets/images/Buttons and Other/button next.png";
+import ButtonPrev from "../assets/images/Buttons and Other/button prev.png";
+import TimerLog from "../assets/images/Parke Game/Timer Log.png";
+
+
+
+
 
 const ParkeQuest = () => {
-  const [story, setStory] = useState("");
-  const [question, setQuestion] = useState("");
-  const [fullSentence, setFullSentence] = useState("");
-  const [fragments, setFragments] = useState(["", "", ""]);
-  const [hint, setHint] = useState("");
-  const [message, setMessage] = useState("");
-  const [questionNumber, setQuestionNumber] = useState(1);
-  const [allQuestions, setAllQuestions] = useState([]);
-  const [editingId, setEditingId] = useState(null);
+  const hasInitializedRef = useRef(false);
+  const navigate = useNavigate();
+  const [questions, setQuestions] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(() =>
+    parseInt(localStorage.getItem("pq_index")) || 0
+  );
+  const [playerName, setPlayerName] = useState(() => localStorage.getItem("pq_playerName") || "");
+  const [orderedChoices, setOrderedChoices] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState([]);
+  const [usedHint, setUsedHint] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
+  const [score, setScore] = useState(() =>
+    parseInt(localStorage.getItem("pq_score")) || 0
+  );
+  const [answeredIndices, setAnsweredIndices] = useState(() => {
+    const saved = localStorage.getItem("pq_answered");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const alreadyAnsweredCorrectly = answeredIndices.includes(currentIndex);
+
+
+  const submitGame = async () => {
+  try {
+    await axios.post("http://localhost:8080/api/parkequest/submit-score", {
+      score: score,
+      studentName: playerName || "Anonymous"
+    });
+
+    setFinalScore(score); // ✅ Show score first
+
+    setTimeout(() => {
+      setScore(0);
+      setAnsweredIndices([]);
+      setResultMessage("");
+      localStorage.removeItem("pq_score");
+      localStorage.removeItem("pq_answered");
+      localStorage.removeItem("pq_index");
+      localStorage.removeItem("pq_startTime");
+      navigate("/#games");
+    }, 3000);
+  } catch (err) {
+    console.error("❌ Failed to submit game manually:", err);
+  }
+};
+
+
+  const intervalRef = useRef(null);
+  const [totalSeconds, setTotalSeconds] = useState(null); // ⏱️ fetched from backend
+  const [secondsLeft, setSecondsLeft] = useState(null);
+  const [finalScore, setFinalScore] = useState(null);
 
   useEffect(() => {
-    fetchAllQuestions();
+        axios.get("http://localhost:8080/api/parkequest/timer").then((res) => {
+          const total = res.data;
+          setTotalSeconds(total);
+
+          const savedStartTime = localStorage.getItem("pq_startTime");
+          const parsed = parseInt(savedStartTime);
+          const now = Date.now();
+
+          // 🟢 New session if no start time, or invalid, or time already expired
+          if (!savedStartTime || isNaN(parsed) || now - parsed >= total * 1000) {
+            localStorage.setItem("pq_startTime", now.toString());
+            setSecondsLeft(total);
+            setScore(0);
+            setAnsweredIndices([]);
+            setResultMessage("");
+            localStorage.removeItem("pq_score");
+            localStorage.removeItem("pq_answered");
+            localStorage.removeItem("pq_index");
+          } else {
+            // 🔁 Resumed session
+            const elapsed = Math.floor((now - parsed) / 1000);
+            const remaining = total - elapsed;
+            setSecondsLeft(remaining > 0 ? remaining : 0);
+          }
+        });
+      }, []);
+
+
+
+
+  useEffect(() => {
+  if (
+    !hasInitializedRef.current &&
+    currentIndex === 0 &&
+    secondsLeft !== null &&
+    !localStorage.getItem("pq_score")
+  ) {
+    setScore(0);
+    setAnsweredIndices([]);
+    localStorage.removeItem("pq_score");
+    localStorage.removeItem("pq_answered");
+    localStorage.removeItem("pq_index");
+    hasInitializedRef.current = true;
+  }
+}, [secondsLeft, currentIndex]);
+
+
+      useEffect(() => {
+        if (totalSeconds === null) return;
+
+        intervalRef.current = setInterval(() => {
+          setSecondsLeft((prev) => {
+            if (prev <= 1) {
+              clearInterval(intervalRef.current);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(intervalRef.current);
+      }, [totalSeconds]); // ✅ Only runs once when timer is fetched
+
+      // 🔁 Auto-redirect 4 seconds after time is up
+        useEffect(() => {
+  if (secondsLeft === 0) {
+    (async () => {
+      try {
+        await axios.post("http://localhost:8080/api/parkequest/submit-score", {
+          score: score,
+          studentName: playerName || "Anonymous"
+        });
+      } catch (err) {
+        console.error("Failed to save score at timeout:", err);
+      }
+
+      setFinalScore(score);
+      localStorage.removeItem("pq_score");
+      localStorage.removeItem("pq_answered");
+      localStorage.removeItem("pq_index");
+      setScore(0);
+      setAnsweredIndices([]);
+      setResultMessage("");
+
+      setTimeout(() => {
+        navigate("/#games");
+      }, 4000);
+    })();
+  }
+}, [secondsLeft, navigate]);
+
+  // ⏬ Fetch questions once
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/parkequest")
+      .then((res) => {
+        const filtered = res.data.filter(
+          (q) =>
+            q.story &&
+            q.question &&
+            Array.isArray(q.choices) &&
+            q.choices.length > 0
+        );
+        setQuestions(filtered);
+      })
+      .catch((err) => console.error("Failed to fetch questions:", err));
   }, []);
 
-  const fetchAllQuestions = async () => {
-    try {
-      const res = await axiosInstance.get("/parkequest");
-      setAllQuestions(res.data);
-      setQuestionNumber(res.data.length + 1);
-    } catch (error) {
-      console.error("Error fetching questions:", error);
-    }
+  useEffect(() => {
+  if (questions.length > 0 && questions[currentIndex]) {
+    const choices = questions[currentIndex].choices.map((c) => c.choice);
+    setOrderedChoices(choices);
+    setSelectedOrder(choices);
+    setResultMessage("");
+    setShowHint(false);
+    setUsedHint(false);
+  }
+}, [questions, currentIndex]);
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    const updated = Array.from(orderedChoices);
+    const [moved] = updated.splice(result.source.index, 1);
+    updated.splice(result.destination.index, 0, moved);
+    setOrderedChoices(updated);
+    setSelectedOrder(updated);
   };
 
-  const handleSplitSentence = () => {
-    const words = fullSentence.trim().split(" ");
-    const splitCount = Math.ceil(words.length / 3);
-    const part1 = words.slice(0, splitCount).join(" ");
-    const part2 = words.slice(splitCount, splitCount * 2).join(" ");
-    const part3 = words.slice(splitCount * 2).join(" ");
-    const shuffled = [part1, part2, part3].sort(() => Math.random() - 0.5);
-    setFragments(shuffled);
-  };
+        const checkAnswer = async () => {
+          if (secondsLeft === 0) return;
 
-  const handleFragmentChange = (index, value) => {
-    const updated = [...fragments];
-    updated[index] = value;
-    setFragments(updated);
-  };
+          const current = questions[currentIndex];
+          const studentAnswer = selectedOrder.join(" ");
 
-  const handleEdit = (q) => {
-    setEditingId(q.id);
-    setStory(q.story);
-    setQuestion(q.question);
-    setFullSentence(q.correctAnswer);
-    setHint(q.hint);
-    setFragments(q.choices.map(c => c.choice));
-    setMessage("✏️ Editing Question #" + q.id);
-  };
+          try {
+            const res = await axios.post("http://localhost:8080/api/parkequest/check", {
+              questionId: current.id,
+              selectedAnswer: studentAnswer,
+              usedHint,
+            });
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this question?")) {
+            setResultMessage(res.data.message);
+
+            const alreadyAnswered = answeredIndices.includes(currentIndex);
+
+            if (!alreadyAnswered && res.data.message === "CORRECT ANSWER") {
+              const newScore = score + 2; // ✅ Always +2
+              const newAnswered = [...answeredIndices, currentIndex];
+              setScore(newScore);
+              setAnsweredIndices(newAnswered);
+              localStorage.setItem("pq_score", newScore.toString());
+              localStorage.setItem("pq_answered", JSON.stringify(newAnswered));
+            }
+
+          } catch (err) {
+            console.error("Check answer failed:", err);
+          }
+        };
+
+  const goToNext = async () => {
+    if (secondsLeft === 0) return; // ⛔ Prevent navigation if time is up
+    if (currentIndex === questions.length - 1) {
       try {
-        await axiosInstance.delete(`/parkequest/${id}`);
-        setMessage("🗑️ Question deleted.");
-        fetchAllQuestions();
-      } catch (error) {
-        console.error("Delete error:", error);
-        setMessage("❌ Failed to delete question.");
+        await axios.post("http://localhost:8080/api/parkequest/submit-score", {
+          score: score,
+          studentName: playerName || "Anonymous"
+        });
+        localStorage.removeItem("pq_score");
+        localStorage.removeItem("pq_answered");
+        localStorage.removeItem("pq_index");
+      } catch (err) {
+        console.error("Failed to save final score:", err);
       }
+    } else {
+      const newIndex = Math.min(currentIndex + 1, questions.length - 1);
+      setCurrentIndex(newIndex);
+      localStorage.setItem("pq_index", newIndex.toString());
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
 
-    if (!story || !question || !fullSentence || fragments.includes("") || !hint) {
-      setMessage("❌ Please fill out all fields.");
-      return;
-    }
 
-    const dto = {
-      story,
-      question,
-      correctAnswer: fullSentence,
-      choices: fragments,
-      hint,
-    };
-
-    try {
-      if (editingId) {
-        await axiosInstance.put(`/parkequest/${editingId}`, dto);
-        setMessage(`✅ Question #${editingId} updated!`);
-        setEditingId(null);
-      } else {
-        await axiosInstance.post("/parkequest", dto);
-        setMessage("✅ Question #" + questionNumber + " submitted!");
-        setQuestionNumber((prev) => prev + 1);
-      }
-
-      setStory("");
-      setQuestion("");
-      setFullSentence("");
-      setFragments(["", "", ""]);
-      setHint("");
-      fetchAllQuestions();
-    } catch (error) {
-      console.error("Submit error:", error);
-      setMessage("❌ Failed to submit. Try again.");
-    }
+  const goToPrevious = () => {
+    const newIndex = Math.max(currentIndex - 1, 0);
+    setCurrentIndex(newIndex);
+    localStorage.setItem("pq_index", newIndex.toString());
   };
+
+  const progress =
+  totalSeconds && secondsLeft !== null
+    ? (secondsLeft / totalSeconds) * 100
+    : 100;
+
+  const current = questions[currentIndex];
+
+  if (!questions.length) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center text-white text-xl"
+        style={{ backgroundImage: `url(${Background})`, backgroundSize: "cover" }}
+      >
+        Loading Parke Quest...
+      </div>
+    );
+  }
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center flex items-center justify-center py-10 px-4"
-      style={{
-        backgroundImage: `url(${Background})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="flex flex-col min-h-screen bg-cover bg-center font-['Fredoka'] relative"
+      style={{ backgroundImage: `url(${Background})` }}
     >
-      <div className="w-full max-w-2xl bg-white bg-opacity-90 p-8 rounded-2xl shadow-lg font-['Fredoka'] border border-gray-200">
-        <div className="flex justify-center mb-6">
-          <img src={Logo} alt="Logo" className="w-40" />
-        </div>
+      <div className="absolute top-4 left-4 z-10">
+        <img src={Logo} alt="Logo" className="w-40" />
+      </div>
 
-        <form onSubmit={handleSubmit}>
-          <h2 className="text-2xl font-bold mb-4 text-center text-[#073B4C]">
-            {editingId ? `Edit Parke Quest Question #${editingId}` : `Add Parke Quest Question #${questionNumber}`}
-          </h2>
-
-          <label className="block font-semibold">Story</label>
-          <textarea
-            className="w-full p-3 border rounded mb-4"
-            rows={3}
-            value={story}
-            onChange={(e) => setStory(e.target.value)}
-          />
-
-          <label className="block font-semibold">Question</label>
-          <input
-            className="w-full p-2 border rounded mb-4"
-            type="text"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-          />
-
-          <label className="block font-semibold">Correct Full Sentence</label>
-          <input
-            className="w-full p-2 border rounded mb-2"
-            type="text"
-            value={fullSentence}
-            onChange={(e) => setFullSentence(e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={handleSplitSentence}
-            className="mb-4 bg-[#FFD166] text-[#073B4C] px-4 py-2 rounded hover:bg-[#ffc94a]"
-          >
-            Split into Fragments
-          </button>
-
-          {fragments.map((frag, index) => (
-            <div key={index} className="mb-2">
-              <label className="font-semibold">Fragment {index + 1}</label>
-              <input
-                type="text"
-                className="w-full p-2 border rounded"
-                value={frag}
-                onChange={(e) => handleFragmentChange(index, e.target.value)}
-              />
-            </div>
-          ))}
-
-          <label className="block font-semibold mt-4">Hint</label>
-          <input
-            className="w-full p-2 border rounded mb-4"
-            type="text"
-            value={hint}
-            onChange={(e) => setHint(e.target.value)}
-          />
-
-          <button
-            type="submit"
-            className="w-full bg-[#06D6A0] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#05c594] transition-all"
-          >
-            {editingId ? "Update Question" : "Submit Question"}
-          </button>
-
-          {message && <p className="mt-4 text-center text-sm">{message}</p>}
-        </form>
-
-        <div className="mt-10">
-          <h3 className="text-lg font-bold mb-2 text-[#073B4C]">Existing Questions</h3>
-          {allQuestions.length === 0 && (
-            <p className="text-sm italic text-gray-500">No questions yet.</p>
-          )}
-          {allQuestions.map((q) => (
-            <div key={q.id} className="bg-white border rounded p-4 mb-3 shadow-sm">
-              <p><strong>Q#{q.id}:</strong> {q.question}</p>
-              <p className="text-sm italic">Story: {q.story}</p>
-              <p className="text-sm">Answer: <span className="text-green-700">{q.correctAnswer}</span></p>
-              <p className="text-sm">Hint: {q.hint}</p>
-              <p className="text-sm">Choices: {q.choices.map(c => c.choice).join(", ")}</p>
-              <div className="flex gap-2 mt-2">
-                <button onClick={() => handleEdit(q)} className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1 rounded">Edit</button>
-                <button onClick={() => handleDelete(q.id)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded">Delete</button>
-              </div>
-            </div>
-          ))}
+      <div className="w-full flex justify-start mt-6 pl-[375px]">
+        <div className="w-[600px] bg-amber-100 border-4 border-amber-800 px-8 py-4 rounded-xl shadow-md text-center">
+          <h1 className="text-3xl font-bold text-amber-900">Hulaan ang Salita</h1>
+          <p className="text-lg text-amber-800">Buoin ang salita na tinutukoy ng kahulugan</p>
         </div>
       </div>
+
+      <div className="flex flex-1 justify-center items-center gap-10 px-6 py-12">
+        {/* Timer Stick with static + dynamic liquid */}
+        <div className="relative w-[180px] h-[420px] flex items-center justify-center">
+          {/* Stick Background */}
+          <img
+            src={TimerLog}
+            alt="Timer Stick"
+            className="absolute w-full h-full object-contain z-10"
+          />
+
+          {/* Static Liquid Layer (base fill) */}
+          <div className="absolute w-[36px] h-[360px] bottom-[25px] z-20 flex items-end justify-center overflow-hidden rounded-full">
+            <div
+              className="w-full h-full"
+              style={{ backgroundColor: "#fff3bf" }}
+            />
+          </div>
+
+          {/* Dynamic Liquid Layer (shrinking fill) */}
+          <div className="absolute w-[36px] h-[360px] bottom-[25px] z-30 flex items-end justify-center overflow-hidden rounded-full">
+            <div
+              className="w-full"
+              style={{
+                height: `${progress}%`,
+                backgroundColor: "#1fd0a1",
+                borderRadius: "9999px",
+                transition: "all 1s ease",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Game Panel */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative bg-[#4e2c1c] rounded-[30px] w-[600px] min-h-[500px] flex flex-col items-center justify-start shadow-md px-6 py-4 text-white gap-3">
+            <p className="text-sm italic text-center text-[#fde68a]">{current?.story}</p>
+            <h2 className="text-lg font-bold text-center">{current?.question}</h2>
+
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="fragments">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-col items-center gap-3 mt-2">
+                    {orderedChoices.map((frag, idx) => (
+                      <Draggable key={`frag-${idx}`} draggableId={`frag-${idx}`} index={idx}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="relative"
+                          >
+                            <img
+                              src={WoodPanel}
+                              alt={`Fragment ${idx}`}
+                              className="h-[120px] w-full max-w-[460px] object-contain"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg px-4 text-center">
+                              {frag}
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </div>
+
+          <div className="flex items-center justify-between w-full px-8 mt-2">
+            <button onClick={goToPrevious} className="w-[185px] h-[85px]">
+              <img src={ButtonPrev} alt="Previous" className="w-full h-full object-contain" />
+            </button>
+            <button
+              onClick={checkAnswer}
+              className="px-8 py-4 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full font-bold text-lg shadow-md"
+            >
+              CHECK ANSWER
+            </button>
+            <button onClick={goToNext} className="w-[185px] h-[85px]">
+              <img src={ButtonNext} alt="Next" className="w-full h-full object-contain" />
+            </button>
+          </div>
+        </div>
+
+        {/* Right Panel */}
+        <div className="flex flex-col items-center gap-5">
+          <div className="relative w-[325px] h-[70px]">
+            <div className="absolute -top-[100px] left-1/2 transform -translate-x-1/2 bg-[#4e2c1c] rounded-[24px] w-full h-[80px] flex items-center justify-center shadow-md">
+              <div className="bg-[#fde68a] h-[60px] w-[280px] rounded-[20px] px-4 py-2 shadow-inner text-center flex items-center justify-center font-bold text-lg text-[#4e2c1c]">
+                {showHint ? current?.hint : ""}
+              </div>
+            </div>
+          </div>
+
+          <div className="relative w-[280px] min-h-[230px] bg-[#8B4A32] rounded-[24px] shadow-lg">
+            <div className="absolute top-4 left-3 grid grid-cols-4 gap-x-3 gap-y-3 w-full pr-4">
+              {questions.map((_, num) => (
+                <div
+                  key={num + 1}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ${
+                    currentIndex === num ? "bg-orange-500 text-white" : "bg-[#F9D9A6] text-black"
+                  }`}
+                >
+                  {num + 1}
+                </div>
+              ))}
+            </div>
+          </div>
+
+        <button
+          onClick={() => {
+            if (score >= 1 && !usedHint && !alreadyAnsweredCorrectly) {
+              const newScore = score - 1;
+              setScore(newScore);
+              setUsedHint(true);
+              setShowHint(true);
+              localStorage.setItem("pq_score", newScore.toString());
+            }
+          }}
+          disabled={score < 1 || usedHint || alreadyAnsweredCorrectly}
+          className={`w-[250px] py-3 rounded-full font-bold text-lg shadow-md ${
+            score < 1 || usedHint || alreadyAnsweredCorrectly
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-[#1982fc] hover:bg-blue-700 text-white'
+          }`}
+        >
+          HINT
+        </button>
+
+
+          <button
+            onClick={submitGame}
+            className="w-[250px] py-3 rounded-full bg-[#ffca28] hover:bg-yellow-500 text-white font-bold text-lg shadow-md"
+          >
+            SUBMIT
+          </button>
+
+
+          <div className="text-white text-lg font-bold text-center mt-2">
+            Score: <span className="text-green-300">{score}</span> / {questions.length * 2}
+          </div>
+
+
+          {resultMessage && (
+            <div className="text-white text-lg font-bold text-center mt-4">
+              {resultMessage === "CORRECT ANSWER" ? "✅ Tama!" : "❌ Mali. Subukan muli."}
+            </div>
+          )}
+
+          {finalScore !== null && secondsLeft !== 0 && (
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+              <div className="bg-white text-[#4e2c1c] p-8 rounded-xl shadow-lg text-center max-w-md font-bold text-xl">
+                ✅ Session submitted!<br />
+                Your final score: {finalScore} / {questions.length * 2}
+                <div className="text-sm mt-2 text-gray-600">Returning to homepage...</div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+      {/* Timer popup when time is up */}
+{secondsLeft === 0 && (
+  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+    <div className="bg-white text-[#4e2c1c] p-8 rounded-xl shadow-lg text-center max-w-md font-bold text-xl">
+      Your final score: {finalScore ?? score} / {questions.length * 2}
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
