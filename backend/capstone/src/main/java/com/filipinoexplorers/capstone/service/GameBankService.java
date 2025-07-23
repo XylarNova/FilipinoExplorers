@@ -83,6 +83,7 @@ public class GameBankService {
         // ✅ Build the GameBank
         GameBank.GameBankBuilder gameBuilder = GameBank.builder()
                 .gameTitle(request.getGameTitle())
+                .gameType(request.getGameType())
                 .category(request.getCategory())
                 .leaderboard(request.isLeaderboard())
                 .hints(request.isHints())
@@ -109,6 +110,7 @@ public class GameBankService {
     // Basic fields
     existing.setGameTitle(request.getGameTitle());
     existing.setCategory(request.getCategory());
+    existing.setGameType(request.getGameType());
     existing.setLeaderboard(request.isLeaderboard());
     existing.setHints(request.isHints());
     existing.setReview(request.isReview());

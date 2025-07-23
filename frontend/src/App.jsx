@@ -15,6 +15,8 @@ import GameBank from './assets/GameBank';
 import TeacherGuessTheWord from './assets/TeacherGuessTheWord';
 import MyAccountTeacher from './assets/MyAccountTeacher';
 import ProgressTracking from './assets/ProgressTracking'; 
+import ClassRecord from './assets/ClassRecord';
+
 
 
 import StudentDashboard from './assets/StudentDashboard';
@@ -32,7 +34,7 @@ import InputsMemoryGame from './assets/InputsMemoryGame';
 import PaaralanQuestGroup from './assets/PaaralanQuestGroup';
 import PaaralanQuest from './assets/PaaralanQuest';
 import ParkeQuest from './assets/ParkeQuest';
-//harvey paaralan
+import ParkeQuestTeacher from './assets/ParkeQuestTeacher';
 import GroupMode from './assets/Groupmode';
 import PaaralanQuestTeacher from './assets/PaaralanQuestTeacher';
 import CreateQuestion from './assets/CreateQuestion';
@@ -64,7 +66,10 @@ const App = () => {
         <Route path="/gamebank" element={<GameBank />} />
         <Route path="/guess-the-word-teacher" element={<TeacherGuessTheWord />} />
         <Route path="/progress-tracking/:classRoomId" element={<ProgressTracking />} />
-        
+        <Route path="/parkequestteacher" element={<ParkeQuestTeacher />} />
+        <Route path="/class-record" element={<ClassRecord />} />
+       
+
         {/* Student Side Path */}
 
         <Route path="/student-dashboard" element={<StudentDashboard />} />
