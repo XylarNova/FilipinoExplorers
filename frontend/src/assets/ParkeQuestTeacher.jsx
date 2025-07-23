@@ -446,7 +446,7 @@ const ParkeQuestTeacher = () => {
                     className="wood-input w-full"
                     value={hint}
                     onChange={(e) => setHint(e.target.value)}
-                    placeholder="Give the students a helpful clue..."
+                    placeholder="Shows the first fragment"
                   />
                 </div>
 
