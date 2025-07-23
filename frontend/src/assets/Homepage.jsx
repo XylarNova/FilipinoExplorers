@@ -251,7 +251,9 @@ const Homepage = () => {
       fontFamily: "'Fredoka', sans-serif",
       boxShadow: '0 8px 16px rgba(0,0,0,0.25)'
     }}>
-      <h2 style={{ marginBottom: '20px', fontSize: '24px' }}>Select User</h2>
+      <h2 style={{ marginBottom: '10px', fontSize: '24px' }}>Choose Mode</h2>
+<p style={{ marginBottom: '20px', fontSize: '16px', color: '#444' }}>Who will play this game?</p>
+
       <button
         onClick={() => {
           setShowUserSelect(false);
@@ -329,7 +331,9 @@ const Homepage = () => {
       fontFamily: "'Fredoka', sans-serif",
       boxShadow: '0 8px 16px rgba(0,0,0,0.25)'
     }}>
-      <h2 style={{ marginBottom: '20px', fontSize: '24px' }}>Choose Mode</h2>
+      <h2 style={{ marginBottom: '10px', fontSize: '24px' }}>Choose Mode</h2>
+<p style={{ marginBottom: '20px', fontSize: '16px', color: '#444' }}>How do you want to play?</p>
+
       <button
         onClick={() => {
           setShowPaaralanOptions(false);
