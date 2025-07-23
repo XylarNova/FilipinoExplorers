@@ -272,6 +272,15 @@ const ParkeQuest = () => {
       <div className="absolute top-4 left-4 z-10">
         <img src={Logo} alt="Logo" className="w-40" />
       </div>
+      <div className="absolute top-4 right-8 z-10">
+        <a
+          href="http://localhost:5173/#games"
+          className="px-6 py-3 bg-[#1982fc] hover:bg-blue-700 text-white font-bold rounded-full shadow-lg text-lg flex items-center gap-2 transition-colors duration-200"
+          style={{ textDecoration: 'none' }}
+        >
+          Back to Games <span className="ml-2">→</span>
+        </a>
+      </div>
       <div className="w-full flex justify-start mt-6 pl-[375px]">
         <div className="w-[600px] bg-amber-100 border-4 border-amber-800 px-8 py-4 rounded-xl shadow-md text-center">
           <h1 className="text-3xl font-bold text-amber-900">Hulaan ang Salita</h1>
@@ -317,14 +326,14 @@ const ParkeQuest = () => {
                         isHinted = correctSentence.startsWith(frag);
                       }
                       return (
-                        <Draggable key={`frag-${idx}`} draggableId={`frag-${idx}`} index={idx}>
-                          {(provided) => (
+                        <Draggable key={`frag-${frag}-${idx}`} draggableId={`frag-${frag}-${idx}`} index={idx}>
+                          {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className={`relative flex items-center justify-center mb-4 ${isHinted ? "ring-4 ring-white" : ""}`}
-                              style={{ minHeight: "120px", width: "100%", maxWidth: "460px" }}
+                              className={`relative flex items-center justify-center mb-4 cursor-move ${isHinted ? "ring-4 ring-white" : ""} ${snapshot.isDragging ? "z-50" : ""}`}
+                              style={{ minHeight: "120px", width: "100%", maxWidth: "460px", ...provided.draggableProps.style }}
                             >
                               <img
                                 src={WoodPanel}
@@ -433,16 +442,25 @@ const ParkeQuest = () => {
             SUBMIT
           </button>
           {resultMessage && (
-            <div className="text-white text-lg font-bold text-center mt-4">
-              {resultMessage === "CORRECT ANSWER" ? "✅ Tama!" : "❌ Mali. Subukan muli."}
+            <div className={`flex flex-col items-center justify-center mt-4 ${resultMessage === "CORRECT ANSWER" ? "" : ""}`}>
+              <div className={`rounded-2xl px-8 py-6 shadow-2xl border-4 ${resultMessage === "CORRECT ANSWER" ? "bg-green-200 border-green-500" : "bg-red-200 border-red-500"} flex flex-col items-center animate-bounceIn`}>
+                <span className={`text-3xl font-extrabold mb-2 ${resultMessage === "CORRECT ANSWER" ? "text-green-700" : "text-red-700"}`}>
+                  {resultMessage === "CORRECT ANSWER" ? "✅ Tama!" : "❌ Mali. Subukan muli."}
+                </span>
+                <span className="text-lg font-bold text-[#4e2c1c]">{resultMessage === "CORRECT ANSWER" ? "Great job!" : "Try again!"}</span>
+              </div>
             </div>
           )}
           {finalScore !== null && secondsLeft !== 0 && (
-            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-              <div className="bg-white text-[#4e2c1c] p-8 rounded-xl shadow-lg text-center max-w-md font-bold text-xl">
-                ✅ Session submitted!<br />
-                Your final score: {finalScore} / {questions.length * 2}
-                <div className="text-sm mt-2 text-gray-600">Returning to homepage...</div>
+            <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none" style={{ backgroundImage: `url(${Background})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+              <div className="bg-white bg-opacity-90 text-[#4e2c1c] p-10 rounded-3xl shadow-2xl text-center max-w-md font-extrabold text-2xl border-4 border-amber-400 animate-fadeIn pointer-events-auto">
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-5xl mb-2">🎉</span>
+                  <span className="text-3xl font-extrabold mb-2 text-amber-700">Session Submitted!</span>
+                  <span className="text-xl font-bold mb-2">Your final score:</span>
+                  <span className="text-4xl font-extrabold text-green-700 mb-2">{finalScore} / {questions.length * 2}</span>
+                  <div className="text-base mt-2 text-gray-600 font-medium">Returning to homepage...</div>
+                </div>
               </div>
             </div>
           )}
@@ -450,9 +468,14 @@ const ParkeQuest = () => {
       </div>
       {/* Timer popup when time is up */}
       {secondsLeft === 0 && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white text-[#4e2c1c] p-8 rounded-xl shadow-lg text-center max-w-md font-bold text-xl">
-            Your final score: {finalScore ?? score} / {questions.length * 2}
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none" style={{ backgroundImage: `url(${Background})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+          <div className="bg-white bg-opacity-80 p-10 rounded-3xl shadow-2xl text-center max-w-md font-extrabold text-2xl border-4 border-amber-400 animate-fadeIn pointer-events-auto">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-5xl mb-2">⏰</span>
+              <span className="text-3xl font-extrabold mb-2 text-amber-700">Time's Up!</span>
+              <span className="text-xl font-bold mb-2">Your final score:</span>
+              <span className="text-4xl font-extrabold text-green-700 mb-2">{finalScore ?? score} / {questions.length * 2}</span>
+            </div>
           </div>
         </div>
       )}
