@@ -128,6 +128,10 @@ const ParkeQuestTeacher = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (allQuestions.length >= 10 && !editingId) {
+      setMessage("❌ Maximum of 10 questions only. Delete a question to add more.")
+      return
+    }
     if (!story || !question || !fullSentence || fragments.includes("") || !hint) {
       setMessage("❌ Please fill out all fields, including a valid timer.")
       return
