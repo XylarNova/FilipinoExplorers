@@ -128,6 +128,10 @@ const ParkeQuestTeacher = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (allQuestions.length >= 10 && !editingId) {
+      setMessage("❌ Maximum of 10 questions only. Delete a question to add more.")
+      return
+    }
     if (!story || !question || !fullSentence || fragments.includes("") || !hint) {
       setMessage("❌ Please fill out all fields, including a valid timer.")
       return
@@ -302,14 +306,14 @@ const ParkeQuestTeacher = () => {
         className="flex flex-col min-h-screen bg-cover bg-center font-['Fredoka'] relative"
         style={{ backgroundImage: `url(${Background})` }}
       >
-        {/* Logo at top center */}
-        <div className="w-full text-center pt-6 pb-4">
-          <img src={Logo || "/placeholder.svg"} alt="Logo" className="w-40 mx-auto" />
+        {/* Logo at top left */}
+        <div className="absolute top-6 left-8 z-10">
+          <img src={Logo || "/placeholder.svg"} alt="Logo" className="w-40" />
         </div>
 
         {/* Title Banner */}
-        <div className="w-full text-center mb-6">
-          <div className="inline-block bg-amber-100 border-4 border-amber-800 px-8 py-4 rounded-xl shadow-md">
+        <div className="w-full flex justify-center mb-6 mt-6">
+          <div className="inline-block bg-amber-100 border-4 border-amber-800 px-8 py-4 rounded-xl shadow-md text-center">
             <h1 className="text-3xl font-bold text-amber-900">🌟 Parke Quest Teacher Portal 🌟</h1>
             <p className="text-lg text-amber-800">Gumawa ng mga Tanong para sa mga Batang Eksplorador!</p>
           </div>
@@ -317,7 +321,7 @@ const ParkeQuestTeacher = () => {
 
         <div className="flex flex-1 justify-center items-start gap-8 px-6 pb-12">
           {/* Left Panel - Stats */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 mt-4">
             {/* Stats Panel */}
             <div className="wood-panel p-6 text-white text-center min-w-[220px]">
               <h3 className="text-xl font-bold mb-4 text-[#fde68a]">📊 Statistics</h3>
@@ -336,10 +340,10 @@ const ParkeQuestTeacher = () => {
           </div>
 
           {/* Main Content Panel */}
-          <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-6 w-[750px]">
             {/* Timer Settings */}
-            <div className="wood-panel p-6 text-white w-[700px]">
-              <h3 className="text-xl font-bold mb-4 text-[#fde68a] text-center">⏰ Global Game Timer</h3>
+            <div className="wood-panel p-6 text-white w-full">
+              <h3 className="text-xl font-bold mb-4 text-[#fde68a] text-center">⏰ Game Timer</h3>
               <div className="flex items-center justify-center gap-4">
                 <label className="text-[#fde68a] font-semibold">Minutes:</label>
                 <input
@@ -357,7 +361,7 @@ const ParkeQuestTeacher = () => {
             </div>
 
             {/* Question Form */}
-            <div className="wood-panel p-6 text-white w-[700px]">
+            <div className="wood-panel p-6 text-white w-full">
               <h2 className="text-2xl font-bold mb-6 text-center text-[#fde68a]">
                 {editingId ? `✏️ Edit Question #${editingId}` : `➕ Create Question #${questionNumber}`}
               </h2>
@@ -382,11 +386,12 @@ const ParkeQuestTeacher = () => {
                 </div>
               )}
 
-
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Story */}
-                <div>
-                  <label className="block text-[#fde68a] font-semibold mb-2">📚 Adventure Story</label>
+                <div className="flex flex-col gap-2">
+                  <label className="block text-[#fde68a] font-semibold mb-2">
+                    📚 Adventure Story
+                  </label>
                   <textarea
                     className="wood-input w-full"
                     rows={3}
@@ -397,8 +402,10 @@ const ParkeQuestTeacher = () => {
                 </div>
 
                 {/* Question */}
-                <div>
-                  <label className="block text-[#fde68a] font-semibold mb-2">❓ Question</label>
+                <div className="flex flex-col gap-2">
+                  <label className="block text-[#fde68a] font-semibold mb-2">
+                    ❓ Question
+                  </label>
                   <input
                     className="wood-input w-full"
                     value={question}
@@ -408,8 +415,10 @@ const ParkeQuestTeacher = () => {
                 </div>
 
                 {/* Full Sentence */}
-                <div>
-                  <label className="block text-[#fde68a] font-semibold mb-2">✅ Correct Answer</label>
+                <div className="flex flex-col gap-2">
+                  <label className="block text-[#fde68a] font-semibold mb-2">
+                    ✅ Correct Answer
+                  </label>
                   <input
                     className="wood-input w-full mb-3"
                     value={fullSentence}
@@ -422,8 +431,10 @@ const ParkeQuestTeacher = () => {
                 </div>
 
                 {/* Fragments */}
-                <div>
-                  <label className="block text-[#fde68a] font-semibold mb-3">🧩 Answer Fragments</label>
+                <div className="flex flex-col gap-2">
+                  <label className="block text-[#fde68a] font-semibold mb-3">
+                    🧩 Answer Fragments
+                  </label>
                   <div className="grid grid-cols-1 gap-3">
                     {fragments.map((frag, index) => (
                       <div key={index} className="flex items-center gap-3">
@@ -440,13 +451,15 @@ const ParkeQuestTeacher = () => {
                 </div>
 
                 {/* Hint */}
-                <div>
-                  <label className="block text-[#fde68a] font-semibold mb-2">💡 Hint</label>
+                <div className="flex flex-col gap-2">
+                  <label className="block text-[#fde68a] font-semibold mb-2">
+                    💡 Hint
+                  </label>
                   <input
                     className="wood-input w-full"
                     value={hint}
                     onChange={(e) => setHint(e.target.value)}
-                    placeholder="Give the students a helpful clue..."
+                    placeholder="Shows the first fragment"
                   />
                 </div>
 
@@ -464,7 +477,7 @@ const ParkeQuestTeacher = () => {
           </div>
 
           {/* Right Panel - Questions & Scores */}
-          <div className="flex flex-col gap-6 w-[450px]">
+          <div className="flex flex-col gap-6 w-[450px] mt-4">
             {/* Questions List */}
             <div className="wood-panel p-6 text-white max-h-[400px] overflow-y-auto">
               <h3 className="text-xl font-bold mb-4 text-[#fde68a] text-center">📚 Question Library</h3>
