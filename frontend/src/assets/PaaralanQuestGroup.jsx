@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import Background from '../assets/images/Paaralan Quest/Paaralan Quest BG.png';
 import Logo from '../assets/images/Logo.png';
-import StickImage from '../assets/images/Buttons and Other/Timer Log.png';
+
 import LeftArrow from '../assets/images/Buttons and Other/button prev.png';
 import RightArrow from '../assets/images/Buttons and Other/button next.png';
 import { useLocation } from 'react-router-dom';
@@ -16,6 +16,8 @@ const players = ['Player 1', 'Player 2', 'Player 3'];
 
 
 const PaaralanQuestGroup = () => {
+const [showTimesUp, setShowTimesUp] = useState(false);
+
 const [showNameInput, setShowNameInput] = useState(true);
 const [playerNames, setPlayerNames] = useState(['', '', '']);
 const [questions, setQuestions] = useState([]);
@@ -122,14 +124,15 @@ useEffect(() => {
     setTimeLeft(prev => {
       if (prev <= 1) {
         clearInterval(interval);
+        setShowTimesUp(true); // ⏰ show popup
         return 0;
       }
       return prev - 1;
     });
-  }, 1000); // every 1 second
+  }, 1000);
+  return () => clearInterval(interval);
+}, [currentIndex]); // Re-run when question changes
 
-  return () => clearInterval(interval); // cleanup
-}, []);
   const handleStartGame = () => {
   if (playerNames.every(name => name.trim() !== '')) {
     setShowNameInput(false);
@@ -238,20 +241,19 @@ if (!current) {
       <img src={Logo} alt="Logo" style={{ position: 'absolute', top: 20, left: 30, width: 160 }} />
 
       <div style={{ display: 'flex', gap: 20, width: '90%', alignItems: 'center' }}>
-        <div style={{ position: 'relative', marginRight: '-25px' }}>
-          <img src={StickImage} alt="Timer" style={{ width: 'auto', height: '150px', transform: 'rotate(90deg)',marginLeft: '50px' }} />
-          <div style={{
-        position: 'absolute',
-        bottom: 0,
-         right: '20px',
-        width: '50px',
-        height: `${(timeLeft / 10) * 320}px`, // dynamic height
-        backgroundColor: 'lightgreen',
-        borderRadius: '50px',
-        transition: 'height 1s linear'
-      }} />
+        <div style={{ position: 'relative', marginRight: '-25px', height: '150px', width: '50px' }}>
+  <div style={{
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: '100%',
+    height: `${(timeLeft / 10) * 350}px`,
+    backgroundColor: 'lightgreen',
+    borderRadius: '50px',
+    transition: 'height 1s linear'
+  }} />
+</div>
 
-        </div>
 
         <div style={{
           border: '4px solid #8B4513', backgroundColor: '#f5e5c0',
@@ -302,11 +304,12 @@ if (!current) {
 }}>
   <div>
     <h3>📊 Player Scores</h3>
-    {players.map((player, i) => (
-      <div key={i}>
-        {player}: <strong>{scores[i]}</strong>
-      </div>
-    ))}
+   {playerNames.map((name, i) => (
+  <div key={i}>
+    {name}: <strong>{scores[i]}</strong>
+  </div>
+))}
+
   </div>
 
   {scoredQuestions[currentIndex] && (
@@ -340,13 +343,14 @@ if (!current) {
             gap: 20,
             justifyContent: 'center'
           }}>
-            {players.map((player, i) => (
-              <div key={i} style={{ textAlign: 'center', flex: 1 }}>
-                <div style={{
-                  marginBottom: 10,
-                  fontWeight: 'bold',
-                  fontSize: '16px'
-                }}>{player}'s Vote</div>
+            {playerNames.map((name, i) => (
+  <div key={i} style={{ textAlign: 'center', flex: 1 }}>
+    <div style={{
+      marginBottom: 10,
+      fontWeight: 'bold',
+      fontSize: '16px'
+    }}>{name}'s Vote</div>
+
 
                 <div style={{
                   display: 'flex',
@@ -391,6 +395,43 @@ if (!current) {
           </div>
         </div>
       </div>
+{showTimesUp && (
+  <div style={{
+    position: 'fixed',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    zIndex: 9999
+  }}>
+    <div style={{
+      backgroundColor: 'white',
+      padding: '40px',
+      borderRadius: '20px',
+      textAlign: 'center',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+    }}>
+      <h2 style={{ color: '#d32f2f', fontSize: '28px', marginBottom: '20px' }}>⏰ Time's Up!</h2>
+      <button
+        onClick={() => {
+          setShowTimesUp(false);
+          handleNext();
+          setTimeLeft(10); // reset timer
+        }}
+        style={{
+          backgroundColor: '#007BFF',
+          color: '#fff',
+          border: 'none',
+          padding: '12px 24px',
+          fontSize: '16px',
+          borderRadius: '10px',
+          cursor: 'pointer'
+        }}
+      >
+        Next Question
+      </button>
+    </div>
+  </div>
+)}
 
       <div style={{ marginTop: 40, display: 'flex', alignItems: 'center', gap: 40 }}>
         <img src={LeftArrow} alt="Prev" onClick={handlePrev}

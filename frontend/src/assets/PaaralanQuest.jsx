@@ -47,6 +47,8 @@ const PaaralanQuest = () => {
   const [timeLeft, setTimeLeft] = useState(10);
   const [timerActive, setTimerActive] = useState(true);
   const timeoutTriggeredRef = React.useRef(false);
+  const [showTimesUp, setShowTimesUp] = useState(false);
+
 
 
   const current = storyData.length > 0 ? storyData[currentIndex] : null;
@@ -106,31 +108,21 @@ const PaaralanQuest = () => {
   const interval = setInterval(() => {
     setTimeLeft(prev => {
       if (prev <= 1) {
-        clearInterval(interval);
-        setFeedback("You ran out of time");
+  clearInterval(interval);
+  setFeedback("You ran out of time");
+  setShowTimesUp(true); // Show the popup
 
-        const updatedAnswers = [...answeredQuestions];
-        updatedAnswers[currentIndex] = true;
-        setAnsweredQuestions(updatedAnswers);
+  const updatedAnswers = [...answeredQuestions];
+  updatedAnswers[currentIndex] = true;
+  setAnsweredQuestions(updatedAnswers);
 
-        const updatedResults = [...answerResults];
-        updatedResults[currentIndex] = "wrong";
-        setAnswerResults(updatedResults);
+  const updatedResults = [...answerResults];
+  updatedResults[currentIndex] = "wrong";
+  setAnswerResults(updatedResults);
 
-        if (!timeoutTriggeredRef.current) {
-          timeoutTriggeredRef.current = true;
+  return 0;
+}
 
-          setTimeout(() => {
-            if (currentIndex < storyData.length - 1) {
-              handleNext();
-            } else {
-              setEnd_Time(true);
-            }
-          }, 0); // Can be immediate or slight delay if you prefer
-        }
-
-        return 0;
-      }
       return prev - 1;
     });
   }, 1000);
@@ -406,6 +398,49 @@ const PaaralanQuest = () => {
           <img src={RightArrow} alt="Next" onClick={handleNext} style={{ width: '60px', height: '60px', cursor: currentIndex < storyData.length - 1 ? 'pointer' : 'not-allowed', opacity: currentIndex < storyData.length - 1 ? 1 : 0.5 }} />
         </div>
       )}
+      {showTimesUp && (
+  <div style={{
+    position: 'fixed',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999
+  }}>
+    <div style={{
+      backgroundColor: '#fff',
+      padding: '40px',
+      borderRadius: '15px',
+      textAlign: 'center',
+      boxShadow: '0 0 20px rgba(0,0,0,0.3)'
+    }}>
+      <h2 style={{ fontSize: '28px', marginBottom: '20px' }}>⏰ TIME'S UP!</h2>
+      <button
+        onClick={() => {
+          setShowTimesUp(false);
+          if (currentIndex < storyData.length - 1) {
+            handleNext();
+          } else {
+            setEnd_Time(true);
+          }
+        }}
+        style={{
+          padding: '10px 20px',
+          fontSize: '16px',
+          borderRadius: '8px',
+          backgroundColor: '#007BFF',
+          color: '#fff',
+          border: 'none',
+          cursor: 'pointer'
+        }}
+      >
+        NEXT QUESTION
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
