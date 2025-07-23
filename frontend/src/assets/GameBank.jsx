@@ -9,6 +9,7 @@ import ParkeQuestImage from './images/Homepage/Parke Quest.png';
 import PaaralanQuestImage from './images/Homepage/Paaralan Quest Icon.png';
 import MemoryGameImage from './images/Homepage/Memory Game Icon.png';
 import MemoryGamePanel from './MemoryGamePanel';
+import GuessTheWordPanel from './GuessTheWordPanel';
 
 
 
@@ -36,6 +37,12 @@ const GameBank = () => {
   const [classes, setClasses] = useState([]);
   const [editingGameId, setEditingGameId] = useState(null);
   const [teacherId, setTeacherId] = useState(null);
+
+  const [showGuessTheWordPanel, setShowGuessTheWordPanel] = useState(false);
+  const [selectedGameType, setSelectedGameType] = useState('Individual'); // Individual or Group
+  const [puzzles, setPuzzles] = useState([
+    { word: '', clue: '', translation: '', score: 10, hintEnabled: true }
+  ]);
 
 useEffect(() => {
   axiosInstance
@@ -323,30 +330,41 @@ const handlePublishGame = async (gameId) => {
 
 
   const handleEditGame = (game) => {
-    setEditingGameId(game.id);
-    setGameTitle(game.gameTitle || '');
-    setSelectedCategory(game.category || '');
+  setEditingGameId(game.id);
+  setGameTitle(game.gameTitle || '');
+  setSelectedCategory(game.category || '');
+  
+  // Check if it's a Guess the Word game
+  if (game.gameType && game.gameType.startsWith('GuessTheWord')) {
+    const gameTypeSubstring = game.gameType.split('_')[1] || 'Individual';
+    setSelectedGameType(gameTypeSubstring);
+    setPuzzles(game.puzzles || [
+      { word: '', clue: '', translation: '', score: 10, hintEnabled: true }
+    ]);
+    setShowGuessTheWordPanel(true);
+  } else {
+    // Handle other game types (Memory Game, etc.)
     setVocabularyQuestions(game.vocabularyQuestions || [
       { tagalogWord: '', choices: ['', '', '', '', ''], correctAnswer: null, hint: '' }
     ]);
-    setGameSettings({
-      leaderboard: game.leaderboard || false,
-      hints: game.hints || false,
-      review: game.review || false,
-      shuffle: game.shuffle || false,
-      windowTracking: game.windowTracking || false,
-    });
-    setQuarter(game.quarter || '');
-    setSetTime(game.setTime || '');
-    setGamePoints(game.gamePoints || '');
-   setClassSelections((prev) => ({
+    setIsPanelOpen(true);
+  }
+  
+  setGameSettings({
+    leaderboard: game.leaderboard || false,
+    hints: game.hints || false,
+    review: game.review || false,
+    shuffle: game.shuffle || false,
+    windowTracking: game.windowTracking || false,
+  });
+  setQuarter(game.quarter || '');
+  setSetTime(game.setTime || '');
+  setGamePoints(game.gamePoints || '');
+  setClassSelections((prev) => ({
     ...prev,
     [game.id]: game.classrooms?.map(c => c.id) || []
   }));
-
-    setIsPanelOpen(true);
-  };
-
+};
 
   const handlePerGameClassChange = (gameId, value) => {
     setClassSelections((prev) => ({
@@ -372,6 +390,116 @@ const handlePublishGame = async (gameId) => {
     }
   };
 
+ {/* Guess The Word */}
+
+ const handleGuessTheWordImageClick = () => {
+  setShowGuessTheWordPanel(true);
+  setSelectedCategory('Vocabulary'); // Set default category for Guess the Word
+  resetGuessTheWordForm();
+};
+
+const resetGuessTheWordForm = () => {
+  setGameTitle('');
+  setSelectedGameType('Individual');
+  setPuzzles([{ word: '', clue: '', translation: '', score: 10, hintEnabled: true }]);
+  setGameSettings({ leaderboard: false, hints: false, review: false, shuffle: false, windowTracking: false });
+  setQuarter('');
+  setSetTime('');
+  setGamePoints('10');
+  setClassSelections((prev) => {
+    const updated = { ...prev };
+    if (editingGameId) delete updated[editingGameId];
+    return updated;
+  });
+  setEditingGameId(null);
+};
+
+const handlePuzzleInputChange = (index, field, value) => {
+  const updated = [...puzzles];
+  updated[index][field] = value;
+  setPuzzles(updated);
+};
+
+const handleAddPuzzle = () => {
+  setPuzzles([
+    ...puzzles,
+    { word: '', clue: '', translation: '', score: parseInt(gamePoints) || 10, hintEnabled: true }
+  ]);
+};
+
+const handleSaveGuessTheWordGame = async () => {
+  if (!teacherId) {
+    alert("Please wait for the teacher ID to load.");
+    return;
+  }
+
+  const validPuzzles = puzzles.filter(
+    (p) => p.word.trim() && p.clue.trim() && p.translation.trim()
+  );
+
+  if (validPuzzles.length === 0) {
+    alert("Please fill in at least one valid puzzle with word, clue, and translation.");
+    return;
+  }
+
+  const selectedClassroomIds = editingGameId
+    ? classSelections[editingGameId] || []
+    : classSelections['new'] || [];
+
+  const classRoomIds = Array.isArray(selectedClassroomIds)
+    ? selectedClassroomIds
+    : [selectedClassroomIds];
+
+  const gameSession = {
+    gameTitle,
+    gameType: `GuessTheWord_${selectedGameType}`, // e.g., "GuessTheWord_Individual" or "GuessTheWord_Group"
+    category: selectedCategory,
+    leaderboard: gameSettings.leaderboard,
+    hints: gameSettings.hints,
+    review: gameSettings.review,
+    shuffle: gameSettings.shuffle,
+    windowTracking: gameSettings.windowTracking,
+    setTime: parseInt(setTime) * 60, // convert minutes to seconds
+    quarter,
+    gamePoints: parseInt(gamePoints),
+    status: editingGameId 
+      ? savedGames.find(g => g.id === editingGameId)?.status || "Closed"
+      : (classRoomIds.length === 0 ? "Draft" : "Closed"),
+    classRoomIds,
+    teacherId,
+    puzzles: validPuzzles, // Use puzzles instead of vocabularyQuestions
+  };
+
+  try {
+    if (editingGameId) {
+      await axiosInstance.put(`/gamesessions/put/${editingGameId}`, gameSession);
+      await axiosInstance.put(`/gamesessions/updateClass/${editingGameId}`, {
+        classIds: classRoomIds,
+      });
+      alert("Guess the Word game updated successfully!");
+    } else {
+      const res = await axiosInstance.post(`/gamesessions/post`, gameSession);
+      const newGameId = res.data.id;
+
+      await axiosInstance.put(`/gamesessions/updateClass/${newGameId}`, {
+        classIds: classRoomIds,
+      });
+
+      await axiosInstance.put(`/gamesessions/updateStatus/${newGameId}`, {
+        status: classRoomIds.length === 0 ? "Draft" : "Closed",
+      });
+
+      alert("Guess the Word game saved successfully!");
+    }
+
+    fetchSavedGames();
+    resetGuessTheWordForm();
+    setShowGuessTheWordPanel(false);
+  } catch (error) {
+    console.error("❌ Error saving Guess the Word game:", error);
+    alert("Error saving game!");
+  }
+};
 
   return (
       <div className="w-full relative">
@@ -408,7 +536,12 @@ const handlePublishGame = async (gameId) => {
   {/* Horizontal Row with Images and Center Title */}
   <div className="flex items-center justify-center gap-8 mt-10 mb-12 flex-wrap">
     {/* Left Side Images */}
-    <img src={GuessTheWordImage} alt="Guess the Word" className="w-[100px] h-auto drop-shadow-md hover:scale-105 transition" />
+    <img 
+    src={GuessTheWordImage} 
+    alt="Guess the Word" 
+    className="w-[100px] h-auto drop-shadow-md hover:scale-105 transition cursor-pointer" 
+    onClick={handleGuessTheWordImageClick}
+  />
     <img src={ParkeQuestImage} alt="Parke Quest" className="w-[100px] h-auto drop-shadow-md hover:scale-105 transition" />
 
     {/* Center Title */}
@@ -753,7 +886,35 @@ const handlePublishGame = async (gameId) => {
     </button>
   </div>
 )}
-
+{showGuessTheWordPanel && (
+  <GuessTheWordPanel
+    editingGameId={editingGameId}
+    gameTitle={gameTitle}
+    setGameTitle={setGameTitle}
+    selectedCategory={selectedCategory}
+    selectedGameType={selectedGameType}
+    setSelectedGameType={setSelectedGameType}
+    actualCategory={selectedCategory}
+    puzzles={puzzles}
+    setPuzzles={setPuzzles}
+    handleInputChange={handlePuzzleInputChange}
+    handleAddPuzzle={handleAddPuzzle}
+    classes={classes}
+    classSelections={classSelections}
+    setClassSelections={setClassSelections}
+    gameSettings={gameSettings}
+    handleCheckboxChange={handleCheckboxChange}
+    setTime={setTime}
+    handleSetTimeChange={handleSetTimeChange}
+    quarter={quarter}
+    setQuarter={setQuarter}
+    gamePoints={gamePoints}
+    handleGamePointsChange={handleGamePointsChange}
+    handleSaveGame={handleSaveGuessTheWordGame}
+    resetForm={resetGuessTheWordForm}
+    setIsPanelOpen={setShowGuessTheWordPanel}
+  />
+)}
   </div>
 </div>
 );

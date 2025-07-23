@@ -2,6 +2,7 @@ package com.filipinoexplorers.capstone.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -55,10 +56,15 @@ public class SecurityConfig {
             .requestMatchers("/api/questions/**").permitAll()
             .requestMatchers("/api/story-questions/**").permitAll()
 
+            // Guess the Word
+            .requestMatchers("/api/gtw/word-puzzles").permitAll()
+            .requestMatchers("/api/gtw/**").permitAll()
+
             // Parke Quest Permit
             .requestMatchers("/api/parkequest/**").permitAll()
             .requestMatchers("/api/parkequestteacher/**").permitAll()
 
+            
             
             .anyRequest().authenticated()
     ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); 

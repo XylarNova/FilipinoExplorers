@@ -531,14 +531,14 @@ const clearGameState = () => {
           )}
 
           {/* Main area: timer | game | levels - increased gap between elements */}
-          <div className={`flex w-full gap-x-8 justify-center ${gameCompleted ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`flex w-full gap-x-4 justify-center ${gameCompleted ? 'opacity-50 pointer-events-none' : ''}`}>
 
             {/* Timer - ADJUSTED POSITIONING */}
             <div className="relative">
-              <img src={woodenLog} alt="Timer" className="h-85 transform translate-y-18" />
-              <div className="absolute inset-0 flex items-center justify-center mt-10">
+              <img src={woodenLog} alt="Timer" className="h-30 rotate-90 mt-50 -ml-15" />
+              <div className="absolute inset-0 flex items-center justify-center mt-15">
                 <div 
-                  className="w-4 bg-green-400 rounded" 
+                  className="w-4 bg-green-400 rounded -ml-15" 
                   style={{ 
                     height: `${(remainingTime / 300) * 60}%`, 
                     bottom: '25%', 
@@ -550,7 +550,7 @@ const clearGameState = () => {
             </div>
 
             {/* Game - increased internal spacing */}
-            <div className="bg-amber-800 rounded-lg p-6 shadow-lg flex-grow max-w-3xl flex flex-col space-y-8">
+            <div className="bg-amber-800 rounded-lg p-6 shadow-lg flex-grow max-w-3xl flex flex-col space-y-8 -ml-40">
 
               {/* Clue */}
               <div className="bg-amber-100 p-4 rounded-lg h-[150px] flex items-center justify-center relative">

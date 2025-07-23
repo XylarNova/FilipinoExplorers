@@ -151,7 +151,7 @@ const TeacherGuessTheWord = () => {
     id: puzzle.id,
     word: puzzle.word,
     clue: puzzle.clue,
-    translation: puzzle.translation || '', // Add translation field with fallback
+    translation: puzzle.translation || '', 
     shuffledLetters: puzzle.shuffledLetters,
     score: puzzle.score || 10,
     hintEnabled: puzzle.hintEnabled !== false
@@ -289,7 +289,6 @@ const TeacherGuessTheWord = () => {
 };
   return (
     <div className="min-h-screen bg-amber-50">
-      {/* Header Section with logo on the left */}
       <div className="w-full py-4 px-8">
         <div className="w-40">
           <img src={filipinoExplorerLogo} alt="Filipino Explorer" className="w-full" />
@@ -299,7 +298,6 @@ const TeacherGuessTheWord = () => {
       {/* Main content container */}
       <div className="flex justify-center">
         <div className="w-3/4 py-8">
-          {/* Title */}
           <h1 className="text-3xl font-bold text-amber-900 text-center mb-8">Teacher Management: Guess the Word</h1>
 
           {/* Confirmation Message */}
@@ -360,31 +358,6 @@ const TeacherGuessTheWord = () => {
                   />
                   <p className="text-gray-500 text-sm mt-2">The word players need to guess</p>
                 </div>
-                
-                <div>
-                  <label className="block text-amber-800 font-medium mb-3">
-                    Shuffled Letters
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      name="shuffledLetters"
-                      value={currentPuzzle.shuffledLetters}
-                      onChange={handleInputChange}
-                      className="w-full border border-amber-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      placeholder="Leave blank for auto-generation"
-                    />
-                    <button 
-                      type="button" 
-                      onClick={shuffleLetters}
-                      className="bg-amber-400 hover:bg-amber-500 text-amber-900 px-4 py-2 rounded-md"
-                    >
-                      Shuffle
-                    </button>
-                  </div>
-                  <p className="text-gray-500 text-sm mt-2">Optional: System will auto-generate if left blank</p>
-                </div>
-                
                 <div className="md:col-span-2 mt-2">
                   <label className="block text-amber-800 font-medium mb-3">
                     Score*
@@ -624,44 +597,6 @@ const TeacherGuessTheWord = () => {
                 </table>
               </div>
             )}
-            
-            {/* Requirements and instructions */}
-            <div className="mt-8 space-y-4">
-              {puzzles.length < 10 && (
-                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
-                  <p className="font-medium">⚠️ You need to add at least {10 - puzzles.length} more word(s) to meet the minimum requirement.</p>
-                  <p className="text-sm mt-2">Students need at least 10 words to play the game effectively.</p>
-                </div>
-              )}
-              
-              {puzzles.length >= 10 && puzzles.length <= 10 && activePuzzles.length === 0 && (
-                <div className="bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-md">
-                  <p className="font-medium">⚠️ You need to set these puzzles as active for students to play with them.</p>
-                  <p className="text-sm mt-2">Click the "Select Puzzles for Gameplay" button to activate them.</p>
-                </div>
-              )}
-              
-              {puzzles.length > 10 && (
-                <div className="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-md">
-                  <p className="font-medium">ℹ️ You've created more than 10 words, which is great!</p>
-                  <p className="text-sm mt-2">Please select exactly 10 words for students to play with by clicking the "Select Puzzles for Gameplay" button.</p>
-                </div>
-              )}
-              
-              {activePuzzles.length > 0 && activePuzzles.length < 10 && (
-                <div className="bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-md">
-                  <p className="font-medium">⚠️ You currently have {activePuzzles.length} active puzzles.</p>
-                  <p className="text-sm mt-2">It's recommended to have exactly 10 active puzzles for the best student experience.</p>
-                </div>
-              )}
-              
-              {activePuzzles.length === 10 && (
-                <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-md">
-                  <p className="font-medium">✅ Perfect! You have 10 active puzzles ready for students.</p>
-                  <p className="text-sm mt-2">Students will see these puzzles when they play the game.</p>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>

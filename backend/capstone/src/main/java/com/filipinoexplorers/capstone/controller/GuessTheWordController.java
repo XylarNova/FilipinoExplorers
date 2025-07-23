@@ -1,11 +1,16 @@
 package com.filipinoexplorers.capstone.controller;
 
 import com.filipinoexplorers.capstone.entity.GuessTheWordEntity;
+import com.filipinoexplorers.capstone.entity.Teacher;
+import com.filipinoexplorers.capstone.repository.TeacherRepository;
 import com.filipinoexplorers.capstone.service.GuessTheWordService;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -13,12 +18,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+ 
 @RestController
 @RequestMapping("/api/gtw")
-@CrossOrigin(origins = "http://localhost:5173") // For development only
+//@CrossOrigin(origins = "http://localhost:5173") // For development only
+@RequiredArgsConstructor
 public class GuessTheWordController {
     @Autowired
     private GuessTheWordService guessServ;
+
+    @Autowired
+    private TeacherRepository teacherRepository;
 
     @GetMapping("/word-puzzles")
     public List<GuessTheWordEntity> getAllPuzzles() {
@@ -46,13 +58,21 @@ public class GuessTheWordController {
     }
     
     // Teacher management interface endpoints
-    @PostMapping("/word-puzzles")
-    public ResponseEntity<GuessTheWordEntity> createPuzzle(@RequestBody GuessTheWordEntity puzzle) {
+    @PostMapping("/word-puzzles") //teacher
+    public ResponseEntity<GuessTheWordEntity> createPuzzle(@RequestBody GuessTheWordEntity puzzle, @AuthenticationPrincipal(required = false) UserDetails userDetails) {
+        // Get the teacher's email from the authenticated principal
+    String email = userDetails.getUsername();
+    Teacher teacher = teacherRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+    puzzle.setTeacher(teacher);
         GuessTheWordEntity savedPuzzle = guessServ.savePuzzle(puzzle);
         return new ResponseEntity<>(savedPuzzle, HttpStatus.CREATED);
     }
+
     
-    @PutMapping("/word-puzzles/{id}")
+    
+    @PutMapping("/word-puzzles/{id}")//teacher
     public ResponseEntity<GuessTheWordEntity> updatePuzzle(
             @PathVariable Long id, 
             @RequestBody GuessTheWordEntity puzzle) {
@@ -70,7 +90,7 @@ public class GuessTheWordController {
         return ResponseEntity.ok(updatedPuzzle);
     }
     
-    @PutMapping("/word-puzzles/{id}/score")
+    @PutMapping("/word-puzzles/{id}/score")//teacher
     public ResponseEntity<GuessTheWordEntity> updatePuzzleScore(
             @PathVariable Long id, 
             @RequestBody Map<String, Integer> scoreMap) {
@@ -88,7 +108,7 @@ public class GuessTheWordController {
         return ResponseEntity.ok(updatedPuzzle);
     }
     
-    @PutMapping("/word-puzzles/{id}/hint-status")
+    @PutMapping("/word-puzzles/{id}/hint-status")//teacher
     public ResponseEntity<GuessTheWordEntity> updateHintStatus(
             @PathVariable Long id, 
             @RequestBody Map<String, Boolean> hintStatusMap) {
@@ -106,7 +126,7 @@ public class GuessTheWordController {
         return ResponseEntity.ok(updatedPuzzle);
     }
     
-    @DeleteMapping("/word-puzzles/{id}")
+    @DeleteMapping("/word-puzzles/{id}")//teacher 
     public ResponseEntity<Map<String, Boolean>> deletePuzzle(@PathVariable Long id) {
         Optional<GuessTheWordEntity> puzzle = guessServ.getPuzzleById(id);
         
@@ -184,7 +204,7 @@ public class GuessTheWordController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/hint/{puzzleId}")
+    /*@GetMapping("/hint/{puzzleId}")
     public ResponseEntity<Map<String, Object>> getHint(@PathVariable Long puzzleId) {
         Optional<GuessTheWordEntity> puzzleOpt = guessServ.getPuzzleById(puzzleId);
         
@@ -209,7 +229,7 @@ public class GuessTheWordController {
         response.put("hint", puzzle.getHint());
         
         return ResponseEntity.ok(response);
-    }
+    }*/
     
     // Updated translation endpoint to use the dedicated translation field
     @GetMapping("/translation/{puzzleId}")

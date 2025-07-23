@@ -16,6 +16,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.Lob;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.OneToMany;
 
 @Entity
 @Data
@@ -50,6 +55,19 @@ public class Teacher implements User {
         public Long getId() {
             return teacherId;
         }
+
+    @OneToMany(mappedBy = "teacher")
+    @JsonIgnoreProperties("teacher")
+    private Set<GuessTheWordEntity> createdPuzzles;
+
+    // Getter and Setter
+    public Set<GuessTheWordEntity> getCreatedPuzzles() {
+        return createdPuzzles;
+    }
+
+    public void setCreatedPuzzles(Set<GuessTheWordEntity> createdPuzzles) {
+        this.createdPuzzles = createdPuzzles;
+    }
 
 }
 

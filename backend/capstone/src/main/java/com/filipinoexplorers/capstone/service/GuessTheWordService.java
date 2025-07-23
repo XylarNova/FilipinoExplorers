@@ -89,11 +89,6 @@ public class GuessTheWordService {
         return false;
     }
     
-    public String getHint(Long puzzleId) {
-        Optional<GuessTheWordEntity> puzzle = guessRepo.findById(puzzleId);
-        return puzzle.map(GuessTheWordEntity::getHint).orElse("No hint available");
-    }
-    
     // Get next active puzzle for gameplay, excluding already played puzzles for a student
     public Optional<GuessTheWordEntity> getNextPuzzle(Long currentPuzzleId, Long studentId) {
         List<GuessTheWordEntity> activePuzzles = getActivePuzzles();

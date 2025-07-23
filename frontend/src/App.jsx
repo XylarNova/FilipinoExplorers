@@ -82,7 +82,7 @@ const App = () => {
         
 
         {/* Games Section Path */}
-       {/*<Route path="/guesstheword" element={<GuessTheWord />} />*/}
+       <Route path="/guesstheword" element={<GuessTheWord />} />
         <Route path="/memorygamegroup" element={<MemoryGameGroup />} />wd
 
         <Route path="/memorygame/:sessionId?" element={<MemoryGame />} />

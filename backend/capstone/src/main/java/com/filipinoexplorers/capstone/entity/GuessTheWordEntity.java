@@ -10,6 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 
 @Entity
@@ -21,31 +23,35 @@ public class GuessTheWordEntity {
     private Long id;
     
     private String word;
-    private String clue;
+    private String clue; //tagalog meaning
     private String shuffledLetters;
-    private String hint;
-    // Add new field for translation
-    private String translation;
-    private Integer score = 10; // Default score of 10
+    private String translation; //english translation
+    private Integer score = 10; // Default score 
     private Boolean active = false; // Flag to mark puzzles selected for gameplay
     private Boolean hintEnabled = true; // Default to enabled
 
     @ManyToMany(mappedBy = "playedPuzzles")
     @JsonIgnoreProperties("playedPuzzles")
     private Set<Student> playedByStudents = new HashSet<>();
+
+
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")
+    @JsonIgnoreProperties("createdPuzzles") // Prevents infinite recursion in JSON serialization
+    private Teacher teacher;
     
     // Default constructor
     public GuessTheWordEntity() {}
     
     // Constructor with parameters
-    public GuessTheWordEntity(String word, String clue, String shuffledLetters, String hint, String translation, Integer score, Boolean hintEnabled) {
+    public GuessTheWordEntity(String word, String clue, String shuffledLetters, String translation, Integer score, Boolean hintEnabled) {
         this.word = word;
-        this.clue = clue;
-        this.shuffledLetters = shuffledLetters;
-        this.hint = hint;
-        this.translation = translation;
-        this.score = score != null ? score : 10; // Default to 10 if not provided
-        this.hintEnabled = hintEnabled != null ? hintEnabled : true; // Default to true if not provided
+        this.clue = clue; //tagalog meaning
+        this.active = true; // word defaults to active when created 
+        this.shuffledLetters = shuffledLetters; //for hint
+        this.translation = translation; //english translation 
+        this.score = score != null ? score : 10; // Default 10
+        this.hintEnabled = hintEnabled != null ? hintEnabled : true; // Default true
     }
     
     // Getters and Setters
@@ -80,15 +86,7 @@ public class GuessTheWordEntity {
     public void setShuffledLetters(String shuffledLetters) {
         this.shuffledLetters = shuffledLetters;
     }
-    
-    public String getHint() {
-        return hint;
-    }
-    
-    public void setHint(String hint) {
-        this.hint = hint;
-    }
-    
+
     public String getTranslation() {
         return translation;
     }
@@ -122,10 +120,18 @@ public class GuessTheWordEntity {
     }
 
     public Set<Student> getPlayedByStudents() {
-        return playedByStudents;
+    return playedByStudents;
     }
-    
+
     public void setPlayedByStudents(Set<Student> playedByStudents) {
         this.playedByStudents = playedByStudents;
+    }
+
+    public Teacher getTeacher() {
+    return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
     }
 }
